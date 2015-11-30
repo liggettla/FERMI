@@ -1,2 +1,2 @@
-# FERMI
-Fast Extremely Rare Mutation Identification
+# standaloneTrueSeqPipeline
+This is a Complete Standalone TrueSeq Analysis Pipeline
