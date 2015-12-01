@@ -39,10 +39,10 @@ today = str(date.today())
 read1 = raw_input('Read 1 fastq Location (/dir/R1.fastq): ')
 read2 = raw_input('Read 2 fastq Location (/dir/R2.fastq): ')
 outputDir = raw_input('Output Location (/dir): ')
+#make the output directory expanduser is used to allow ~/Desktop shortcuts
 mkdir(os.path.expanduser(outputDir))
 #create output directory
 outputDir = outputDir + '/' + today
-#make the output directory
 mkdir(os.path.expanduser(outputDir))
 
 
