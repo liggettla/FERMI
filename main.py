@@ -34,7 +34,10 @@ import pdb
 #final_output_file = '/vol3/home/liggettl/TruSeqPanel/8.17.2015_HiSeqFastq/10_Reads_99_Percent/finalOutput.fastq'
 #coverage_file = '/vol3/home/liggettl/TruSeqPanel/8.17.2015_HiSeqFastq/10_Reads_99_Percent/coverageData'
 
-#set directories
+#################
+#Set directories#
+#################
+
 today = str(date.today())
 read1 = raw_input('Read 1 fastq Location (/dir/R1.fastq): ')
 read2 = raw_input('Read 2 fastq Location (/dir/R2.fastq): ')
@@ -43,25 +46,11 @@ infoOutput = raw_input('Info Writeup About This Run (info/n): ')
 
 #make the output directory expanduser is used to allow ~/Desktop shortcuts
 mkdir(os.path.expanduser(outputDir))
-#create output directory
-outputDir = outputDir + '/' + today
-mkdir(os.path.expanduser(outputDir))
 
+####################
+#Set Run Parameters#
+####################
 
-'''
-This might work better on the cluster:
-from os import system
-outputDir = "~/Desktop/test"
-system('mkdir {}'.format(outputDir))
-'''
-
-twoUmiOut = outputDir + '/twoUMIs.fastq'
-final_output_file = outputDir + '/finalOutput.fastq'
-coverage_file = outputDir + '/coverageData.txt'
-infoFile = outputDir + '/runInfo.txt'
-parametersUsed = outputDir + '/parametersUsed.txt'
-
-#set parameters
 useDefaults = raw_input('Use Default Parameters? (Y/n): ')
 
 if useDefaults == 'Y':
@@ -77,15 +66,21 @@ elif useDefaults == 'n':
     varThresh = raw_input('Read Prevalence Threshold (0.75): ')
     supportingReads = raw_input('Required Supporting Reads (5): ')
 
-'''
-Would be better here if parameters are included in folder name
 #create output directory
 outputDir = outputDir + '/' + today + '_' + str(supportingReads) + '_' + str(varThresh)
 #make the output directory
 mkdir(os.path.expanduser(outputDir))
-'''
 
-#record files and parameteres used in run
+twoUmiOut = outputDir + '/twoUMIs.fastq'
+final_output_file = outputDir + '/finalOutput.fastq'
+coverage_file = outputDir + '/coverageData.txt'
+infoFile = outputDir + '/runInfo.txt'
+parametersUsed = outputDir + '/parametersUsed.txt'
+
+#############################
+#Record Files and Parameters#
+#############################
+
 if infoOutput != 'n':
     info = open(infoFile, 'w')
     info.write(infoOutput)
