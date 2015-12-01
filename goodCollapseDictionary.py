@@ -1,10 +1,15 @@
-#Unless otherwise noted, this is the most up-to-date artificial consensus read derivation script that should now be compatible with both MiSeq and HiSeq runs.
+'''
+Unless otherwise noted, this is the most up-to-date artificial consensus read
+derivation script that should now be fully compatible with both MiSeq and HiSeq runs
+and independent of amplicon length.
 
-#This is similar to identifyUniqueUMI.py and quickCollapse.py but attempts to
-#improve upon processing speed by first putting all reads into a dictionary
-#with UMIs as keys and sequences as sequences in corresponding lists
+This is similar to identifyUniqueUMI.py and quickCollapse.py but attempts to
+improve upon processing speed by first putting all reads into a dictionary
+with UMIs as keys and sequences as sequences in corresponding lists
 
-#For a HiSeq run with 150 cycle chemistry to process correctly, concatenateUMI.py must be run before the methods in this script.
+For a HiSeq run with 150 cycle chemistry to process correctly, concatenateUMI.py must
+be run before the methods in this script.
+'''
 
 import pdb
 from collections import defaultdict
@@ -57,6 +62,58 @@ def buildListDict(input_file, distance_stringency):
 
     target.close()
     return sequences
+
+'''
+This is an improvement on the original dictionary containing a lamda defined group of
+lists.
+This method should provide the same result as the previous lamdba dictionary but
+should do so more quickly and in a more easily understood manner.
+'''
+
+def buildNestedDict(input_file, distance_stringency):
+    #Dict format:
+    #sortedSeqs = {'UMI':{'header': header, 'quality': quality, 'seqs':[seq1, seq2]}}
+    sortedSeqs = {}
+    target = open(input_file, 'r')
+    umi_list = []
+    position = 1
+    is_unique = True
+
+    for line in target:
+        if position == 1:
+            header = line.rstrip('\n')
+            position += 1
+        elif position == 2:
+            #Assumes UMI is flanking first and last 6bp of read
+            umi_seq = line[0:6]+line[-6:] #Abs dist from start/end
+            umi_seq = umi_seq.rstrip('\n')
+            read_seq = line[6:-6]
+            position += 1
+        elif position == 3:
+            position += 1
+        elif position == 4:
+            quality = line.rstrip('\n')
+            position = 1
+
+            if not bool(umi_list):
+                umi_list.append(umi_seq)
+            else:
+                is_unique = True
+                for umi in umi_list:
+                    if is_unique:
+                        if distance(umi_seq, umi) <= distance_stringency:
+                            is_unique = False
+                            umi_seq = umi
+
+            #add to sortedSeqs database
+            if is_unique:
+                tempDict = {'header': header, 'quality': quality, 'seqs': [read_seq]}
+                sortedSeqs[umi_seq] = tempDict
+            elif not is_unique:
+                sortedSeqs[umi_seq]['seqs'].append(read_seq)
+
+    target.close()
+    return sortedSeqs
 
 #Collapses reads that come as a nested list dictionary
 def collapseReadsListDict(sequences, varThresh, final_output_file, supportingReads, readLength):
