@@ -14,6 +14,7 @@ from Bio.Seq import Seq
 def concatenateUMI(read1, read2, output):
     position = 1
     plus = '+'
+    #write results to a new fastq file
     target = open(output, 'w')
 
     with open(read1, 'r') as R1:
@@ -39,6 +40,7 @@ def concatenateUMI(read1, read2, output):
                     position += 1
                 elif position == 3:
                     position += 1
+                #retain quality scores for R2 UMI
                 elif position == 4:
                     quality = line1.rstrip('\n')
                     r2UMIqual = line2[0:6]
