@@ -39,6 +39,8 @@ today = str(date.today())
 read1 = raw_input('Read 1 fastq Location (/dir/R1.fastq): ')
 read2 = raw_input('Read 2 fastq Location (/dir/R2.fastq): ')
 outputDir = raw_input('Output Location (/dir): ')
+infoOutput = raw_input('Info Writeup About This Run (info/n): ')
+
 #make the output directory expanduser is used to allow ~/Desktop shortcuts
 mkdir(os.path.expanduser(outputDir))
 #create output directory
@@ -56,6 +58,7 @@ system('mkdir {}'.format(outputDir))
 twoUmiOut = outputDir + '/twoUMIs.fastq'
 final_output_file = outputDir + '/finalOutput.fastq'
 coverage_file = outputDir + '/coverageData.txt'
+infoFile = outputDir + '/runInfo.txt'
 parametersUsed = outputDir + '/parametersUsed.txt'
 
 #set parameters
@@ -83,6 +86,11 @@ mkdir(os.path.expanduser(outputDir))
 '''
 
 #record files and parameteres used in run
+if infoOutput != 'n':
+    info = open(infoFile, 'w')
+    info.write(infoOutput)
+    info.close()
+
 target = open(parametersUsed, 'w')
 target.write("Read 1 Location: %s\n" %(read1))
 target.write("Read 2 Location: %s\n" %(read2))
