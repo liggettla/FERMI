@@ -1,4 +1,5 @@
 from datetime import date
+from os import mkdir
 from concatenateUMI import concatenateUMI
 from goodCollapseDictionary import buildListDict
 from goodCollapseDictionary import collapseReadsListDict
@@ -33,12 +34,21 @@ import pdb
 #coverage_file = '/vol3/home/liggettl/TruSeqPanel/8.17.2015_HiSeqFastq/10_Reads_99_Percent/coverageData'
 
 #set directories
-today = date.today()
-today = str(today)
+today = str(date.today())
 read1 = raw_input('Read 1 fastq Location (/dir/R1.fastq): ')
 read2 = raw_input('Read 2 fastq Location (/dir/R2.fastq): ')
 outputDir = raw_input('Output Location (/dir): ')
+mkdir(os.path.expanduser(outputDir))
 outputDir = outputDir + '/' + today
+#make the output directory
+mkdir(os.path.expanduser(outputDir))
+'''
+This might work better on the cluster:
+from os import system
+outputDir = "~/Desktop/test"
+system('mkdir {}'.format(outputDir))
+'''
+
 twoUmiOut = outputDir + '/twoUMIs.fastq'
 final_output_file = outputDir + '/finalOutput.fastq'
 coverage_file = outputDir + '/coverageData.txt'
@@ -54,13 +64,20 @@ if useDefaults == 'Y':
     varThresh = 0.75
     #the number of required supporting reads of each UMI pair
     supportingReads = 5
-    target = open(parametersUsed, 'w')
-
 
 elif useDefaults == 'n':
     distance_stringency = raw_input('Allowed UMI Mismatches (1): ')
     varThresh = raw_input('Read Prevalence Threshold (0.75): ')
     supportingReads = raw_input('Required Supporting Reads (5): ')
+
+#record files and parameteres used in run
+target = open(parametersUsed, 'w')
+target.write("Read 1 Location: %s\n" %(read1))
+target.write("Read 2 Location: %s\n" %(read2))
+target.write("Distance Stringency: %d\n" %(distance_stringency))
+target.write("Variant Threshold: %d\n" %(varThresh))
+target.write("Supporting Reads: %d\n" %(supportingReads))
+target.close()
 
 #attach 3' UMI from R2 onto R1 read
 #this is a necessary step to process reads with 100-150 cycle chemistry
