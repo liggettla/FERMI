@@ -1,4 +1,5 @@
 from datetime import date
+import os
 from os import mkdir
 from concatenateUMI import concatenateUMI
 from goodCollapseDictionary import buildListDict
@@ -39,9 +40,12 @@ read1 = raw_input('Read 1 fastq Location (/dir/R1.fastq): ')
 read2 = raw_input('Read 2 fastq Location (/dir/R2.fastq): ')
 outputDir = raw_input('Output Location (/dir): ')
 mkdir(os.path.expanduser(outputDir))
+#create output directory
 outputDir = outputDir + '/' + today
 #make the output directory
 mkdir(os.path.expanduser(outputDir))
+
+
 '''
 This might work better on the cluster:
 from os import system
@@ -70,12 +74,20 @@ elif useDefaults == 'n':
     varThresh = raw_input('Read Prevalence Threshold (0.75): ')
     supportingReads = raw_input('Required Supporting Reads (5): ')
 
+'''
+Would be better here if parameters are included in folder name
+#create output directory
+outputDir = outputDir + '/' + today + '_' + str(supportingReads) + '_' + str(varThresh)
+#make the output directory
+mkdir(os.path.expanduser(outputDir))
+'''
+
 #record files and parameteres used in run
 target = open(parametersUsed, 'w')
 target.write("Read 1 Location: %s\n" %(read1))
 target.write("Read 2 Location: %s\n" %(read2))
 target.write("Distance Stringency: %d\n" %(distance_stringency))
-target.write("Variant Threshold: %d\n" %(varThresh))
+target.write("Variant Threshold: %f\n" %(varThresh))
 target.write("Supporting Reads: %d\n" %(supportingReads))
 target.close()
 
