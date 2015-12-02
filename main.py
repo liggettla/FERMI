@@ -5,6 +5,7 @@ from os import path
 from concatenateUMI import concatenateUMI
 from goodCollapseDictionary import buildNestedDict
 from goodCollapseDictionary import collapseNestedDict
+import pickle
 from outputCoverage import outputCov
 import pdb
 
@@ -42,7 +43,6 @@ from goodCollapseDictionary import collapseReadsListDict
 #################
 #Set directories#
 #################
-
 today = str(date.today())
 #read1 = raw_input('Read 1 fastq Location (/dir/R1.fastq): ')
 #read2 = raw_input('Read 2 fastq Location (/dir/R2.fastq): ')
@@ -56,6 +56,9 @@ infoOutput = raw_input('Info Writeup About This Run (info/n): ')
 read1 = '/media/alex/Extra/Dropbox/Code/FERMI/testInput/R1.fastq'
 read2 = '/media/alex/Extra/Dropbox/Code/FERMI/testInput/R2.fastq'
 outputDir = '/media/alex/Extra/Dropbox/Code/FERMI/testOutput'
+previousDict = raw_input('Would you like to load previously sorted data? (Y/n): ')
+if previousDict == 'Y':
+    prevDictLoc = raw_input('Location of previous sorted data (/dir/data.pkl): ')
 
 if not path.exists(outputDir):
     #make the output directory expanduser is used to allow ~/Desktop shortcuts
@@ -122,15 +125,29 @@ target.write("Variant Threshold: %f\n" %(varThresh))
 target.write("Supporting Reads: %d\n" %(supportingReads))
 target.close()
 
+#####################
+#Concatate R1 and R2#
+#####################
 #attach 3' UMI from R2 onto R1 read
 #this is a necessary step to process reads with 100-150 cycle chemistry
 #200 cycle chemistry makes this unnecessary
 concatenateUMI(read1, read2, twoUmiOut)
 
+##############################
+#Build/Get Seq Data Structure#
+##############################
 #build dict binning reads by concatenated UMIs
-#seqDict = buildListDict(twoUmiOut, distance_stringency)
-seqDict = buildNestedDict(twoUmiOut, distance_stringency, pickleOutput)
+if previousDict == 'n':
+    seqDict = buildNestedDict(twoUmiOut, distance_stringency, pickleOutput)
+#retrieve previous seq data structure
+elif previousDict == 'Y':
+    prevData = open(prevDictLoc, 'rb')
+    seqDict = pickle.load(prevData)
+    prevData.close()
 
+################
+#Collapse Reads#
+################
 #calculate individual read length between the UMIs
 with open(twoUmiOut, 'r') as target:
     header = next(target)
@@ -138,8 +155,9 @@ with open(twoUmiOut, 'r') as target:
     readLength = len(readSeq) - 12
 
 #collapse reads on binned UMIs
-#collapseReadsListDict(seqDict, varThresh, final_output_file, supportingReads, readLength)
 collapseNestedDict(seqDict, varThresh, final_output_file, supportingReads, readLength)
 
-#calculate capture coverage
+#####################
+#Output Seq Coverage#
+#####################
 outputCov(twoUmiOut, final_output_file, distance_stringency, coverage_file)
