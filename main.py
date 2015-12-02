@@ -154,7 +154,7 @@ with open(twoUmiOut, 'r') as target:
     readSeq = next(target).rstrip('\n')
     readLength = len(readSeq) - 12
 
-#collapse reads on binned UMIs
+#collapse reads on binned UMI data structure
 collapseNestedDict(seqDict, varThresh, final_output_file, supportingReads, readLength)
 
 #####################
