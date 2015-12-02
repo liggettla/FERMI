@@ -1,5 +1,0 @@
-Eliminating only exact and close UMI matches:
-# of Allowed UMI Mismatches: 1
-Total # of Original UMIs: 10
-# of Unique UMIs: 1
-Avg UMI Coverage: 10.0
