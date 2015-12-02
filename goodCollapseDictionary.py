@@ -15,6 +15,7 @@ import pdb
 from collections import defaultdict
 from Levenshtein import distance #string length can be different
 from itertools import islice
+import pickle
 
 #Tracks quality score and header as well as sequence and UMI
 #by reading in info from input_file into a dict containing three nested lists
@@ -70,7 +71,7 @@ This method should provide the same result as the previous lamdba dictionary but
 should do so more quickly and in a more easily understood manner.
 '''
 
-def buildNestedDict(input_file, distance_stringency):
+def buildNestedDict(input_file, distance_stringency, pickleOut):
     #Dict format:
     #sortedSeqs = {'UMI':{'header': header, 'quality': quality, 'seqs':[seq1, seq2]}}
     sortedSeqs = {}
@@ -113,6 +114,15 @@ def buildNestedDict(input_file, distance_stringency):
                 sortedSeqs[umi_seq]['seqs'].append(read_seq)
 
     target.close()
+
+    ###########################
+    #Write Full Data Structure#
+    ###########################
+
+    pickleFile = open(pickleOut, 'wb')
+    pickle.dump(sortedSeqs, pickleFile)
+    pickleFile.close()
+
     return sortedSeqs
 
 #Collapses reads that come as a nested list dictionary

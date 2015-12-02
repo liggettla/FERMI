@@ -76,6 +76,7 @@ final_output_file = outputDir + '/finalOutput.fastq'
 coverage_file = outputDir + '/coverageData.txt'
 infoFile = outputDir + '/runInfo.txt'
 parametersUsed = outputDir + '/parametersUsed.txt'
+pickleOutput = outputDir + '/sortedSeqData.pkl'
 
 #############################
 #Record Files and Parameters#
@@ -100,7 +101,7 @@ target.close()
 concatenateUMI(read1, read2, twoUmiOut)
 
 #build dict binning reads by concatenated UMIs
-seqDict = buildListDict(twoUmiOut, distance_stringency)
+seqDict = buildListDict(twoUmiOut, distance_stringency, pickleOutput)
 
 #calculate individual read length between the UMIs
 with open(twoUmiOut, 'r') as target:
