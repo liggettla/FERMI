@@ -3,9 +3,13 @@ import os
 from os import mkdir
 from concatenateUMI import concatenateUMI
 from goodCollapseDictionary import buildListDict
-from goodCollapseDictionary import collapseReadsListDict
+from goodCollapseDictionary import collapseNestedDict
 from outputCoverage import outputCov
 import pdb
+
+
+from goodCollapseDictionary import buildListDict
+from goodCollapseDictionary import collapseReadsListDict
 
 ###############
 #Home Computer#
@@ -101,7 +105,8 @@ target.close()
 concatenateUMI(read1, read2, twoUmiOut)
 
 #build dict binning reads by concatenated UMIs
-seqDict = buildListDict(twoUmiOut, distance_stringency, pickleOutput)
+#seqDict = buildListDict(twoUmiOut, distance_stringency, pickleOutput)
+seqDict = buildNestedDict(twoUmiOut, distance_stringency, pickleOutput)
 
 #calculate individual read length between the UMIs
 with open(twoUmiOut, 'r') as target:
@@ -110,7 +115,8 @@ with open(twoUmiOut, 'r') as target:
     readLength = len(readSeq) - 12
 
 #collapse reads on binned UMIs
-collapseReadsListDict(seqDict, varThresh, final_output_file, supportingReads, readLength)
+#collapseReadsListDict(seqDict, varThresh, final_output_file, supportingReads, readLength)
+collapseNestedDict(seqDict, varThresh, final_output_file, supportingReads, readLength)
 
 #calculate capture coverage
 outputCov(twoUmiOut, final_output_file, distance_stringency, coverage_file)

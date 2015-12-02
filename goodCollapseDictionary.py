@@ -173,6 +173,53 @@ def collapseReadsListDict(sequences, varThresh, final_output_file, supportingRea
             trimmed_quality = quality[6:-6] #MiSeq run
             target.write(header + '\n' + finalRead + '\n' + plus + '\n' + trimmed_quality + '\n')
 
+#Collapses reads that are sorted by buildNestedDict()
+def collapseNestedDict(sequences, varThresh, final_output_file, supportingReads, readLength):
+
+    plus = '+'
+    target = open(final_output_file, 'w')
+
+    for umi in sequences:
+        isReadGood = True
+        finalRead = ''
+        numReads = len(sequences[umi]['seqs'])
+        header = sequences[umi]['header']
+        quality = sequences[umi]['quality']
+
+        for base in range(readLength):
+            if isReadGood:
+                A = 0
+                T = 0
+                G = 0
+                C = 0
+
+                for seq in sequences[umi]['seqs']:
+                    if seq[base] == 'A':
+                        A += 1
+                    elif seq[base] == 'T':
+                        T += 1
+                    elif seq[base] == 'G':
+                        G += 1
+                    elif seq[base] == 'C':
+                        C += 1
+
+                if float(A)/numReads >= varThresh:
+                    finalRead += 'A'
+                elif float(T)/numReads >= varThresh:
+                    finalRead += 'T'
+                elif float(G)/numReads >= varThresh:
+                    finalRead += 'G'
+                elif float(C)/numReads >= varThresh:
+                    finalRead += 'C'
+                else:
+                    #if too many errors ignore reads
+                    isReadGood = False
+
+        if isReadGood and numReads >= supportingReads:
+            target = open(final_output_file, 'a')
+            trimmed_quality = quality[6:-6]
+            target.write(header + '\n' + finalRead + '\n' + plus + '\n' + trimmed_quality + '\n')
+
 #Outdated and should be unused
 def outputCov(distance_stringency):
     target = open(coverage_file, 'w')
