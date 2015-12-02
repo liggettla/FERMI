@@ -1,0 +1,5 @@
+Read 1 Location: /media/alex/Extra/Dropbox/Code/FERMI/testInput/R1.fastq
+Read 2 Location: /media/alex/Extra/Dropbox/Code/FERMI/testInput/R2.fastq
+Distance Stringency: 1
+Variant Threshold: 0.750000
+Supporting Reads: 5

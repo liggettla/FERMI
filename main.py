@@ -49,9 +49,12 @@ today = str(date.today())
 infoOutput = raw_input('Info Writeup About This Run (info/n): ')
 
 #just hardcoding to expedite testing
-read1 = '/home/alex/Dropbox/Code/FERMI/testInput/R1.fastq'
-read2 = '/home/alex/Dropbox/Code/FERMI/testInput/R2.fastq'
-outputDir = '/home/alex/Dropbox/Code/FERMI/testOutput'
+#read1 = '/home/alex/Dropbox/Code/FERMI/testInput/R1.fastq'
+#read2 = '/home/alex/Dropbox/Code/FERMI/testInput/R2.fastq'
+#outputDir = '/home/alex/Dropbox/Code/FERMI/testOutput'
+read1 = '/media/alex/Extra/Dropbox/Code/FERMI/testInput/R1.fastq'
+read2 = '/media/alex/Extra/Dropbox/Code/FERMI/testInput/R2.fastq'
+outputDir = '/media/alex/Extra/Dropbox/Code/FERMI/testOutput'
 
 #make the output directory expanduser is used to allow ~/Desktop shortcuts
 mkdir(os.path.expanduser(outputDir))

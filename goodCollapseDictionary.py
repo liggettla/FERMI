@@ -80,6 +80,8 @@ def buildNestedDict(input_file, distance_stringency, pickleOut):
     position = 1
     is_unique = True
 
+    #import pdb
+    #pdb.set_trace()
     for line in target:
         if position == 1:
             header = line.rstrip('\n')
@@ -98,6 +100,7 @@ def buildNestedDict(input_file, distance_stringency, pickleOut):
 
             if not bool(umi_list):
                 umi_list.append(umi_seq)
+                sortedSeqs[umi_seq] = {'header': header, 'quality': quality, 'seqs': [read_seq]}
             else:
                 is_unique = True
                 for umi in umi_list:
@@ -106,13 +109,12 @@ def buildNestedDict(input_file, distance_stringency, pickleOut):
                             is_unique = False
                             umi_seq = umi
 
-            #add to sortedSeqs database
-            if is_unique:
-                tempDict = {'header': header, 'quality': quality, 'seqs': [read_seq]}
-                sortedSeqs[umi_seq] = tempDict
-            elif not is_unique:
-                sortedSeqs[umi_seq]['seqs'].append(read_seq)
-
+                #add to sortedSeqs database
+                if is_unique:
+                    umi_list.append(umi_seq)
+                    sortedSeqs[umi_seq] = {'header': header, 'quality': quality, 'seqs': [read_seq]}
+                elif not is_unique:
+                    sortedSeqs[umi_seq]['seqs'].append(read_seq)
     target.close()
 
     ###########################
@@ -123,8 +125,8 @@ def buildNestedDict(input_file, distance_stringency, pickleOut):
     pickle.dump(sortedSeqs, pickleFile)
     pickleFile.close()
 
-    import pprint
-    pprint.pprint(sortedSeqs)
+    #import pprint
+    #pprint.pprint(sortedSeqs)
     return sortedSeqs
 
 #Collapses reads that come as a nested list dictionary
