@@ -86,9 +86,9 @@ def buildNestedDict(input_file, distance_stringency, pickleOut):
             position += 1
         elif position == 2:
             #Assumes UMI is flanking first and last 6bp of read
-            umi_seq = line[0:6]+line[-6:] #Abs dist from start/end
+            umi_seq = line[0:6]+line[-7:] #Abs dist from start/end
             umi_seq = umi_seq.rstrip('\n')
-            read_seq = line[6:-6]
+            read_seq = line[6:-7]
             position += 1
         elif position == 3:
             position += 1
@@ -123,6 +123,8 @@ def buildNestedDict(input_file, distance_stringency, pickleOut):
     pickle.dump(sortedSeqs, pickleFile)
     pickleFile.close()
 
+    import pprint
+    pprint.pprint(sortedSeqs)
     return sortedSeqs
 
 #Collapses reads that come as a nested list dictionary

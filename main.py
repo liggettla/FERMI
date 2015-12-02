@@ -2,7 +2,7 @@ from datetime import date
 import os
 from os import mkdir
 from concatenateUMI import concatenateUMI
-from goodCollapseDictionary import buildListDict
+from goodCollapseDictionary import buildNestedDict
 from goodCollapseDictionary import collapseNestedDict
 from outputCoverage import outputCov
 import pdb
@@ -43,10 +43,15 @@ from goodCollapseDictionary import collapseReadsListDict
 #################
 
 today = str(date.today())
-read1 = raw_input('Read 1 fastq Location (/dir/R1.fastq): ')
-read2 = raw_input('Read 2 fastq Location (/dir/R2.fastq): ')
-outputDir = raw_input('Output Location (/dir): ')
+#read1 = raw_input('Read 1 fastq Location (/dir/R1.fastq): ')
+#read2 = raw_input('Read 2 fastq Location (/dir/R2.fastq): ')
+#outputDir = raw_input('Output Location (/dir): ')
 infoOutput = raw_input('Info Writeup About This Run (info/n): ')
+
+#just hardcoding to expedite testing
+read1 = '/home/alex/Dropbox/Code/FERMI/testInput/R1.fastq'
+read2 = '/home/alex/Dropbox/Code/FERMI/testInput/R2.fastq'
+outputDir = '/home/alex/Dropbox/Code/FERMI/testOutput'
 
 #make the output directory expanduser is used to allow ~/Desktop shortcuts
 mkdir(os.path.expanduser(outputDir))
@@ -105,7 +110,7 @@ target.close()
 concatenateUMI(read1, read2, twoUmiOut)
 
 #build dict binning reads by concatenated UMIs
-#seqDict = buildListDict(twoUmiOut, distance_stringency, pickleOutput)
+#seqDict = buildListDict(twoUmiOut, distance_stringency)
 seqDict = buildNestedDict(twoUmiOut, distance_stringency, pickleOutput)
 
 #calculate individual read length between the UMIs
