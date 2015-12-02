@@ -1,6 +1,7 @@
 from datetime import date
 import os
 from os import mkdir
+from os import path
 from concatenateUMI import concatenateUMI
 from goodCollapseDictionary import buildNestedDict
 from goodCollapseDictionary import collapseNestedDict
@@ -56,13 +57,13 @@ read1 = '/media/alex/Extra/Dropbox/Code/FERMI/testInput/R1.fastq'
 read2 = '/media/alex/Extra/Dropbox/Code/FERMI/testInput/R2.fastq'
 outputDir = '/media/alex/Extra/Dropbox/Code/FERMI/testOutput'
 
-#make the output directory expanduser is used to allow ~/Desktop shortcuts
-mkdir(os.path.expanduser(outputDir))
+if not path.exists(outputDir):
+    #make the output directory expanduser is used to allow ~/Desktop shortcuts
+    mkdir(os.path.expanduser(outputDir))
 
 ####################
 #Set Run Parameters#
 ####################
-
 useDefaults = raw_input('Use Default Parameters? (Y/n): ')
 
 if useDefaults == 'Y':
@@ -74,14 +75,29 @@ if useDefaults == 'Y':
     supportingReads = 5
 
 elif useDefaults == 'n':
-    distance_stringency = raw_input('Allowed UMI Mismatches (1): ')
-    varThresh = raw_input('Read Prevalence Threshold (0.75): ')
-    supportingReads = raw_input('Required Supporting Reads (5): ')
+    distance_stringency = int(raw_input('Allowed UMI Mismatches (1): '))
+    varThresh = float(raw_input('Read Prevalence Threshold (0.75): '))
+    supportingReads = int(raw_input('Required Supporting Reads (5): '))
 
 #create output directory
 outputDir = outputDir + '/' + today + '_' + str(supportingReads) + '_' + str(varThresh)
-#make the output directory
-mkdir(os.path.expanduser(outputDir))
+
+########################
+#Write Dated Output Dir#
+########################
+#this now allows for multiple daily runs with the same parameters
+if path.exists(outputDir):
+    counter = 1
+    tempDir = outputDir
+    while path.exists(tempDir):
+        tempDir = outputDir
+        tempDir = tempDir + '_Run_' + str(counter)
+        counter += 1
+    outputDir = outputDir + '_Run_' + str(counter - 1)
+
+if not path.exists(outputDir):
+    #make the output directory
+    mkdir(os.path.expanduser(outputDir))
 
 twoUmiOut = outputDir + '/twoUMIs.fastq'
 final_output_file = outputDir + '/finalOutput.fastq'
@@ -93,7 +109,6 @@ pickleOutput = outputDir + '/sortedSeqData.pkl'
 #############################
 #Record Files and Parameters#
 #############################
-
 if infoOutput != 'n':
     info = open(infoFile, 'w')
     info.write(infoOutput)
