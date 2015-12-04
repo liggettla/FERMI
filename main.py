@@ -8,6 +8,7 @@ from goodCollapseDictionary import collapseNestedDict
 import pickle
 from outputCoverage import outputCov
 import pdb
+from os import system
 
 
 from goodCollapseDictionary import buildListDict
@@ -161,3 +162,9 @@ collapseNestedDict(seqDict, varThresh, final_output_file, supportingReads, readL
 #Output Seq Coverage#
 #####################
 outputCov(twoUmiOut, final_output_file, distance_stringency, coverage_file)
+
+###################
+#Plot Allele Freqs#
+###################
+if bool(outputDir/allelefreqs.txt):
+   system(Rscript
