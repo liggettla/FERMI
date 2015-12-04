@@ -166,5 +166,16 @@ outputCov(twoUmiOut, final_output_file, distance_stringency, coverage_file)
 ###################
 #Plot Allele Freqs#
 ###################
-if bool(outputDir/allelefreqs.txt):
-   system(Rscript
+#this should output a plot automatically, but is not runtime tested
+#does not output log10() of plot yet
+if False:
+    import rpy2.robjects as ro
+    from rpy2.robjects.packages import importr
+    r = ro.r
+    r.setwd(outputDir)
+    f = r('read.table("allelefreqs.txt", header = FALSE)')
+    grdevices = importr('grDevices')
+    grdevices.png(file="alleleFreq.png", width=800, height=500)
+    r.hist(f[0], breaks=100, main = '5 Reads', xlab='Variant Freq', ylab='# Vars')
+    grdevices.dev_off()
+
