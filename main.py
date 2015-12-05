@@ -179,3 +179,21 @@ if False:
     r.hist(f[0], breaks=100, main = '5 Reads', xlab='Variant Freq', ylab='# Vars')
     grdevices.dev_off()
 
+###################
+#Run Shell Scripts#
+###################
+'''
+This is not yet function, but shows the general idea of how to run shell scripts
+autonomously and still pass them necessary variables.
+The idea is that variables are output to some variable.txt file like so:
+    output
+    /dir/here
+    read1
+    /dir/R1.fastq
+    read2
+    /dir/R2.fastq
+Then the following code should actually be run from within the actual shell scripts
+and it will pull out necessary variables through a combined grep/tail search
+'''
+if False:
+    read1=$(cat variables.txt | grep -A 1 'read1' variables.txt | tail -n 1)
