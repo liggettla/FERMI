@@ -14,6 +14,25 @@ from os import system
 from goodCollapseDictionary import buildListDict
 from goodCollapseDictionary import collapseReadsListDict
 
+################
+#Load Variables#
+################
+from run import read1
+from run import read2
+from run import twoUmiOut
+from run import previousDict
+if previousDict == 'Y':
+    from run import prevDictLoc
+from run import varThresh
+from run import final_output_file
+from run import supportingReads
+from run import distance_stringency
+from run import coverage_file
+from run import infoFile
+from run import parametersUsed
+from run import pickleOutput
+
+
 #####################
 #Concatate R1 and R2#
 #####################
@@ -83,5 +102,5 @@ The idea is that variables are output to some variable.txt file like so:
 Then the following code should actually be run from within the actual shell scripts
 and it will pull out necessary variables through a combined grep/tail search
 '''
-if False:
-    read1=$(cat variables.txt | grep -A 1 'read1' variables.txt | tail -n 1)
+#if False:
+#    read1=$(cat variables.txt | grep -A 1 'read1' variables.txt | tail -n 1)

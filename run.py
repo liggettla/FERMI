@@ -1,3 +1,18 @@
+from datetime import date
+import os
+from os import mkdir
+from os import path
+from concatenateUMI import concatenateUMI
+from goodCollapseDictionary import buildNestedDict
+from goodCollapseDictionary import collapseNestedDict
+import pickle
+from outputCoverage import outputCov
+import pdb
+from os import system
+
+from goodCollapseDictionary import buildListDict
+from goodCollapseDictionary import collapseReadsListDict
+
 #################
 #Set directories#
 #################
@@ -43,6 +58,8 @@ elif useDefaults == 'n':
 #create output directory
 outputDir = outputDir + '/' + today + '_' + str(supportingReads) + '_' + str(varThresh)
 
+clusterRun = raw_input('Submit Run to LRS Cluster? (Y/n): ')
+
 ########################
 #Write Dated Output Dir#
 ########################
@@ -87,3 +104,12 @@ target.close()
 #Output All Variables to File#
 ##############################
 
+#################
+#Run Main Script#
+#################
+if clusterRun == 'Y':
+    pass
+elif clusterRun == 'n':
+    #without the following check main.py gets run forever
+    if __name__ == "__main__":
+        system("python main.py")
