@@ -10,7 +10,6 @@ from outputCoverage import outputCov
 import pdb
 from os import system
 
-
 from goodCollapseDictionary import buildListDict
 from goodCollapseDictionary import collapseReadsListDict
 
@@ -60,6 +59,8 @@ outputDir = '/media/alex/Extra/Dropbox/Code/FERMI/testOutput'
 previousDict = raw_input('Would you like to load previously sorted data? (Y/n): ')
 if previousDict == 'Y':
     prevDictLoc = raw_input('Location of previous sorted data (/dir/data.pkl): ')
+elif previousDict == 'n':
+    prevDictLoc = 'null'
 
 if not path.exists(outputDir):
     #make the output directory expanduser is used to allow ~/Desktop shortcuts
@@ -142,8 +143,21 @@ vardb['supportingReads'] = supportingReads
 vardb['twoUmiOut'] = twoUmiOut
 vardb['distance_stringency'] = distance_stringency
 vardb['coverage_file'] = coverage_file
+vardb['previousDict'] = previousDict
+vardb['prevDictLoc'] = prevDictLoc
+vardb['pickleOutput'] = pickleOutput
 
-pickleVars = outputDir + '/variables.pkl'
+pickleVars = '/media/alex/Extra/Dropbox/Code/FERMI' + '/variables.pkl'
+#Allow multiple pickle files to be created and delete after use
+'''
+pickleVars = '/media/alex/Extra/Dropbox/Code/FERMI' + '/variables.pkl'
+#allow for multiple runs and multiple pkl files
+counter = 1
+if path.exists(pickleVars):
+    while path.exists(pickleVars):
+        pickleVars = pickleVars + '_1'
+        counter += 1
+'''
 pickleFile = open(pickleVars, 'wb')
 pickle.dump(vardb, pickleFile)
 pickleFile.close()
@@ -226,3 +240,9 @@ and it will pull out necessary variables through a combined grep/tail search
 if False:
     read1=$(cat variables.txt | grep -A 1 'read1' variables.txt | tail -n 1)
     '''
+
+#############
+#Run main.py#
+#############
+if __name__ == "__main__":
+    system("python main.py")
