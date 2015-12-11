@@ -60,6 +60,8 @@ elif useDefaults == 'n':
 #create output directory
 outputDir = outputDir + '/' + today + '_' + str(supportingReads) + '_' + str(varThresh)
 
+clusterRun = raw_input('Submit to LRS cluster? (Y/n): ')
+
 ########################
 #Write Dated Output Dir#
 ########################
@@ -142,4 +144,7 @@ pickleFile.close()
 #to the LRS cluster not the python file
 #look in ~/testScripts on Tesla for example
 if __name__ == "__main__":
-    system("python main.py")
+    if clusterRun == 'n':
+        system("python main.py")
+    elif clusterRun == 'Y':
+        system('bsub -n 1 < clusterSubmit.sh')
