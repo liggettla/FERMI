@@ -63,3 +63,39 @@ collapseNestedDict(seqDict, varThresh, final_output_file, supportingReads, readL
 #Output Seq Coverage#
 #####################
 outputCov(twoUmiOut, final_output_file, distance_stringency, coverage_file)
+
+'''
+Nothing below this has yet been implemented
+###################
+#Plot Allele Freqs#
+###################
+#this should output a plot automatically, but is not runtime tested
+#does not output log10() of plot yet
+if False:
+    import rpy2.robjects as ro
+    from rpy2.robjects.packages import importr
+    r = ro.r
+    r.setwd(outputDir)
+    f = r('read.table("allelefreqs.txt", header = FALSE)')
+    grdevices = importr('grDevices')
+    grdevices.png(file="alleleFreq.png", width=800, height=500)
+    r.hist(f[0], breaks=100, main = '5 Reads', xlab='Variant Freq', ylab='# Vars')
+    grdevices.dev_off()
+
+###################
+#Run Shell Scripts#
+###################
+This is not yet function, but shows the general idea of how to run shell scripts
+autonomously and still pass them necessary variables.
+The idea is that variables are output to some variable.txt file like so:
+    output
+    /dir/here
+    read1
+    /dir/R1.fastq
+    read2
+    /dir/R2.fastq
+Then the following code should actually be run from within the actual shell scripts
+and it will pull out necessary variables through a combined grep/tail search
+if False:
+    read1=$(cat variables.txt | grep -A 1 'read1' variables.txt | tail -n 1)
+'''
