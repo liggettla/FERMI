@@ -69,14 +69,28 @@ outputCov(twoUmiOut, final_output_file, distance_stringency, coverage_file)
 '''
 Nothing below this has yet been implemented
 
-###################
-#Run Shell Scripts#
-###################
+#####################
+#Align and Call Vars#
+#####################
 system("alignAndVars.sh %s" % (outputDir))
+
+#######################
+#Output Var Freq Table#
+#######################
+outputDir = outputDir + '/'
+vcfFile = outputDir + '/finalOutput.vcf'
+system('cp %s ./' % (vcfFile))
+system('bash newIdentifyVars.sh')
+system('mv finalOutput.vcf %s' (outputDir))
 
 ###################
 #Plot Allele Freqs#
 ###################
+system('Rscript plotVarFreq.R')
+system('mv allelefreqs.txt %s' (outputDir))
+system('mv allelefreqs.jpg %s' (outputDir))
+
+
 #this should output a plot automatically, but is not runtime tested
 #does not output log10() of plot yet
 #it may be best to just system(Rscript plotting.R) somehow
