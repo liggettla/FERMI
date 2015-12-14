@@ -10,9 +10,10 @@ from goodCollapseDictionary import collapseNestedDict
 ##################
 #Unpack Variables#
 ##################
-inputData = open('./testInput/variables.pkl', 'rb')
+inputData = open('./variables.pkl', 'rb')
 vardb = pickle.load(inputData)
 inputData.close()
+system('rm ./variables.pkl')
 
 read1 = vardb['read1']
 read2 = vardb['read2']
