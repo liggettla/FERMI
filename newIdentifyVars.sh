@@ -1,3 +1,4 @@
+#identifies variants so they can be plotted
 currentfile=finalOutput.bam
 VCFDIR=/vol3/home/liggettl/TruSeqPanel/8.17.2015_HiSeqFastq/combinedUMI/vcfs
 
