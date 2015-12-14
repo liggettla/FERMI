@@ -10,8 +10,7 @@ from goodCollapseDictionary import collapseNestedDict
 ##################
 #Unpack Variables#
 ##################
-inputData = open('/home/alex/Dropbox/Code/FERMI/testInput/variables.pkl', 'rb')
-#inputData = open('/media/alex/Extra/Dropbox/Code/FERMI/variables.pkl', 'rb')
+inputData = open('./testInput/variables.pkl', 'rb')
 vardb = pickle.load(inputData)
 inputData.close()
 

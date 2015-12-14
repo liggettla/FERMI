@@ -23,12 +23,10 @@ today = str(date.today())
 infoOutput = raw_input('Info Writeup About This Run (info/n): ')
 
 #just hardcoding to expedite testing
-read1 = '/home/alex/Dropbox/Code/FERMI/testInput/R1.fastq'
-read2 = '/home/alex/Dropbox/Code/FERMI/testInput/R2.fastq'
-outputDir = '/home/alex/Dropbox/Code/FERMI/testOutput'
-#read1 = '/media/alex/Extra/Dropbox/Code/FERMI/testInput/R1.fastq'
-#read2 = '/media/alex/Extra/Dropbox/Code/FERMI/testInput/R2.fastq'
-#outputDir = '/media/alex/Extra/Dropbox/Code/FERMI/testOutput'
+read1 = './testInput/R1.fastq'
+read2 = './testInput/R2.fastq'
+outputDir = './testOutput'
+
 previousDict = raw_input('Would you like to load previously sorted data? (Y/n): ')
 if previousDict == 'Y':
     prevDictLoc = raw_input('Location of previous sorted data (/dir/data.pkl): ')
@@ -122,8 +120,7 @@ vardb['previousDict'] = previousDict
 vardb['prevDictLoc'] = prevDictLoc
 vardb['pickleOutput'] = pickleOutput
 
-pickleVars = '/home/alex/Dropbox/Code/FERMI/testInput' + '/variables.pkl'
-#pickleVars = '/media/alex/Extra/Dropbox/Code/FERMI' + '/variables.pkl'
+pickleVars = './variables.pkl'
 #Allow multiple pickle files to be created and delete after use
 '''
 pickleVars = '/media/alex/Extra/Dropbox/Code/FERMI' + '/variables.pkl'
