@@ -1,4 +1,5 @@
 import pickle
+from os import system
 from concatenateUMI import concatenateUMI
 from concatenateUMI import concatenateUMI
 from goodCollapseDictionary import buildNestedDict
@@ -9,7 +10,8 @@ from goodCollapseDictionary import collapseNestedDict
 ##################
 #Unpack Variables#
 ##################
-inputData = open('/media/alex/Extra/Dropbox/Code/FERMI/variables.pkl', 'rb')
+inputData = open('/home/alex/Dropbox/Code/FERMI/testInput/variables.pkl', 'rb')
+#inputData = open('/media/alex/Extra/Dropbox/Code/FERMI/variables.pkl', 'rb')
 vardb = pickle.load(inputData)
 inputData.close()
 
@@ -70,19 +72,7 @@ Nothing below this has yet been implemented
 ###################
 #Run Shell Scripts#
 ###################
-This is not yet function, but shows the general idea of how to run shell scripts
-autonomously and still pass them necessary variables.
-The idea is that variables are output to some variable.txt file like so:
-    output
-    /dir/here
-    read1
-    /dir/R1.fastq
-    read2
-    /dir/R2.fastq
-Then the following code should actually be run from within the actual shell scripts
-and it will pull out necessary variables through a combined grep/tail search
-if False:
-    read1=$(cat variables.txt | grep -A 1 'read1' variables.txt | tail -n 1)
+system("alignAndVars.sh %s" % (outputDir))
 
 ###################
 #Plot Allele Freqs#

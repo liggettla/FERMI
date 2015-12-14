@@ -11,22 +11,26 @@
 
 set -exo pipefail
 
-#load these on headnode
+#load these on headnode if running on LRS cluster
 #module load bwa
 #module load java/1.7
 
 #this is the location of the fastqs, picard, and ref genome
-FQDIR=/vol3/home/liggettl/TruSeqPanel/8.17.2015_HiSeqFastq/25_Reads_75_Percent
-RESDIR=/vol3/home/liggettl/TruSeqPanel/8.17.2015_HiSeqFastq/25_Reads_75_Percent
+#FQDIR=/vol3/home/liggettl/TruSeqPanel/8.17.2015_HiSeqFastq/25_Reads_75_Percent
+#RESDIR=/vol3/home/liggettl/TruSeqPanel/8.17.2015_HiSeqFastq/25_Reads_75_Percent
 PICARD=/vol3/home/liggettl/ExomeSeq/bin/picard-tools-1.83
 REF=/vol3/home/liggettl/refgenomes/hg19.fa
-BAMDIR=/vol3/home/liggettl/TruSeqPanel/8.17.2015_HiSeqFastq/25_Reads_75_Percent
-VCFDIR=/vol3/home/liggettl/TruSeqPanel/8.17.2015_HiSeqFastq/25_Reads_75_Percent
+#BAMDIR=/vol3/home/liggettl/TruSeqPanel/8.17.2015_HiSeqFastq/25_Reads_75_Percent
+#VCFDIR=/vol3/home/liggettl/TruSeqPanel/8.17.2015_HiSeqFastq/25_Reads_75_Percent
 
-mkdir -p $FQDIR
-mkdir -p $RESDIR
-mkdir -p $BAMDIR
-mkdir -p $VCFDIR
+#this assigns the passed output folder variable to FQDIR
+#in the format of /outputDir
+FQDIR=$1
+RESDIR=$FQDIR
+BAMDIR=$FQDIR
+VCFDIR=$FQDIR
+
+#mkdir -p $FQDIR
 
 #currentfile=${files[$(($LSB_JOBINDEX - 1))]}
 currentfile=finalOutput
