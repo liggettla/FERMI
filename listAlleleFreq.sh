@@ -1,6 +1,9 @@
 #the purpose of this script is to genereate a file containing allele freqs
 #to be used in plotting
 
+#make sure to first run:
+#sudo apt-get install gawk
+
 files=file
 
 VCFDIR=/dir
