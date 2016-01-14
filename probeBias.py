@@ -18,6 +18,7 @@ for probe in files:
     total = 0
     count = 0
     for line in target:
+        line = int(line)
         if line != lastLine:
             total += line
             count += 1
@@ -25,7 +26,7 @@ for probe in files:
 
     average = total / count
     target.close()
-    output.write('For Probe ' + probe + ' Coverage = ' + average)
+    output.write('For Probe ' + str(probe) + ' Coverage = ' + str(average) + '\n')
 
 output.close()
 
