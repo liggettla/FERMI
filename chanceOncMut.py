@@ -19,7 +19,7 @@ while filecount < 21:
                 if count > 54:
                     loc = line.split()[1]
 
-                    if loc in oncoRegions: #is the var oncogenic?
+                    if int(loc) in oncoRegions: #is the var oncogenic?
                         oncoTotal += 1
                     else: #is the var nonOncogenic?
                         otherTotal += 1
@@ -29,15 +29,11 @@ while filecount < 21:
         oncoProb = float(oncoTotal)/26
         #43 probes covering 150bp - 26 bp that are oncogenic
         otherProb = float(otherTotal)/(43 * 150 - 26)
+        #output.write('%i\t%f\t%f\n' % (filecount, oncoProb, otherProb))
         output.write('Sample %i \nOnc Mut Prob: %f \nNon-Onc Mut Prob: %f\n' % (filecount, oncoProb, otherProb))
         filecount += 1
 
     #skip these filenames b/c they don't exist
     elif filecount == 3 or filecount == 4:
         filecount += 1
-
-
-
-
-
     target.close()
