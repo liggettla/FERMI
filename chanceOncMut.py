@@ -3,6 +3,7 @@
 #the frequency of mutations in TIII and non-oncogenic regions as compared
 #with the frequency seen at oncogenic locations
 oncoRegions = [5073770, 7577539,7577119,115256529,115258747,115258744,534287,534288,534289,25398284,25380275,106197266,106197267,106197268,106197269,106155172,106155173,106155174,25457242,25457243,209113112,209113113,90631934,90631838,48649700]
+TIIIRegions = ['115227', '229041', '110541', '112997', '121167', '123547', '124428', '1397', '2126', '2390', '2593', '11486', '92527', '73379', '82455', '85949']
 
 output = open('../fermiData/chanceOncMut.txt', 'w')
 
@@ -19,16 +20,30 @@ while filecount < 21:
                 if count > 54:
                     loc = line.split()[1]
 
+                    #for oncogenic mutations
+                    '''
                     if int(loc) in oncoRegions: #is the var oncogenic?
                         oncoTotal += 1
                     else: #is the var nonOncogenic?
                         otherTotal += 1
+                    '''
+
+                    #for TIII mutations
+                    #This cuts off the last 3 digits of each location to match the trimmed
+                    #list locations
+                    if str(int(loc)/1000) in TIIIRegions: #is the var oncogenic?
+                        otherTotal += 1
+                    else: #is the var nonOncogenic?
+                        oncoTotal += 1
+
                 count += 1
 
         #26 oncogenic sites
         oncoProb = float(oncoTotal)/26
         #43 probes covering 150bp - 26 bp that are oncogenic
         otherProb = float(otherTotal)/(43 * 150 - 26)
+
+        #different ways to write the data to file
         #output.write('%i\t%f\t%f\n' % (filecount, oncoProb, otherProb))
         output.write('Sample %i \nOnc Mut Prob: %f \nNon-Onc Mut Prob: %f\n' % (filecount, oncoProb, otherProb))
         filecount += 1
