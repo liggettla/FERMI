@@ -62,37 +62,6 @@ if perGeneOrSample == '1':
 
 #The idea here is to look at individual oncogenes/regions across multiple samples and ask
 #whether or not oncogenes are more preferentially mutated across samples
+#completely unused right now
 elif perGeneOrSample == '2':
     oncogeneDict = {'JAK2':[5073770], 'P53':[7577539, 7578402, 7577119], 'NRAS':[115256529, 115258747, 115258744], 'HRAS':[534287, 534288, 534289], 'KRAS':[25398284, 25380275], 'TET2':[106197266, 106197267, 106197268, 106197269, 106155172, 106155173, 106155174, 106155175], 'DNMT3A':[25457242, 25457243], 'IDH1':[209113112, 209113113], 'IDH2':[90631934, 90631838], 'GATA1':[48649700]}
-#Iterate through each of the genes
-    for gene in oncogeneDict:
-
-#Iterate through each of the files
-        while filecount < 21:
-            if filecount != 3 and filecount != 4: #no files 3 or 4 exist
-                filename = '../fermiData/vcfs/' + str(filecount) + '_finalOutput.vcf'
-                count = 1
-                with open(filename, 'r') as target:
-
-
-
-
-
-
-                        #for oncogenic mutations
-                        '''
-                        if int(loc) in oncoRegions: #is the var oncogenic?
-                            oncoTotal += 1
-                        else: #is the var nonOncogenic?
-                            otherTotal += 1
-                        '''
-
-                        #for TIII mutations
-                        #This cuts off the last 3 digits of each location to match the trimmed
-                        #list locations
-                        '''
-                        if str(int(loc)/1000) in TIIIRegions: #is the var oncogenic?
-                            otherTotal += 1
-                        else: #is the var nonOncogenic?
-                            oncoTotal += 1
-                        '''
