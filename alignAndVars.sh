@@ -19,7 +19,8 @@ set -exo pipefail
 #FQDIR=/vol3/home/liggettl/TruSeqPanel/8.17.2015_HiSeqFastq/25_Reads_75_Percent
 #RESDIR=/vol3/home/liggettl/TruSeqPanel/8.17.2015_HiSeqFastq/25_Reads_75_Percent
 PICARD=/vol3/home/liggettl/ExomeSeq/bin/picard-tools-1.83
-REF=/vol3/home/liggettl/refgenomes/hg19.fa
+#REF=/vol3/home/liggettl/refgenomes/hg19.fa
+REF=/media/alex/Extra/Dropbox/Code/ReferenceGenomes/hg19.fa
 #BAMDIR=/vol3/home/liggettl/TruSeqPanel/8.17.2015_HiSeqFastq/25_Reads_75_Percent
 #VCFDIR=/vol3/home/liggettl/TruSeqPanel/8.17.2015_HiSeqFastq/25_Reads_75_Percent
 
@@ -66,6 +67,7 @@ files=finalOutput
 currentfile=$files
 
 #For Single-end Reads
+#bwa mem is better than bwa for reads > 70bp
 bwa mem $REF $R1 | samtools view -bS - | samtools sort - $RESDIR/$currentfile
 
 samtools index $RESDIR/$currentfile.bam
@@ -80,4 +82,9 @@ currentfile=$files
 #calls variants only if they are at least 0.00001% of the calls 1/10^6
 #this should thus output every variant found in the alignment
 #by default freebayes uses 0.2 (20%)
-/vol3/home/liggettl/TruSeqPanel/Scripts/freebayes/freebayes -F 0.0000001 --fasta-reference $REF $BAMDIR/$currentfile.bam > $VCFDIR/$currentfile.vcf
+
+#Cluster
+#/vol3/home/liggettl/TruSeqPanel/Scripts/freebayes/freebayes -F 0.0000001 --fasta-reference $REF $BAMDIR/$currentfile.bam > $VCFDIR/$currentfile.vcf
+
+#Lab
+/media/alex/Extra/Dropbox/Code/freebayes -F 0.0000001 --fasta-reference $REF $BAMDIR/$currentfile.bam > $VCFDIR/$currentfile.vcf

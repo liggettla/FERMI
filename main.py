@@ -66,14 +66,17 @@ collapseNestedDict(seqDict, varThresh, final_output_file, supportingReads, readL
 #####################
 outputCov(twoUmiOut, final_output_file, distance_stringency, coverage_file)
 
-'''
-Nothing below this has yet been implemented
-
 #####################
 #Align and Call Vars#
 #####################
-system("alignAndVars.sh %s" % (outputDir))
+REF = '/vol3/home/liggettl/refgenomes/hg19.fa'
+bamOut = final_output_file.strip('fastq') + 'bam'
 
+system("bwa mem %s %s | samtools view -bS - | samtools sort > %s" % (REF, final_output_file, bamOut))
+system("samtools index %s" % (bamOut))
+
+'''
+Nothing below this has yet been implemented
 #######################
 #Output Var Freq Table#
 #######################
