@@ -15,8 +15,7 @@ output.write('Sample\tOncMutProb\tOncGeneProb\tTIIIProb\n')
 
 perGeneOrSample = raw_input('Analyse per sample or per gene (1/2): ')
 
-#This needs to be improved, because right now I am manually switching between
-#accurate TIII computation and Oncogene computation b/c not enough time to make automatic
+#Computes probability of any of the regional mutations occurring
 if perGeneOrSample == '1':
     filecount = 1
     while filecount < 21:
