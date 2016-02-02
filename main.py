@@ -66,14 +66,25 @@ collapseNestedDict(seqDict, varThresh, final_output_file, supportingReads, readL
 #####################
 outputCov(twoUmiOut, final_output_file, distance_stringency, coverage_file)
 
-#####################
-#Align and Call Vars#
-#####################
+####################
+#Align to Reference#
+####################
 REF = '/vol3/home/liggettl/refgenomes/hg19.fa'
 bamOut = final_output_file.strip('fastq') + 'bam'
 
 system("bwa mem %s %s | samtools view -bS - | samtools sort > %s" % (REF, final_output_file, bamOut))
 system("samtools index %s" % (bamOut))
+
+###############
+#Call Variants#
+###############
+vcfOut = bamOut.strip(bam) + 'vcf'
+
+#Cluster
+#system("/vol3/home/liggettl/TruSeqPanel/Scripts/freebayes/freebayes -F 0.0000001 --fasta-reference %s %s > %s" % (REF, bamOut, vcfOut))
+
+#Lab
+system("/media/alex/Extra/Dropbox/Code/freebayes -F 0.0000001 --fasta-reference %s %s > %s" % (REF, bamOut, vcfOut))
 
 '''
 Nothing below this has yet been implemented
