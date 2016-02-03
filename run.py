@@ -17,16 +17,30 @@ from goodCollapseDictionary import collapseReadsListDict
 #Set directories#
 #################
 today = str(date.today())
-#read1 = raw_input('Read 1 fastq Location (/dir/R1.fastq): ')
-#read2 = raw_input('Read 2 fastq Location (/dir/R2.fastq): ')
-#outputDir = raw_input('Output Location (/dir): ')
 infoOutput = raw_input('Info Writeup About This Run (info/n): ')
 
-#just hardcoding to expedite testing
-read1 = './testInput/R1.fastq'
-read2 = './testInput/R2.fastq'
+#outputDir = raw_input('Output Location (/dir): ')
 outputDir = './testOutput'
 
+###################
+#Get Input File(s)#
+###################
+numFiles = raw_input('Process only single file? (Y/n): ')
+
+if numFiles == 'Y':
+    #read1 = raw_input('Read 1 fastq Location (/dir/R1.fastq): ')
+    #read2 = raw_input('Read 2 fastq Location (/dir/R2.fastq): ')
+
+    #just hardcoding to expedite testing
+    read1 = './testInput/R1.fastq'
+    read2 = './testInput/R2.fastq'
+
+elif numFiles == 'n':
+    fastqDir = raw_input('Input fastq dir (/dir): ')
+
+####################
+#Load Previous Data#
+####################
 previousDict = raw_input('Would you like to load previously sorted data? (Y/n): ')
 if previousDict == 'Y':
     prevDictLoc = raw_input('Location of previous sorted data (/dir/data.pkl): ')
@@ -145,4 +159,5 @@ if __name__ == "__main__":
     if clusterRun == 'n':
         system("python main.py")
     elif clusterRun == 'Y':
-        system('bsub -n 1 < clusterSubmit.sh')
+        system('bsub -n 1 < #BSUB -J UMICon[1]\n #BSUB -e ~/logs/FERMI.%I.%J.err\n #BSUB -o ~/logs/FERMI.%I.%J.out\n #BSUB -R "span[hosts=1]"\n #BSUB -n 1\n python main.py')
+        #system('bsub -n 1 < clusterSubmit.sh')
