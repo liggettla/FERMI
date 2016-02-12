@@ -13,15 +13,15 @@ for line in target:
         AO = line.split(';')[5]
         DP = line.split(';')[7]
         AF = line.split(';')[3]
+#these just trim off the AO= or DP= or AF= part of the string
         AONum = int(AO.split(',')[0][3:])
         AFNum = float(AF.split(',')[0][3:])
+        DPNum = str(DP.split(',')[0][3:])
+        if int(DPNum) > 50:
+            output.write(DPNum + '\n')
 
-        if AONum in infoDict:
-            infoDict[AONum].append(AFNum)
-        else:
-            infoDict[AONum] = [AFNum]
 
     count+=1
 
 orderedInfoDict = collections.OrderedDict(sorted(infoDict.items()))
-pprint(orderedInfoDict, output)
+#pprint(orderedInfoDict, output)
