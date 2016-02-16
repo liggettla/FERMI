@@ -1,3 +1,6 @@
+#The purpose of this script is to look at how many variants are shared between
+#samples that were prepared and sequenced multiple times as in the dilution
+#series that were using in both 12.22.2015 and 1.16.2016
 inputDir = './dataFiles/'
 
 unfil8 = ['24_finalOutput.vcf', '25_finalOutput.vcf', '26_finalOutput.vcf', '27_finalOutput.vcf']
