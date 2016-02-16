@@ -1,3 +1,6 @@
+#The purpose of this script is to take vcf files and filter them based on
+#AF, AO, and DP parameters
+
 import collections
 from pprint import pprint
 
