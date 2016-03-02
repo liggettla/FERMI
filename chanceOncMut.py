@@ -45,8 +45,8 @@ if perGeneOrSample == '1':
 
             #32 oncogenic sites
             oncoProb = float(oncoTotal)/32
-            #26 probes covering 150bp - 32 bp that are oncogenic
-            oncoGenProb = float(nonOncTotal)/(26 * 150 - 32)
+            #15 probes covering 150bp - 32 bp that are oncogenic
+            oncoGenProb = float(nonOncTotal)/(15 * 150 - 32)
             #17 probes covering 150bp
             TIIIProb = float(TIIITotal)/(17 * 150)
 
