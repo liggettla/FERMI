@@ -1,6 +1,8 @@
 #The purpose of the is script is to test the possibility
 #that collapsing before aligning is causing problems (ITS NOT)
 
+from system import os
+
 inDir = './testInput/'
 outDir = './testOutput/'
 r1Name = 'R1'
