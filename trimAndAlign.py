@@ -26,7 +26,7 @@ for i in files:
         elif position == 4:
             quality = line[6:]
             position = 1
-            outFile.write(header + '\n' + read_seq + '\n' + plus + '\n' + quality + '\n')
+            outFile.write(header + '\n' + read_seq + plus + '\n' + quality)
 
     REF = '/vol3/home/liggettl/refgenomes/hg19.fa'
 
