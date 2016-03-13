@@ -32,8 +32,8 @@ if numFiles == 'Y':
     #read2 = raw_input('Read 2 fastq Location (/dir/R2.fastq): ')
 
     #just hardcoding to expedite testing
-    read1 = './testInput/R1.fastq'
-    read2 = './testInput/R2.fastq'
+    read1 = './testInput/25_R1.fastq'
+    read2 = './testInput/25_R2.fasq'
 
 elif numFiles == 'n':
     fastqDir = raw_input('Input fastq dir (/dir): ')
