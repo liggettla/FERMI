@@ -87,7 +87,10 @@ outputCov(twoUmiOut, final_output_file, distance_stringency, coverage_file)
 #    | samtools view -bS - \
 #    | samtools sort - $RESDIR/$currentfile.fastq
 
+#Cluster
 REF = '/vol3/home/liggettl/refgenomes/hg19.fa'
+#Lab
+#REF = '/media/alex/Extra/Dropbox/Code/ReferenceGenomes/hg19.fa'
 bamOut = final_output_file.strip('fastq') + 'bam'
 
 system("bwa mem %s %s | samtools view -bS - | samtools sort > %s" % (REF, final_output_file, bamOut))
@@ -103,7 +106,7 @@ system("samtools index %s" % (bamOut))
 vcfOut = bamOut.strip('bam') + 'vcf'
 
 #Cluster
-system("/vol3/home/liggettl/TruSeqPanel/Scripts/freebayes/freebayes -F 0.0000001 --fasta-reference %s %s > %s" % (REF, bamOut, vcfOut))
+#system("/vol3/home/liggettl/TruSeqPanel/Scripts/freebayes/freebayes -F 0.0000001 --fasta-reference %s %s > %s" % (REF, bamOut, vcfOut))
 
 #Lab
 system("/media/alex/Extra/Dropbox/Code/freebayes -F 0.0000001 --fasta-reference %s %s > %s" % (REF, bamOut, vcfOut))
