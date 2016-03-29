@@ -17,7 +17,8 @@ from goodCollapseDictionary import collapseReadsListDict
 #Set directories#
 #################
 today = str(date.today())
-infoOutput = raw_input('Info Writeup About This Run (info/n): ')
+#infoOutput = raw_input('Info Writeup About This Run (info/n): ')
+infoOutput = 'n'
 
 #outputDir = raw_input('Output Location (/dir): ')
 outputDir = './testOutput'
@@ -25,7 +26,8 @@ outputDir = './testOutput'
 ###################
 #Get Input File(s)#
 ###################
-numFiles = raw_input('Process only single file? (Y/n): ')
+#numFiles = raw_input('Process only single file? (Y/n): ')
+numFiles = 'Y'
 
 if numFiles == 'Y':
     #read1 = raw_input('Read 1 fastq Location (/dir/R1.fastq): ')
@@ -33,7 +35,7 @@ if numFiles == 'Y':
 
     #just hardcoding to expedite testing
     read1 = './testInput/25_R1.fastq'
-    read2 = './testInput/25_R2.fasq'
+    read2 = './testInput/25_R2.fastq'
 
 elif numFiles == 'n':
     fastqDir = raw_input('Input fastq dir (/dir): ')
@@ -41,7 +43,8 @@ elif numFiles == 'n':
 ####################
 #Load Previous Data#
 ####################
-previousDict = raw_input('Would you like to load previously sorted data? (Y/n): ')
+#previousDict = raw_input('Would you like to load previously sorted data? (Y/n): ')
+previousDict = 'n'
 if previousDict == 'Y':
     prevDictLoc = raw_input('Location of previous sorted data (/dir/data.pkl): ')
 elif previousDict == 'n':
@@ -54,7 +57,8 @@ if not path.exists(outputDir):
 ####################
 #Set Run Parameters#
 ####################
-useDefaults = raw_input('Use Default Parameters? (Y/n): ')
+#useDefaults = raw_input('Use Default Parameters? (Y/n): ')
+useDefaults = 'Y'
 
 if useDefaults == 'Y':
     #number of mismatches allowed when calling two UMIs the same
@@ -72,7 +76,8 @@ elif useDefaults == 'n':
 #create output directory
 outputDir = outputDir + '/' + today + '_' + str(supportingReads) + '_' + str(varThresh)
 
-clusterRun = raw_input('Submit to LRS cluster? (Y/n): ')
+#clusterRun = raw_input('Submit to LRS cluster? (Y/n): ')
+clusterRun = 'n'
 
 ########################
 #Write Dated Output Dir#

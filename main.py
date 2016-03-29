@@ -6,6 +6,9 @@ from goodCollapseDictionary import buildNestedDict
 from outputCoverage import outputCov
 from goodCollapseDictionary import buildNestedDict
 from goodCollapseDictionary import collapseNestedDict
+from time import time
+
+start_time = time()
 
 ##################
 #Unpack Variables#
@@ -87,6 +90,7 @@ outputCov(twoUmiOut, final_output_file, distance_stringency, coverage_file)
 #    | samtools view -bS - \
 #    | samtools sort - $RESDIR/$currentfile.fastq
 
+'''
 #Cluster
 REF = '/vol3/home/liggettl/refgenomes/hg19.fa'
 #Lab
@@ -107,9 +111,9 @@ vcfOut = bamOut.strip('bam') + 'vcf'
 
 #Cluster
 #system("/vol3/home/liggettl/TruSeqPanel/Scripts/freebayes/freebayes -F 0.0000001 --fasta-reference %s %s > %s" % (REF, bamOut, vcfOut))
-
 #Lab
 system("/media/alex/Extra/Dropbox/Code/freebayes -F 0.0000001 --fasta-reference %s %s > %s" % (REF, bamOut, vcfOut))
+'''
 
 #Using pooled continuous makes frequency based calls without using number of samples as input
 #This might help in adjusting for different copy numbers without knowing the exact number of individual captures
@@ -149,3 +153,8 @@ if False:
     r.hist(f[0], breaks=100, main = '5 Reads', xlab='Variant Freq', ylab='# Vars')
     grdevices.dev_off()
 '''
+
+###########################
+#Print time of program run#
+###########################
+print("Total Runtime:\n%s seconds" % (time() - start_time))
