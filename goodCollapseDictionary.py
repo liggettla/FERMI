@@ -20,7 +20,7 @@ import pickle
 #Tracks quality score and header as well as sequence and UMI
 #by reading in info from input_file into a dict containing three nested lists
 #associated with each UMI key
-def buildListDict(input_file, distance_stringency):
+def buildListDict(input_file, distance_stringency, pickleOut):
     #Dict format: {'UMI_1' : (Seqs, First_Header, First_quality), 'UMI_2' : (Seqs, First_Header, First_quality)}
     sequences = defaultdict(lambda:([],[],[]))
     target = open(input_file, 'r')
@@ -62,6 +62,14 @@ def buildListDict(input_file, distance_stringency):
                 sequences[umi_seq][2].append(quality)
 
     target.close()
+
+    ###########################
+    #Write Full Data Structure#
+    ###########################
+    pickleFile = open(pickleOut, 'wb')
+    pickle.dump(sequences, pickleFile)
+    pickleFile.close()
+
     return sequences
 
 '''

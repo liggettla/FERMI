@@ -45,7 +45,7 @@ concatenateUMI(read1, read2, twoUmiOut)
 #build dict binning reads by concatenated UMIs
 if previousDict == 'n':
     #seqDict = buildNestedDict(twoUmiOut, distance_stringency, pickleOutput)
-    seqDict = buildListDict(twoUmiOut, distance_stringency)
+    seqDict = buildListDict(twoUmiOut, distance_stringency, pickleOutput)
 
 #retrieve previous seq data structure
 elif previousDict == 'Y':
