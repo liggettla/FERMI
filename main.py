@@ -1,11 +1,11 @@
 import pickle
 from os import system
 from concatenateUMI import concatenateUMI
-from concatenateUMI import concatenateUMI
 from goodCollapseDictionary import buildNestedDict
-from outputCoverage import outputCov
-from goodCollapseDictionary import buildNestedDict
+from goodCollapseDictionary import buildListDict
 from goodCollapseDictionary import collapseNestedDict
+from goodCollapseDictionary import collapseReadsListDict
+from outputCoverage import outputCov
 from time import time
 
 start_time = time()
@@ -44,7 +44,8 @@ concatenateUMI(read1, read2, twoUmiOut)
 ##############################
 #build dict binning reads by concatenated UMIs
 if previousDict == 'n':
-    seqDict = buildNestedDict(twoUmiOut, distance_stringency, pickleOutput)
+    #seqDict = buildNestedDict(twoUmiOut, distance_stringency, pickleOutput)
+    seqDict = buildListDict(twoUmiOut, distance_stringency)
 
 #retrieve previous seq data structure
 elif previousDict == 'Y':
@@ -62,7 +63,8 @@ with open(twoUmiOut, 'r') as target:
     readLength = len(readSeq) - 12
 
 #collapse reads on binned UMI data structure
-collapseNestedDict(seqDict, varThresh, final_output_file, supportingReads, readLength)
+#collapseNestedDict(seqDict, varThresh, final_output_file, supportingReads, readLength)
+collapseReadsListDict(seqDict, varThresh, final_output_file, supportingReads, readLength)
 
 #####################
 #Output Seq Coverage#
@@ -157,4 +159,6 @@ if False:
 ###########################
 #Print time of program run#
 ###########################
+target = open(outputDir + '/runTime.txt', 'w')
+target.write("Total Runtime:\n%s seconds" % (time() - start_time))
 print("Total Runtime:\n%s seconds" % (time() - start_time))

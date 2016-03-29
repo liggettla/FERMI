@@ -120,10 +120,11 @@ def buildNestedDict(input_file, distance_stringency, pickleOut):
     ###########################
     #Write Full Data Structure#
     ###########################
-
+    '''
     pickleFile = open(pickleOut, 'wb')
     pickle.dump(sortedSeqs, pickleFile)
     pickleFile.close()
+    '''
 
     #import pprint
     #pprint.pprint(sortedSeqs)
