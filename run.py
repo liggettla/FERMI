@@ -164,5 +164,5 @@ if __name__ == "__main__":
     if clusterRun == 'n':
         system("python main.py")
     elif clusterRun == 'Y':
-        system('bsub -n 1 < #BSUB -J UMICon[1]\n #BSUB -e ~/logs/FERMI.%I.%J.err\n #BSUB -o ~/logs/FERMI.%I.%J.out\n #BSUB -R "span[hosts=1]"\n #BSUB -n 1\n python main.py')
-        #system('bsub -n 1 < clusterSubmit.sh')
+        #system('bsub -n 1 < #BSUB -J UMICon[1]\n #BSUB -e ~/logs/FERMI.%I.%J.err\n #BSUB -o ~/logs/FERMI.%I.%J.out\n #BSUB -R "span[hosts=1]"\n #BSUB -n 1\n python main.py')
+        system('bsub -n 1 < clusterSubmit.sh')
