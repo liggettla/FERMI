@@ -62,14 +62,6 @@ def buildListDict(input_file, distance_stringency, pickleOut):
                 sequences[umi_seq][2].append(quality)
 
     target.close()
-
-    ###########################
-    #Write Full Data Structure#
-    ###########################
-    pickleFile = open(pickleOut, 'wb')
-    pickle.dump(sequences, pickleFile)
-    pickleFile.close()
-
     return sequences
 
 '''
