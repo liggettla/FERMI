@@ -33,6 +33,10 @@ previousDict = vardb['previousDict']
 prevDictLoc = vardb['prevDictLoc']
 pickleOutput = vardb['pickleOutput']
 numFiles = vardb['numFiles']
+inputDir = vardb['inputDir']
+
+read1 = inputDir + '/' + read1
+read2 = inputDir + '/' + read2
 
 #####################
 #Concatate R1 and R2#

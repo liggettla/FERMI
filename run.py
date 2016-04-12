@@ -29,23 +29,20 @@ outputDir = './testOutput'
 #Get Input File(s)#
 ##################
 numFiles = raw_input('Process only single file? (Y/n): ')
-#numFiles = 'Y'
+inputDir = raw_input('Input Dir (/dir): ')
 readList={}
 
 if numFiles == 'Y':
-    #read1 = raw_input('Read 1 fastq Location (/dir/R1.fastq): ')
-    #read2 = raw_input('Read 2 fastq Location (/dir/R2.fastq): ')
+    read1 = raw_input('Read 1 fastq Location (R1.fastq): ')
+    read2 = raw_input('Read 2 fastq Location (R2.fastq): ')
 
-    #just hardcoding to expedite testing
-    read1 = './testInput/25_R1.fastq'
-    read2 = './testInput/25_R2.fastq'
     readList[read1] = read2
 
 elif numFiles == 'n':
     others = 'Y'
     while others == 'Y':
-        read1 = raw_input('Read 1 fastq Location (/dir/R1.fastq): ')
-        read2 = raw_input('Read 2 fastq Location (/dir/R2.fastq): ')
+        read1 = raw_input('Read 1 fastq Location (R1.fastq): ')
+        read2 = raw_input('Read 2 fastq Location (R2.fastq): ')
         others = raw_input('Enter more fastq files? (Y/n): ')
         readList[read1] = read2
 
@@ -105,38 +102,44 @@ if not path.exists(outputDir):
     #make the output directory
     mkdir(os.path.expanduser(outputDir))
 
-twoUmiOut = outputDir + '/twoUMIs.fastq'
-final_output_file = outputDir + '/finalOutput.fastq'
-coverage_file = outputDir + '/coverageData.txt'
-infoFile = outputDir + '/runInfo.txt'
-parametersUsed = outputDir + '/parametersUsed.txt'
-pickleOutput = outputDir + '/sortedSeqData.pkl'
 
 #############################
 #Record Files and Parameters#
 #############################
-if infoOutput != 'n':
-    info = open(infoFile, 'w')
-    info.write(infoOutput)
-    info.close()
+def recordParams(parametersUsed, inputDir, read1, read2, varThresh, supportingReads):
+    if infoOutput != 'n':
+        info = open(infoFile, 'w')
+        info.write(infoOutput)
+        info.close()
 
-target = open(parametersUsed, 'w')
-target.write("Read 1 Location: %s\n" %(read1))
-target.write("Read 2 Location: %s\n" %(read2))
-target.write("Distance Stringency: %d\n" %(distance_stringency))
-target.write("Variant Threshold: %f\n" %(varThresh))
-target.write("Supporting Reads: %d\n" %(supportingReads))
-target.close()
+    target = open(parametersUsed, 'w')
+    target.write('Input File Location: %s\n' %(inputDir))
+    target.write("Read 1: %s\n" %(read1))
+    target.write("Read 2: %s\n" %(read2))
+    target.write("Distance Stringency: %d\n" %(distance_stringency))
+    target.write("Variant Threshold: %f\n" %(varThresh))
+    target.write("Supporting Reads: %d\n" %(supportingReads))
+    target.close()
 
 ############################
 #Write Variables for Python#
 ############################
 #outputs variables as pickle file that need to be loaded by cluster submitted
 #scripts
-def writePickle(read1, read2):
+def writePickle(one, two, specificOut):
     vardb = {}
 
-    vardb['outputDir'] = outputDir
+    twoUmiOut = specificOut + '/twoUMIs.fastq'
+    final_output_file = specificOut + '/finalOutput.fastq'
+    coverage_file = specificOut + '/coverageData.txt'
+    infoFile = specificOut + '/runInfo.txt'
+    parametersUsed = specificOut + '/parametersUsed.txt'
+    pickleOutput = specificOut + '/sortedSeqData.pkl'
+
+    # this also records the parameters used in the run
+    recordParams(parametersUsed, inputDir, read1, read2, varThresh, supportingReads)
+
+    vardb['outputDir'] = specificOut
     vardb['varThresh'] = varThresh
     vardb['final_output_file'] = final_output_file
     vardb['supportingReads'] = supportingReads
@@ -147,8 +150,9 @@ def writePickle(read1, read2):
     vardb['prevDictLoc'] = prevDictLoc
     vardb['pickleOutput'] = pickleOutput
     vardb['numFiles'] = numFiles
-    vardb['read1'] = read1
-    vardb['read2'] = read2
+    vardb['read1'] = one
+    vardb['read2'] = two
+    vardb['inputDir'] = inputDir
 
     pickleVars = './variables.pkl'
 
@@ -173,10 +177,13 @@ if __name__ == "__main__":
         for i in readList:
             read1 = i
             read2 = readList[i]
+            # make file specific output
+            specificOut = outputDir + '/' + read1
+            mkdir(os.path.expanduser(specificOut))
 
             while os.path.exists('queueFile'): # wait until previous file is processed before continuing
                 time.sleep(10)
-            writePickle(read1, read2) # write new pickle with new read1/2
+            writePickle(read1, read2, specificOut) # write new pickle with new read1/2
             system("touch queueFile") # set waiting file
             system("python main.py")
 
