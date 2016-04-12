@@ -82,8 +82,8 @@ elif useDefaults == 'n':
 #create output directory
 outputDir = outputDir + '/' + today + '_' + str(supportingReads) + '_' + str(varThresh)
 
-#clusterRun = raw_input('Submit to LRS cluster? (Y/n): ')
-clusterRun = 'n'
+clusterRun = raw_input('Submit to LRS cluster? (Y/n): ')
+#clusterRun = 'n'
 
 ########################
 #Write Dated Output Dir#
