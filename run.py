@@ -9,6 +9,8 @@ import pickle
 from outputCoverage import outputCov
 import pdb
 from os import system
+import os.path
+import time
 
 from goodCollapseDictionary import buildListDict
 from goodCollapseDictionary import collapseReadsListDict
@@ -25,9 +27,10 @@ outputDir = './testOutput'
 
 ###################
 #Get Input File(s)#
-###################
-#numFiles = raw_input('Process only single file? (Y/n): ')
-numFiles = 'Y'
+##################
+numFiles = raw_input('Process only single file? (Y/n): ')
+#numFiles = 'Y'
+readList={}
 
 if numFiles == 'Y':
     #read1 = raw_input('Read 1 fastq Location (/dir/R1.fastq): ')
@@ -36,9 +39,15 @@ if numFiles == 'Y':
     #just hardcoding to expedite testing
     read1 = './testInput/25_R1.fastq'
     read2 = './testInput/25_R2.fastq'
+    readList[read1] = read2
 
 elif numFiles == 'n':
-    fastqDir = raw_input('Input fastq dir (/dir): ')
+    others = 'Y'
+    while others == 'Y':
+        read1 = raw_input('Read 1 fastq Location (/dir/R1.fastq): ')
+        read2 = raw_input('Read 2 fastq Location (/dir/R2.fastq): ')
+        others = raw_input('Enter more fastq files? (Y/n): ')
+        readList[read1] = read2
 
 ####################
 #Load Previous Data#
@@ -124,35 +133,29 @@ target.close()
 ############################
 #outputs variables as pickle file that need to be loaded by cluster submitted
 #scripts
-vardb = {}
+def writePickle(read1, read2):
+    vardb = {}
 
-vardb['read1'] = read1
-vardb['read2'] = read2
-vardb['outputDir'] = outputDir
-vardb['varThresh'] = varThresh
-vardb['final_output_file'] = final_output_file
-vardb['supportingReads'] = supportingReads
-vardb['twoUmiOut'] = twoUmiOut
-vardb['distance_stringency'] = distance_stringency
-vardb['coverage_file'] = coverage_file
-vardb['previousDict'] = previousDict
-vardb['prevDictLoc'] = prevDictLoc
-vardb['pickleOutput'] = pickleOutput
+    vardb['outputDir'] = outputDir
+    vardb['varThresh'] = varThresh
+    vardb['final_output_file'] = final_output_file
+    vardb['supportingReads'] = supportingReads
+    vardb['twoUmiOut'] = twoUmiOut
+    vardb['distance_stringency'] = distance_stringency
+    vardb['coverage_file'] = coverage_file
+    vardb['previousDict'] = previousDict
+    vardb['prevDictLoc'] = prevDictLoc
+    vardb['pickleOutput'] = pickleOutput
+    vardb['numFiles'] = numFiles
+    vardb['read1'] = read1
+    vardb['read2'] = read2
 
-pickleVars = './variables.pkl'
-#Allow multiple pickle files to be created and delete after use
-'''
-pickleVars = '/media/alex/Extra/Dropbox/Code/FERMI' + '/variables.pkl'
-#allow for multiple runs and multiple pkl files
-counter = 1
-if path.exists(pickleVars):
-    while path.exists(pickleVars):
-        pickleVars = pickleVars + '_1'
-        counter += 1
-'''
-pickleFile = open(pickleVars, 'wb')
-pickle.dump(vardb, pickleFile)
-pickleFile.close()
+    pickleVars = './variables.pkl'
+
+    pickleFile = open(pickleVars, 'wb')
+    pickle.dump(vardb, pickleFile)
+    pickleFile.close()
+
 
 #############
 #Run main.py#
@@ -161,8 +164,23 @@ pickleFile.close()
 #to the LRS cluster not the python file
 #look in ~/testScripts on Tesla for example
 if __name__ == "__main__":
+
+    # remove any existing queueFile
+    if os.path.exists('queueFile'):
+        system('rm ./queueFile')
+
     if clusterRun == 'n':
-        system("python main.py")
+        for i in readList:
+            read1 = i
+            read2 = readList[i]
+
+            while os.path.exists('queueFile'): # wait until previous file is processed before continuing
+                time.sleep(10)
+            writePickle(read1, read2) # write new pickle with new read1/2
+            system("touch queueFile") # set waiting file
+            system("python main.py")
+
     elif clusterRun == 'Y':
-        #system('bsub -n 1 < #BSUB -J UMICon[1]\n #BSUB -e ~/logs/FERMI.%I.%J.err\n #BSUB -o ~/logs/FERMI.%I.%J.out\n #BSUB -R "span[hosts=1]"\n #BSUB -n 1\n python main.py')
+
+        system("touch queueFile") # set waiting file
         system('bsub -n 1 < clusterSubmit.sh')

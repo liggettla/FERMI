@@ -1,5 +1,6 @@
 import pickle
 from os import system
+from os import makedirs
 from concatenateUMI import concatenateUMI
 from goodCollapseDictionary import buildNestedDict
 from goodCollapseDictionary import buildListDict
@@ -17,6 +18,7 @@ inputData = open('./variables.pkl', 'rb')
 vardb = pickle.load(inputData)
 inputData.close()
 system('rm ./variables.pkl')
+system('rm ./queueFile') # tell the system to start processing next file
 
 read1 = vardb['read1']
 read2 = vardb['read2']
@@ -30,6 +32,7 @@ coverage_file = vardb['coverage_file']
 previousDict = vardb['previousDict']
 prevDictLoc = vardb['prevDictLoc']
 pickleOutput = vardb['pickleOutput']
+numFiles = vardb['numFiles']
 
 #####################
 #Concatate R1 and R2#
@@ -37,7 +40,18 @@ pickleOutput = vardb['pickleOutput']
 #attach 3' UMI from R2 onto R1 read
 #this is a necessary step to process reads with 100-150 cycle chemistry
 #200 cycle chemistry makes this unnecessary
+
 concatenateUMI(read1, read2, twoUmiOut)
+
+'''
+if numFiles == 'Y':
+    for i in readList:
+        read1 = i
+        read2 = readList[i]
+        concatenateUMI(read1, read2, twoUmiOut)
+elif numFiles == 'n':
+pass
+'''
 
 ##############################
 #Build/Get Seq Data Structure#
@@ -143,15 +157,15 @@ system('mv allelefreqs.jpg %s' (outputDir))
 #does not output log10() of plot yet
 #it may be best to just system(Rscript plotting.R) somehow
 if False:
-    import rpy2.robjects as ro
-    from rpy2.robjects.packages import importr
-    r = ro.r
-    r.setwd(outputDir)
-    f = r('read.table("allelefreqs.txt", header = FALSE)')
-    grdevices = importr('grDevices')
-    grdevices.png(file="alleleFreq.png", width=800, height=500)
-    r.hist(f[0], breaks=100, main = '5 Reads', xlab='Variant Freq', ylab='# Vars')
-    grdevices.dev_off()
+import rpy2.robjects as ro
+from rpy2.robjects.packages import importr
+r = ro.r
+r.setwd(outputDir)
+f = r('read.table("allelefreqs.txt", header = FALSE)')
+grdevices = importr('grDevices')
+grdevices.png(file="alleleFreq.png", width=800, height=500)
+r.hist(f[0], breaks=100, main = '5 Reads', xlab='Variant Freq', ylab='# Vars')
+grdevices.dev_off()
 '''
 
 ###########################
