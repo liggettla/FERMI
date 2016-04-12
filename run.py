@@ -173,21 +173,20 @@ if __name__ == "__main__":
     if os.path.exists('queueFile'):
         system('rm ./queueFile')
 
-    if clusterRun == 'n':
-        for i in readList:
-            read1 = i
-            read2 = readList[i]
-            # make file specific output
-            specificOut = outputDir + '/' + read1
-            mkdir(os.path.expanduser(specificOut))
+    for i in readList:
+        read1 = i
+        read2 = readList[i]
+        # make file specific output
+        specificOut = outputDir + '/' + read1
+        mkdir(os.path.expanduser(specificOut))
 
-            while os.path.exists('queueFile'): # wait until previous file is processed before continuing
-                time.sleep(10)
-            writePickle(read1, read2, specificOut) # write new pickle with new read1/2
-            system("touch queueFile") # set waiting file
+        while os.path.exists('queueFile'): # wait until previous file is processed before continuing
+            time.sleep(10)
+        writePickle(read1, read2, specificOut) # write new pickle with new read1/2
+        system("touch queueFile") # set waiting file
+
+        if clusterRun == 'n':
             system("python main.py")
 
-    elif clusterRun == 'Y':
-
-        system("touch queueFile") # set waiting file
-        system('bsub -n 1 < clusterSubmit.sh')
+        elif clusterRun == 'Y':
+            system('bsub -n 1 < clusterSubmit.sh')
