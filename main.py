@@ -34,6 +34,7 @@ prevDictLoc = vardb['prevDictLoc']
 pickleOutput = vardb['pickleOutput']
 numFiles = vardb['numFiles']
 inputDir = vardb['inputDir']
+clusterRun = vardb['clusterRun']
 
 read1 = inputDir + '/' + read1
 read2 = inputDir + '/' + read2
@@ -46,16 +47,6 @@ read2 = inputDir + '/' + read2
 #200 cycle chemistry makes this unnecessary
 
 concatenateUMI(read1, read2, twoUmiOut)
-
-'''
-if numFiles == 'Y':
-    for i in readList:
-        read1 = i
-        read2 = readList[i]
-        concatenateUMI(read1, read2, twoUmiOut)
-elif numFiles == 'n':
-pass
-'''
 
 ##############################
 #Build/Get Seq Data Structure#
@@ -89,7 +80,6 @@ collapseReadsListDict(seqDict, varThresh, final_output_file, supportingReads, re
 #####################
 outputCov(twoUmiOut, final_output_file, distance_stringency, coverage_file)
 
-'''
 ####################
 #Align to Reference#
 ####################
@@ -111,14 +101,13 @@ outputCov(twoUmiOut, final_output_file, distance_stringency, coverage_file)
 #    | samtools view -bS - \
 #    | samtools sort - $RESDIR/$currentfile.fastq
 
-#Cluster
-REF = '/vol3/home/liggettl/refgenomes/hg19.fa'
-#Lab
-#REF = '/media/alex/Extra/Dropbox/Code/ReferenceGenomes/hg19.fa'
-bamOut = final_output_file.strip('fastq') + 'bam'
+# only runs this on the cluster
+if clusterRun == 'Y':
+    REF = '/vol3/home/liggettl/refgenomes/hg19.fa'
+    bamOut = final_output_file.strip('fastq') + 'bam'
 
-system("bwa mem %s %s | samtools view -bS - | samtools sort > %s" % (REF, final_output_file, bamOut))
-system("samtools index %s" % (bamOut))
+    system("bwa mem %s %s | samtools view -bS - | samtools sort > %s" % (REF, final_output_file, bamOut))
+    system("samtools index %s" % (bamOut))
 
 ###############
 #Call Variants#
@@ -127,18 +116,17 @@ system("samtools index %s" % (bamOut))
 #this should thus output every variant found in the alignment
 #by default freebayes uses 0.2 (20%)
 
-vcfOut = bamOut.strip('bam') + 'vcf'
+if clusterRun == 'Y':
+    vcfOut = bamOut.strip('bam') + 'vcf'
 
-#Cluster
-#system("/vol3/home/liggettl/TruSeqPanel/Scripts/freebayes/freebayes -F 0.0000001 --fasta-reference %s %s > %s" % (REF, bamOut, vcfOut))
-#Lab
-system("/media/alex/Extra/Dropbox/Code/freebayes -F 0.0000001 --fasta-reference %s %s > %s" % (REF, bamOut, vcfOut))
+    system("/vol3/home/liggettl/TruSeqPanel/Scripts/freebayes/freebayes -F 0.0000001 --fasta-reference %s %s > %s" % (REF, bamOut, vcfOut))
 
 #Using pooled continuous makes frequency based calls without using number of samples as input
 #This might help in adjusting for different copy numbers without knowing the exact number of individual captures
 #in a given reaction
 #freebayes -f %s -F 0.0000001 -C 1 --pooled-continuous %s > %s % (REF, bamOut, vcfOut))
 
+'''
 Nothing below this has yet been implemented
 #######################
 #Output Var Freq Table#

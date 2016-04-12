@@ -153,6 +153,7 @@ def writePickle(one, two, specificOut):
     vardb['read1'] = one
     vardb['read2'] = two
     vardb['inputDir'] = inputDir
+    vardb['clusterRun'] = clusterRun
 
     pickleVars = './variables.pkl'
 
