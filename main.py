@@ -126,6 +126,15 @@ if clusterRun == 'Y':
 #in a given reaction
 #freebayes -f %s -F 0.0000001 -C 1 --pooled-continuous %s > %s % (REF, bamOut, vcfOut))
 
+#################
+#Filter Variants#
+#################
+# filters final vcf file to output either only AF=0 reads
+# or AF=0.5 and AF=1 reads
+if clusterRun == 'Y':
+    from varDPFilter import vcfFilter
+    vcfFilter(inputDir, vcfOut)
+
 '''
 Nothing below this has yet been implemented
 #######################

@@ -102,7 +102,6 @@ if not path.exists(outputDir):
     #make the output directory
     mkdir(os.path.expanduser(outputDir))
 
-
 #############################
 #Record Files and Parameters#
 #############################
