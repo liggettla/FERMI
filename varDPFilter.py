@@ -3,18 +3,17 @@
 import collections
 from pprint import pprint
 
-def vcfFilter(inDir, inputFile):
+def vcfFilter(inDir, outputDir, inputFile):
 
     inFiles = [inputFile]
 
     for file in inFiles:
-        input = inDir + file + '.vcf'
-        vcfOutputAF0 = inDir + file + '_AF0_filtered.vcf' # includes AF=0
-        vcfOutputAF1 = inDir + file + '_AF1_filtered.vcf' # includes AF=1,0.5
-        plottable0 = inDir + file + '_AF0_plottable.txt'
-        plottable1 = inDir + file + '_AF1_plottable.txt'
+        vcfOutputAF0 = outputDir + '/AF0_filtered.vcf' # includes AF=0
+        vcfOutputAF1 = outputDir + '/AF1_filtered.vcf' # includes AF=1,0.5
+        plottable0 = outputDir + '/AF0_plottable.txt'
+        plottable1 = outputDir + '/AF1_plottable.txt'
 
-        target = open(input, 'r')
+        target = open(inputFile, 'r')
         vcfOut0 = open(vcfOutputAF0, 'w')
         vcfOut1 = open(vcfOutputAF1, 'w')
         dataOut0 = open(plottable0, 'w')

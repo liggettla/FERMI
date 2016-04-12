@@ -133,7 +133,7 @@ if clusterRun == 'Y':
 # or AF=0.5 and AF=1 reads
 if clusterRun == 'Y':
     from varDPFilter import vcfFilter
-    vcfFilter(inputDir, vcfOut)
+    vcfFilter(inputDir, outputDir, vcfOut)
 
 '''
 Nothing below this has yet been implemented
