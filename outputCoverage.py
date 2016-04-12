@@ -6,7 +6,7 @@ def outputCov(input_file, final_output_file, distance_stringency, coverage_file)
     outputLines = sum(1 for line in open(final_output_file))
     target.write("Eliminating only exact and close UMI matches:\n")
     target.write("# of Allowed UMI Mismatches: %d\n" %(distance_stringency))
-    if inputLines == 0:
+    if not inputLines == 0:
         target.write("Total # of Original UMIs: %d\n" % (inputLines/4))
         target.write("# of Unique UMIs: %d\n" % (outputLines/4))
         avgCov = float(inputLines)/outputLines
