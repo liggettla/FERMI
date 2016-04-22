@@ -50,8 +50,10 @@ def vcfFilter(inDir, outputDir, inputFile):
                 vcfOut1.write(line)
 
         target.close()
-        vcfOut.close()
-        dataOut.close()
+        vcfOut0.close()
+        vcfOut1.close()
+        dataOut0.close()
+        dataOut1.close()
 
         #orderedInfoDict = collections.OrderedDict(sorted(infoDict.items()))
 #pprint(orderedInfoDict, output)
