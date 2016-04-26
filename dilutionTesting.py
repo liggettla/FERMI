@@ -1,4 +1,4 @@
-#The purpose of this script is to understand how well mutations in th
+#The purpose of this script is to understand how well mutations in the
 #dilution samples are found from the spiked-in DNA.
 #This script looks at variants that are AF=1 of the spiked-in
 #sample unfortunately there is no way to know if it unique because the seq
