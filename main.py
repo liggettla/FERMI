@@ -182,5 +182,5 @@ print("Total Runtime:\n%s seconds" % (time() - start_time))
 ##########################
 # purpose of this is to suppress the output of large fastq files
 # unless otherwise needed to prevent the use of unnecessary space
-if noBigFiles = 'Y':
+if noBigFiles == 'Y':
     system('rm %s' % (twoUmiOut))
