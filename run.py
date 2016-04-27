@@ -19,11 +19,11 @@ from goodCollapseDictionary import collapseReadsListDict
 #Set directories#
 #################
 today = str(date.today())
-#infoOutput = raw_input('Info Writeup About This Run (info/n): ')
-infoOutput = 'n'
+infoOutput = raw_input('Info Writeup About This Run (info/n): ')
+#infoOutput = 'n'
 
-#outputDir = raw_input('Output Location (/dir): ')
-outputDir = './testOutput'
+outputDir = raw_input('Output Location (/dir): ')
+#outputDir = './testOutput'
 
 ###################
 #Get Input File(s)#
@@ -63,8 +63,8 @@ if not path.exists(outputDir):
 ####################
 #Set Run Parameters#
 ####################
-#useDefaults = raw_input('Use Default Parameters? (Y/n): ')
-useDefaults = 'Y'
+useDefaults = raw_input('Use Default Parameters? (Y/n): ')
+#useDefaults = 'Y'
 
 if useDefaults == 'Y':
     #number of mismatches allowed when calling two UMIs the same
