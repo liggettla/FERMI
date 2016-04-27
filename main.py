@@ -35,6 +35,7 @@ pickleOutput = vardb['pickleOutput']
 numFiles = vardb['numFiles']
 inputDir = vardb['inputDir']
 clusterRun = vardb['clusterRun']
+noBigFiles = vardb['noBigFiles']
 
 read1 = inputDir + '/' + read1
 read2 = inputDir + '/' + read2
@@ -175,3 +176,11 @@ grdevices.dev_off()
 target = open(outputDir + '/runTime.txt', 'w')
 target.write("Total Runtime:\n%s seconds" % (time() - start_time))
 print("Total Runtime:\n%s seconds" % (time() - start_time))
+
+##########################
+#Remove Large Fastq Files#
+##########################
+# purpose of this is to suppress the output of large fastq files
+# unless otherwise needed to prevent the use of unnecessary space
+if noBigFiles = 'Y':
+    system('rm %s' % (twoUmiOut))

@@ -22,6 +22,8 @@ today = str(date.today())
 infoOutput = raw_input('Info Writeup About This Run (info/n): ')
 #infoOutput = 'n'
 
+noBigFiles = raw_input('Suppress Output of Large Files (Y/n): ')
+
 outputDir = raw_input('Output Location (/dir): ')
 #outputDir = './testOutput'
 
@@ -153,6 +155,7 @@ def writePickle(one, two, specificOut):
     vardb['read2'] = two
     vardb['inputDir'] = inputDir
     vardb['clusterRun'] = clusterRun
+    vardb['noBigFiles'] = noBigFiles
 
     pickleVars = './variables.pkl'
 
