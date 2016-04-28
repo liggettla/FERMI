@@ -120,7 +120,7 @@ if clusterRun == 'Y':
 if clusterRun == 'Y':
     vcfOut = bamOut.strip('bam') + 'vcf'
 
-    system("/vol3/home/liggettl/TruSeqPanel/Scripts/freebayes/freebayes -F 0.0000001 --fasta-reference %s %s > %s" % (REF, bamOut, vcfOut))
+    system("/vol3/home/liggettl/TruSeqPanel/Scripts/freebayes/freebayes -X -F 0.0000001 --fasta-reference %s %s > %s" % (REF, bamOut, vcfOut))
 
 #Using pooled continuous makes frequency based calls without using number of samples as input
 #This might help in adjusting for different copy numbers without knowing the exact number of individual captures
