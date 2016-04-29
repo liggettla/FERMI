@@ -1,3 +1,10 @@
+'''
+Ensure that both of the following have been run on cluster headnode if
+clusterRun is going to be utilized:
+module load bwa
+module load vt
+'''
+
 from datetime import date
 import os
 from os import mkdir
