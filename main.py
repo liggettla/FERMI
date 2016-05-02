@@ -133,11 +133,9 @@ if clusterRun == 'Y':
 # this takes care of the problem in freebayes where variants are output
 # not left aligned and not parsimonious
 # for ref: http://genome.sph.umich.edu/wiki/Variant_Normalization
-decomposeOut = vcfOut.strip('.vcf') + 'Decomposed.vcf'
-blockDecomposedOut = vcfOut.strip('.vcf') + 'BlockDecomposed.vcf'
 if clusterRun == 'Y':
-    system('vt decompose %s > %s') % (vcfOut, decomposeOut)
-    system('vt decompose_blocksub %s > %s') % (decomposeOut, blockDecomposedOut)
+    from decomposeVCF import decompose
+    decompose(vcfOut)
 
 #################
 #Filter Variants#
