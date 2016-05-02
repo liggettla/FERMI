@@ -22,25 +22,73 @@ import time
 from goodCollapseDictionary import buildListDict
 from goodCollapseDictionary import collapseReadsListDict
 
+#####################
+#Argparse Flag Input#
+#####################
+import argparse
+
+#parser.add_argument('--info', '-i', required=True, type=int, help='specifies the readlimit')
+#parser.add_argument('--something', '-s', action='store_true', help='no')
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--nfo', '-n', type=str, help='Info writeup about a particular run that will be output in the run directory.')
+parser.add_argument('--largefiles', '-l', action='store_true', help='Outputs all generated fastq files generated during analysis.')
+parser.add_argument('--avoidalign', '-a', action='store_true', help='Only runs through initial analysis of input fastq files, and does not align to reference or call variants.')
+parser.add_argument('--outdir', '-o', required=True, type=str, help='Specifies output directory where all analysis files will be written')
+parser.add_argument('--indir', '-i', required=True, type=str, help='Specifies the input directory that contains the fastq files to be analyzed.')
+parser.add_argument('--single', '-s', action='store_true', help='Only process a single set of paired end reads.')
+parser.add_argument('--prevdict', '-p', type=str, help='Specify a previously output pickle file containing collapsed fastq data as an input instead of raw fastq files.')
+parser.add_argument('--umimismatch', '-u', type=int, help='Specify the number of mismatches allowed in a UMI pair to still consider as the same UMI')
+parser.add_argument('--varthresh', '-v', type=float, help='Specify the percentage of reads that must contain a particular base for that base to be used in the final consensus read')
+parser.add_argument('--readsupport', '-r', type=int, help='Specifies the number of reads that must have a given UMI sequence in order to be binned as a true capture event, and not be thrown out.')
+parser.add_argument('--clustersubmit', '-c', action='store_true', help='Submit run to cluster computing rather than running locally')
+
+args = parser.parse_args()
+
 #################
 #Set directories#
 #################
+# info writeup
 today = str(date.today())
-infoOutput = raw_input('Info Writeup About This Run (info/n): ')
+if args.nfo:
+    infoOutput = args.info
+else:
+    infoOutput = 'n'
+#infoOutput = raw_input('Info Writeup About This Run (info/n): ')
 #infoOutput = 'n'
 
-noBigFiles = raw_input('Suppress Output of Large Files (Y/n): ')
+# large fastq file writing
+if args.largefiles:
+    noBigFiles = 'n'
+else:
+    noBigFiles = 'Y'
+#noBigFiles = raw_input('Suppress Output of Large Files (Y/n): ')
 
-alignAndVar = raw_input('Align and Call Variants (Y/n): ')
+# avoid alignment and var calling
+if args.avoidalign:
+    alignAndVar = 'n'
+else:
+    alignAndVar = 'Y'
+#alignAndVar = raw_input('Align and Call Variants (Y/n): ')
 
-outputDir = raw_input('Output Location (/dir): ')
+# set output directory
+outputDir = args.outdir
+#outputDir = raw_input('Output Location (/dir): ')
 #outputDir = './testOutput'
 
 ###################
 #Get Input File(s)#
 ##################
-numFiles = raw_input('Process only single file? (Y/n): ')
-inputDir = raw_input('Input Dir (/dir): ')
+if args.single:
+    numFiles = 'Y'
+else:
+    numFiles = 'n'
+#numFiles = raw_input('Process only single file? (Y/n): ')
+
+# set input directory
+inputDir = args.indir
+#inputDir = raw_input('Input Dir (/dir): ')
+
 readList={}
 
 if numFiles == 'Y':
@@ -61,11 +109,18 @@ elif numFiles == 'n':
 #Load Previous Data#
 ####################
 #previousDict = raw_input('Would you like to load previously sorted data? (Y/n): ')
-previousDict = 'n'
-if previousDict == 'Y':
-    prevDictLoc = raw_input('Location of previous sorted data (/dir/data.pkl): ')
-elif previousDict == 'n':
+if args.prevdict:
+    prevDict = 'Y'
+    prevDictLoc = args.prevdict
+else:
+    previousDict = 'n'
     prevDictLoc = 'null'
+
+#previousDict = 'n'
+#if previousDict == 'Y':
+#    prevDictLoc = raw_input('Location of previous sorted data (/dir/data.pkl): ')
+#elif previousDict == 'n':
+#    prevDictLoc = 'null'
 
 if not path.exists(outputDir):
     #make the output directory expanduser is used to allow ~/Desktop shortcuts
@@ -74,9 +129,27 @@ if not path.exists(outputDir):
 ####################
 #Set Run Parameters#
 ####################
-useDefaults = raw_input('Use Default Parameters? (Y/n): ')
-#useDefaults = 'Y'
+# set allowed umi mismatches
+if args.umimismatch:
+    distance_stringency = args.umimismatch
+else:
+    distance_stringency = 1
 
+# variant threshold
+if args.varthresh:
+    varThresh = args.varthresh
+else:
+    varThresh = 0.75
+
+# num supporting reads
+if args.readsupport:
+    supportingReads = args.readsupport
+else:
+    supportingReads = 5
+
+#useDefaults = raw_input('Use Default Parameters? (Y/n): ')
+#useDefaults = 'Y'
+'''
 if useDefaults == 'Y':
     #number of mismatches allowed when calling two UMIs the same
     distance_stringency = 1
@@ -89,11 +162,16 @@ elif useDefaults == 'n':
     distance_stringency = int(raw_input('Allowed UMI Mismatches (1): '))
     varThresh = float(raw_input('Read Prevalence Threshold (0.75): '))
     supportingReads = int(raw_input('Required Supporting Reads (5): '))
-
+'''
 #create output directory
 outputDir = outputDir + '/' + today + '_' + str(supportingReads) + '_' + str(varThresh)
 
-clusterRun = raw_input('Submit to LRS cluster? (Y/n): ')
+# run locally or submit to cluster
+if args.clustersubmit:
+    clusterRun = 'Y'
+else:
+    clusterRun = 'n'
+#clusterRun = raw_input('Submit to LRS cluster? (Y/n): ')
 #clusterRun = 'n'
 
 ########################
