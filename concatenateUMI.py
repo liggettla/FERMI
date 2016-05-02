@@ -1,10 +1,16 @@
-#The purpose of this script is to make use of both UMIs found in paired-end
-#reads. The problem is that the HiSeq chemistry only runs for 100 cycles
-#which means that unless stitching works well, both UMIs are never found
-#in a single read file. This script overcomes this problem by reading the
-#UMI sequences from R2 and concatentating them onto the corresponding reads
-#in R1. These sequences can then be binned based on their UMI sequences
-#while ignoring the problems that stitching can introduce.
+#####################
+#Concatate R1 and R2#
+#####################
+# The purpose of this script is to make use of both UMIs found in paired-end
+# reads. The problem is that the HiSeq chemistry only runs for 100 cycles
+# which means that unless stitching works well, both UMIs are never found
+# in a single read file. This script overcomes this problem by reading the
+# UMI sequences from R2 and concatentating them onto the corresponding reads
+# in R1. These sequences can then be binned based on their UMI sequences
+# while ignoring the problems that stitching can introduce.
+# attach 3' UMI from R2 onto R1 read
+# this is a necessary step to process reads with 100-150 cycle chemistry
+# 200 cycle chemistry should make this unnecessary
 
 import itertools
 from Bio.Seq import Seq

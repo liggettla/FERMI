@@ -1,3 +1,6 @@
+###################
+#VCF Decomposition#
+###################
 # this takes care of the problem in freebayes where variants are output
 # not left aligned and not parsimonious
 # for ref: http://genome.sph.umich.edu/wiki/Variant_Normalization

@@ -1,5 +1,10 @@
+#################
+#Filter Variants#
+#################
 # The purpose of this script is to filter the variants output in the final
 # vcf files after running FERMI or the original TrueSeq analysis
+# filters final vcf file to output either only AF=0 reads
+# or AF=0.5 and AF=1 reads
 import collections
 from pprint import pprint
 
