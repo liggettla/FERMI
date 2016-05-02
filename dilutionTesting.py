@@ -1,12 +1,22 @@
 #The purpose of this script is to understand how well mutations in the
-#dilution samples are found from the spiked-in DNA.
-#This script looks at variants that are AF=1 of the spiked-in
+#dilution samples are found from the donor DNA.
+#This script looks at variants that are AF=1 of the donor-in
 #sample unfortunately there is no way to know if it unique because the seq
 #of each sample alone failed.
+import argparse
+parser = argparse.ArgumentParser()
 
-inputDir = './dataFiles/'
-spikedSample = '21'
-samples = ['24', '25', '28', '29']
+parser.add_argument('--indir', '-i', required=True, type=str, help='Specifies the input directory containing all folders containing output analysis from a fermi analysis run.')
+parser.add_argument('--donor', '-d', required=True, type=str, help='Name of the directory containing fermi analysis of donor dilution sample')
+parser.add_argument('--recipients', '-r', required=True, type=str, help='Name of the directories containing fermi analysis of recipient dilution samples')
+
+
+inputDir = args.indir
+donorSample = args.donor
+samples = args.recipients # this is a list
+donorFile = 'AF1_filtered.vcf'
+recipientFile = 'AF0_filtered.vcf'
+recipientCheck = 'AF1_filtered.vcf' # to check if donor var is in recipient
 
 consName = '_finalOutput.vcf'
 
@@ -17,7 +27,8 @@ List28 = []
 List29 = []
 listOfLists = [List24, List25, List28, List29]
 
-target = open(inputDir + spikedSample + consName, 'r')
+target = open(inputDir + donorSample + consName, 'r')
+
 for line in target:
     if '#' not in line and 'chr' in line: #skip the damn info
         AO = line.split(';')[5]
@@ -52,7 +63,7 @@ for sample in listOfLists:
         if loc in spikeList:
             counter += 1
     fraction = float(counter) / numVars * 100
-    outFile.write('In sample %s %f percent of spiked in variants were observed.\n' % (samples[index], fraction))
+    outFile.write('In sample %s %f percent of donor in variants were observed.\n' % (samples[index], fraction))
 
 print len(spikeList)
 
