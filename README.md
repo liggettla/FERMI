@@ -10,11 +10,6 @@ Please see the [FERMI Homepage](http://liggettla.github.io/FERMI/) for
 download and usage instructrions. This page will be progressively updated
 to be as complete as possible.
 
-
-
-
-
-
 *"Where is everybody?!"*
 
 ####Help File
