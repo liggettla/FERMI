@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
 Ensure that both of the following have been run on cluster headnode if
 clusterRun is going to be utilized:
