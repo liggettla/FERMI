@@ -31,6 +31,8 @@ infoOutput = raw_input('Info Writeup About This Run (info/n): ')
 
 noBigFiles = raw_input('Suppress Output of Large Files (Y/n): ')
 
+alignAndVar = raw_input('Align and Call Variants (Y/n): ')
+
 outputDir = raw_input('Output Location (/dir): ')
 #outputDir = './testOutput'
 
@@ -163,6 +165,7 @@ def writePickle(one, two, specificOut):
     vardb['inputDir'] = inputDir
     vardb['clusterRun'] = clusterRun
     vardb['noBigFiles'] = noBigFiles
+    vardb['alignAndVar'] = alignAndVar
 
     pickleVars = './variables.pkl'
 

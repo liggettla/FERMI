@@ -36,6 +36,8 @@ numFiles = vardb['numFiles']
 inputDir = vardb['inputDir']
 clusterRun = vardb['clusterRun']
 noBigFiles = vardb['noBigFiles']
+alignAndVar = vardb['alignAndVar']
+
 
 read1 = inputDir + '/' + read1
 read2 = inputDir + '/' + read2
@@ -103,7 +105,7 @@ outputCov(twoUmiOut, final_output_file, distance_stringency, coverage_file)
 #    | samtools sort - $RESDIR/$currentfile.fastq
 
 # only runs this on the cluster
-if clusterRun == 'Y':
+if alignAndVar == 'Y':
     REF = '/vol3/home/liggettl/refgenomes/hg19.fa'
     bamOut = final_output_file.strip('fastq') + 'bam'
 
@@ -117,7 +119,7 @@ if clusterRun == 'Y':
 #this should thus output every variant found in the alignment
 #by default freebayes uses 0.2 (20%)
 
-if clusterRun == 'Y':
+if alignAndVar == 'Y':
     vcfOut = bamOut.strip('bam') + 'vcf'
 
     system("/vol3/home/liggettl/TruSeqPanel/Scripts/freebayes/freebayes -X -F 0.0000001 --fasta-reference %s %s > %s" % (REF, bamOut, vcfOut))
@@ -133,7 +135,7 @@ if clusterRun == 'Y':
 # this takes care of the problem in freebayes where variants are output
 # not left aligned and not parsimonious
 # for ref: http://genome.sph.umich.edu/wiki/Variant_Normalization
-if clusterRun == 'Y':
+if alignAndVar == 'Y':
     from decomposeVCF import decompose
     blockDecomposedOut = decompose(vcfOut)
 
@@ -142,7 +144,7 @@ if clusterRun == 'Y':
 #################
 # filters final vcf file to output either only AF=0 reads
 # or AF=0.5 and AF=1 reads
-if clusterRun == 'Y':
+if alignAndVar == 'Y':
     from varDPFilter import vcfFilter
     vcfFilter(inputDir, outputDir, blockDecomposedOut)
 
