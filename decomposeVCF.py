@@ -8,3 +8,5 @@ def decompose(vcfOut):
     blockDecomposedOut = vcfOut.strip('.vcf') + 'BlockDecomposed.vcf'
     system('vt decompose %s > %s' % (vcfOut, decomposeOut))
     system('vt decompose_blocksub %s > %s' % (decomposeOut, blockDecomposedOut))
+
+    return blockDecomposedOut

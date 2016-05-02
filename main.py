@@ -135,7 +135,7 @@ if clusterRun == 'Y':
 # for ref: http://genome.sph.umich.edu/wiki/Variant_Normalization
 if clusterRun == 'Y':
     from decomposeVCF import decompose
-    decompose(vcfOut)
+    blockDecomposedOut = decompose(vcfOut)
 
 #################
 #Filter Variants#
@@ -144,7 +144,7 @@ if clusterRun == 'Y':
 # or AF=0.5 and AF=1 reads
 if clusterRun == 'Y':
     from varDPFilter import vcfFilter
-    vcfFilter(inputDir, outputDir, vcfOut)
+    vcfFilter(inputDir, outputDir, blockDecomposedOut)
 
 '''
 Nothing below this has yet been implemented
