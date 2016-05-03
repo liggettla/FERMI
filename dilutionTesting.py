@@ -63,7 +63,7 @@ uniqDonor = []
 for i in donorList:
     for j in recAF1Dict:
         if i in recAF1Dict[j]:
-            commonDonor.append[i]
+            commonDonor.append(i)
 
 for i in donorList:
     if not i in commonDonor:
@@ -85,14 +85,16 @@ for i in recSamples:
             AO = line.split(';')[5]
             DP = line.split(';')[7]
             #AF = line.split(';')[3]
-            AF = float(AO) / float(DP)
 
+            AONum = float(AO.split(',')[0][3:])
+            DPNum = float(DP.split(',')[0][3:])
+            AFNum = AONum / DPNum
 
             if loc in uniqDonor:
-                target0.write('Sample: ' + i + '\n' + 'Location: ' + loc + '\n' \
-                        + 'AO: ' + AO + '\n' \
-                        + 'DP: ' + DP + '\n' \
-                        + 'AF: ' + AF + '\n')
+                target.write('Sample: ' + str(i) + '\n' + 'Location: ' + str(loc) + '\n' \
+                        + 'AO: ' + str(AONum) + '\n' \
+                        + 'DP: ' + str(DPNum) + '\n' \
+                        + 'AF: ' + str(AFNum) + '\n')
 
 target.close()
 target0.close()
