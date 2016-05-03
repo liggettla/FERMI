@@ -10,7 +10,7 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('--indir', '-i', required=True, type=str, help='Specifies the input directory containing all folders containing output analysis from a fermi analysis run.')
 parser.add_argument('--donor', '-d', required=True, type=str, help='Name of the directory containing fermi analysis of donor dilution sample')
-parser.add_argument('--recipients', '-r', required=True, type=str, help='Name of the directories containing fermi analysis of recipient dilution samples')
+parser.add_argument('--recipients', '-r', required=True, nargs='*', type=str, help='Name of the directories containing fermi analysis of recipient dilution samples')
 
 args = parser.parse_args()
 
@@ -40,6 +40,7 @@ target.close()
 ##########################
 recAF0Dict = {}
 recAF1Dict = {}
+print recSamples
 for i in recSamples:
     A1 = inputDir + '/' + i + '/AF1_filtered.vcf'
     target1 = open(A1, 'r')
