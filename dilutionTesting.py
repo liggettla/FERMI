@@ -10,13 +10,98 @@ parser.add_argument('--indir', '-i', required=True, type=str, help='Specifies th
 parser.add_argument('--donor', '-d', required=True, type=str, help='Name of the directory containing fermi analysis of donor dilution sample')
 parser.add_argument('--recipients', '-r', required=True, type=str, help='Name of the directories containing fermi analysis of recipient dilution samples')
 
+args = parser.parse_args()
 
+#############
+#Input Files#
+#############
 inputDir = args.indir
 donorSample = args.donor
-samples = args.recipients # this is a list
-donorFile = 'AF1_filtered.vcf'
-recipientFile = 'AF0_filtered.vcf'
-recipientCheck = 'AF1_filtered.vcf' # to check if donor var is in recipient
+recSamples = args.recipients # this is a list
+donorFile = inputDir + '/' + donorSample + '/AF1_filtered.vcf'
+# to check if donor var is in recipient
+recipientCheck = inputDir + '/' + donorSample + 'AF1_filtered.vcf'
+
+######################
+#Build Donor Loc List#
+######################
+donorList = []
+target = open(donorFile, 'r')
+for line in target:
+    if '#' not in line and 'chr' in line: #skip the damn info
+            loc = line.split('\t')[1]
+            donorList.append(loc)
+target.close()
+
+##########################
+#Build Recipient Loc Dict#
+##########################
+recAF0Dict = {}
+recAF1Dict = {}
+for i in recSamples:
+    A1 = inputDir + '/' + i + '/AF1_filtered.vcf'
+    target1 = open(A1, 'r')
+
+    AF1List = []
+    for line in target1:
+        if '#' not in line and 'chr' in line: #skip the damn info
+            loc = line.split('\t')[1]
+            AF1List.append(loc)
+
+    recAF1Dict[i] = AF1List
+
+target1.close()
+
+#####################
+#Get Uniq Donor Vars#
+#####################
+commonDonor = []
+uniqDonor = []
+for i in donorList:
+    for j in recAF1Dict:
+        if i in recAF1Dict[j]:
+            commonDonor.append[i]
+
+for i in donorList:
+    if not i in commonDonor:
+        uniqDonor.append(i)
+
+#####################
+#Output Observations#
+#####################
+results = inputDir + '/dilutionResults.txt'
+target = open(results, 'w')
+
+for i in recSamples:
+    A0 = inputDir + '/' + i + '/AF0_filtered.vcf'
+    target0 = open(A0, 'r')
+
+    for line in target0:
+        if '#' not in line and 'chr' in line: #skip the damn info
+            loc = line.split('\t')[1]
+            AO = line.split(';')[5]
+            DP = line.split(';')[7]
+            #AF = line.split(';')[3]
+            AF = float(AO) / float(DP)
+
+
+            if loc in uniqDonor:
+                target0.write('Sample: ' + i + '\n' + 'Location: ' + loc + '\n' \
+                        + 'AO: ' + AO + '\n' \
+                        + 'DP: ' + DP + '\n' \
+                        + 'AF: ' + AF + '\n')
+
+target.close()
+target0.close()
+
+
+
+
+
+'''
+recipientCons = 'AF0_filtered.vcf'
+
+
 
 consName = '_finalOutput.vcf'
 
@@ -67,4 +152,4 @@ for sample in listOfLists:
 
 print len(spikeList)
 
-
+'''
