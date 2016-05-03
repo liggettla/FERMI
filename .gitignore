@@ -1,7 +1,3 @@
 *pyc
-./testOutput
-./testOutput/*
-
-/home/alex/Dropbox/Code/FERMI/testOutput
-/media/alex/Extra/Dropbox/Code/FERMI/testOutput
-/media/alex/Extra/Dropbox/Code/FERMI/variables.pkl*
+testInput
+testOutput
