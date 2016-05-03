@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 #The purpose of this script is to understand how well mutations in the
 #dilution samples are found from the donor DNA.
 #This script looks at variants that are AF=1 of the donor-in
