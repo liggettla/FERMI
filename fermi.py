@@ -101,10 +101,14 @@ if numFiles == 'Y':
 elif numFiles == 'n':
     others = 'Y'
     while others == 'Y':
-        read1 = raw_input('Read 1 fastq Location (R1.fastq): ')
-        read2 = raw_input('Read 2 fastq Location (R2.fastq): ')
-        others = raw_input('Enter more fastq files? (Y/n): ')
-        readList[read1] = read2
+        temp = raw_input('Read 1 fastq Location (R1.fastq/n if done): ')
+        if not temp == 'n':
+            read1 = temp
+            read2 = raw_input('Read 2 fastq Location (R2.fastq): ')
+            readList[read1] = read2
+        elif temp == 'n':
+            others = 'n'
+        #others = raw_input('Enter more fastq files? (Y/n): ')
 
 ####################
 #Load Previous Data#
