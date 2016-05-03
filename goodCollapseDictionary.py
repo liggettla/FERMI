@@ -33,8 +33,9 @@ def buildListDict(input_file, distance_stringency, pickleOut):
             header = line.rstrip('\n')
             position += 1
         elif position == 2:
-            #Assumes UMI is flanking first and last 6bp of read
-            umi_seq = line[0:6]+line[-6:] #Abs dist from start/end compatible with miSeq/hiSeq
+            # assumes UMI is flanking first and last 6bp of read
+            # uses the first 11 5' bases to include both the umi and seq
+            umi_seq = line[0:11]+line[-6:] #Abs dist from start/end compatible with miSeq/hiSeq
             umi_seq = umi_seq.rstrip('\n')
             read_seq = line[6:-6]
             position += 1
