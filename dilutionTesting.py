@@ -40,7 +40,6 @@ target.close()
 ##########################
 recAF0Dict = {}
 recAF1Dict = {}
-print recSamples
 for i in recSamples:
     A1 = inputDir + '/' + i + '/AF1_filtered.vcf'
     target1 = open(A1, 'r')
