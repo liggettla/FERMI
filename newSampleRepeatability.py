@@ -65,12 +65,12 @@ for i in file1:
                 highFreqAbsent += 1
 
 
-    outTarget.write('Low Freq Var Present: \n' + str(lowFreqPresent) + '\n')
-    outTarget.write('High Freq Var Present: \n' + str(highFreqPresent) + '\n')
-    percentLow = float(lowFreqPresent) / (lowFreqAbsent + lowFreqPresent)
-    outTarget.write('Percent Low Freq Var Present: \n' + percentLow + '\n')
-    percentHigh = float(highFreqPresent) / (highFreqAbsent + highFreqPresent)
-    outTarget.write('Percent High Freq Var Present: \n' + percentHigh + '\n')
+outTarget.write('Low Freq Var Present: \n' + str(lowFreqPresent) + '\n')
+outTarget.write('High Freq Var Present: \n' + str(highFreqPresent) + '\n')
+percentLow = float(lowFreqPresent) / (lowFreqAbsent + lowFreqPresent)
+outTarget.write('Percent Low Freq Var Present: \n' + percentLow + '\n')
+percentHigh = float(highFreqPresent) / (highFreqAbsent + highFreqPresent)
+outTarget.write('Percent High Freq Var Present: \n' + percentHigh + '\n')
 
 
 
