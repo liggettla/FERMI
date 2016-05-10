@@ -18,58 +18,62 @@ samples = args.samples # this is a list
 outputFile = outputDir + '/' + 'sampleRepeatability.txt'
 outTarget = open(outputFile, 'w')
 
-###################
-#Read Through VCFs#
-###################
-sample1 = inputDir + '/' + samples[0] + '/' + 'finalOutputBlockDecomposed.vcf'
-sample2 = inputDir + '/' + samples[1] + '/' + 'finalOutputBlockDecomposed.vcf'
-file1 = open(sample1, 'r')
+from itertools import combinations
 
-lowFreqPresent = 0
-lowFreqAbsent = 0
-highFreqPresent = 0
-highFreqAbsent = 0
+#sample1 = inputDir + '/' + samples[0] + '/' + 'finalOutputBlockDecomposed.vcf'
+#sample2 = inputDir + '/' + samples[1] + '/' + 'finalOutputBlockDecomposed.vcf'
 
-for i in file1:
-    presence = 'n'
+for a, b in combinations(samples, 2):
+    sample1 = inputDir + '/' + a + '/' + 'AF1_filtered.vcf'
+    sample2 = inputDir + '/' + b + '/' + 'AF1_filtered.vcf'
 
-    if '#' not in i and 'chr' in i: #skip the damn info
+    file1 = open(sample1, 'r')
 
-        loc = i.split('\t')[1]
-        AO = i.split(';')[5]
-        DP = i.split(';')[7]
-        var = i.split('\t')[4]
+    lowFreqPresent = 0
+    lowFreqAbsent = 0
+    highFreqPresent = 0
+    highFreqAbsent = 0
 
-        AONum = float(AO.split(',')[0][3:])
-        DPNum = float(DP.split(',')[0][3:])
-        AFNum = AONum / DPNum
+    for i in file1:
+        presence = 'n'
 
-        file2 = open(sample2, 'r')
+        if '#' not in i and 'chr' in i: #skip the damn info
 
-        for j in file2:
+            loc = i.split('\t')[1]
+            AO = i.split(';')[5]
+            DP = i.split(';')[7]
+            var = i.split('\t')[4]
 
-            if '#' not in j and 'chr' in i: #skip the damn info
-                loc2 = j.split('\t')[1]
-                var2 = j.split('\t')[4]
+            AONum = float(AO.split(',')[0][3:])
+            DPNum = float(DP.split(',')[0][3:])
+            AFNum = AONum / DPNum
 
-                if loc == loc2 and var == var2:
-                    presence = 'y'
-        file2.close()
+            file2 = open(sample2, 'r')
 
-        if presence == 'y':
-            if AFNum < 0.5:
-                lowFreqPresent += 1
+            for j in file2:
+
+                if '#' not in j and 'chr' in i: #skip the damn info
+                    loc2 = j.split('\t')[1]
+                    var2 = j.split('\t')[4]
+
+                    if loc == loc2 and var == var2:
+                        presence = 'y'
+            file2.close()
+
+            if presence == 'y':
+                if AFNum < 0.5:
+                    lowFreqPresent += 1
+                else:
+                    highFreqPresent += 1
             else:
-                highFreqPresent += 1
-        else:
-            if AFNum < 0.5:
-                lowFreqAbsent += 1
-            else:
-                highFreqAbsent += 1
-
-outTarget.write('Low Freq Var Present: \n' + str(lowFreqPresent) + '\n')
-outTarget.write('High Freq Var Present: \n' + str(highFreqPresent) + '\n')
-percentLow = float(lowFreqPresent) / (lowFreqAbsent + lowFreqPresent)
-outTarget.write('Percent Low Freq Var Present: \n' + str(percentLow) + '\n')
-percentHigh = float(highFreqPresent) / (highFreqAbsent + highFreqPresent)
-outTarget.write('Percent High Freq Var Present: \n' + str(percentHigh) + '\n')
+                if AFNum < 0.5:
+                    lowFreqAbsent += 1
+                else:
+                    highFreqAbsent += 1
+    outTarget.write('Counting the number of variants from sample %s that are found in sample %s \n' % (sample1, sample2))
+    outTarget.write('Low Freq Var Present: \n' + str(lowFreqPresent) + '\n')
+    outTarget.write('High Freq Var Present: \n' + str(highFreqPresent) + '\n')
+    percentLow = float(lowFreqPresent) / (lowFreqAbsent + lowFreqPresent)
+    outTarget.write('Percent Low Freq Var Present: \n' + str(percentLow) + '\n')
+    percentHigh = float(highFreqPresent) / (highFreqAbsent + highFreqPresent)
+    outTarget.write('Percent High Freq Var Present: \n' + str(percentHigh) + '\n')
