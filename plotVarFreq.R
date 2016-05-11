@@ -26,3 +26,25 @@ hist(log10(allelefreqshort$V1), xlim = c(-4,0), breaks=100, main='10 Reads 95 Pe
 setwd("/media/alex/Extra/Dropbox/TrueSeqPipeline/results/10_Reads_99_Percent")
 allelefreqshort <- read.table("allelefreqs.txt", header = FALSE)
 hist(log10(allelefreqshort$V1), xlim = c(-0.4,0), breaks=100, main='10 Reads 99 Percent', xlab='Variant Frequency', ylab='Number of Variants')
+
+##################
+# 3.21.2016 Data #
+##################
+
+setwd('/home/alex/Dropbox/Degregori_Lab/5.10.2016/e1r1')
+allelefreqshort <- read.table('AF0_plottable.txt', header = TRUE)
+hist(allelefreqshort$AO, breaks=100, main='Sample 35 AF=0', xlab='AO', ylab='# Unique Variants')
+hist(allelefreqshort$AO, breaks=100, ylim = c(0,10), main='Sample 35 AF=0', xlab='AO', ylab='# Unique Variants')
+
+setwd('/home/alex/Dropbox/Degregori_Lab/5.10.2016/e1r1')
+allelefreqshort <- read.table('AF1_plottable.txt', header = TRUE)
+hist(allelefreqshort$AO, breaks=100, ylim = c(0,10), main='Sample 35 AF=1', xlab='AO', ylab='# Unique Variants')
+
+setwd('/home/alex/Dropbox/Degregori_Lab/5.10.2016/f1r1')
+allelefreqshort <- read.table('AF0_plottable.txt', header = TRUE)
+hist(allelefreqshort$AO, breaks=100, main='Sample 36 AF=0', xlab='AO', ylab='# Unique Variants')
+hist(allelefreqshort$AO, breaks=100, ylim = c(0,10), main='Sample 36 AF=0', xlab='AO', ylab='# Unique Variants')
+
+setwd('/home/alex/Dropbox/Degregori_Lab/5.10.2016/f1r1')
+allelefreqshort <- read.table('AF1_plottable.txt', header = TRUE)
+hist(allelefreqshort$AO, breaks=100, ylim = c(0,10), main='Sample 36 AF=1', xlab='AO', ylab='# Unique Variants')
