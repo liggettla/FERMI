@@ -37,7 +37,8 @@ inputDir = vardb['inputDir']
 clusterRun = vardb['clusterRun']
 noBigFiles = vardb['noBigFiles']
 alignAndVar = vardb['alignAndVar']
-
+DPNum = vardb['dpnum']
+AONum = vardb['aonum']
 
 read1 = inputDir + '/' + read1
 read2 = inputDir + '/' + read2
@@ -109,7 +110,7 @@ if alignAndVar == 'Y':
 # or AF=0.5 and AF=1 reads
 if alignAndVar == 'Y':
     from varDPFilter import vcfFilter
-    vcfFilter(inputDir, outputDir, blockDecomposedOut)
+    vcfFilter(inputDir, outputDir, blockDecomposedOut, AONum, DPNum)
 
 ################
 #Output Runtime#

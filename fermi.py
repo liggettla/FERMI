@@ -43,6 +43,8 @@ parser.add_argument('--umimismatch', '-u', type=int, help='Specify the number of
 parser.add_argument('--varthresh', '-v', type=float, help='Specify the percentage of reads that must contain a particular base for that base to be used in the final consensus read')
 parser.add_argument('--readsupport', '-r', type=int, help='Specifies the number of reads that must have a given UMI sequence in order to be binned as a true capture event, and not be thrown out.')
 parser.add_argument('--clustersubmit', '-c', action='store_true', help='Submit run to cluster computing rather than running locally')
+parser.add_argument('--filterao', '-f', type=int, help='Specifies the AO cuttoff for reported variants, where -f 5 would eliminate all variants that are seen 5 times or less. Default == 5.')
+parser.add_argument('--dpfilter', '-d', type=int, help='Read depth elimination threshold. If specified as -d 500 only variants found in a locus read greater than 500 times will be reported. Default == 500.')
 
 args = parser.parse_args()
 
@@ -152,6 +154,18 @@ if args.readsupport:
 else:
     supportingReads = 5
 
+# depth filtering
+if args.dpfilter:
+    DPNum = args.dpfilter
+else:
+    DPNum = 500
+
+# ao filtering
+if args.filterao:
+    AONum = args.filterao
+else:
+    AONum = 5
+
 #useDefaults = raw_input('Use Default Parameters? (Y/n): ')
 #useDefaults = 'Y'
 '''
@@ -249,6 +263,8 @@ def writePickle(one, two, specificOut):
     vardb['clusterRun'] = clusterRun
     vardb['noBigFiles'] = noBigFiles
     vardb['alignAndVar'] = alignAndVar
+    vardb['dpnum'] = DPNum
+    vardb['aonum'] = AONum
 
     pickleVars = './variables.pkl'
 

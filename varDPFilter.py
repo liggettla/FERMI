@@ -8,7 +8,7 @@
 import collections
 from pprint import pprint
 
-def vcfFilter(inDir, outputDir, inputFile):
+def vcfFilter(inDir, outputDir, inputFile, AOCutoff, DPCuttoff):
 
     inFiles = [inputFile]
 
@@ -40,8 +40,8 @@ def vcfFilter(inDir, outputDir, inputFile):
                 DPNum = str(DP.split(',')[0][3:])
 
                 # filtering parameters
-                if int(DPNum) > 500:
-                    if AONum > 5:
+                if int(DPNum) > DPCuttoff:
+                    if AONum > AOCutoff:
                         if AFNum == 0:
                             vcfOut0.write(line)
                             dataOut0.write(str(AONum) + '\t' + str(DPNum) + '\t' + str(AFNum) + '\n')
