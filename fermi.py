@@ -284,8 +284,8 @@ def writePickle(one, two, specificOut):
 if __name__ == "__main__":
 
     # remove any existing queueFile
-    if os.path.exists('queueFile'):
-        system('rm ./queueFile')
+    while os.path.exists('queueFile'):
+        time.sleep(10)
 
     for i in readList:
         read1 = i
