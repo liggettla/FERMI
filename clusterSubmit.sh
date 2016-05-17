@@ -3,5 +3,6 @@
 #BSUB -o ~/logs/FERMI%I.%J.out
 #BSUB -R "span[hosts=1]"
 #BSUB -n 1
+#BSUB -R "rusage[mem=25]"
 
 python main.py

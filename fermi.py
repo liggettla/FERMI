@@ -226,6 +226,8 @@ def recordParams(parametersUsed, inputDir, read1, read2, varThresh, supportingRe
     target.write("Distance Stringency: %d\n" %(distance_stringency))
     target.write("Variant Threshold: %f\n" %(varThresh))
     target.write("Supporting Reads: %d\n" %(supportingReads))
+    target.write('DP Filter: %i\n' %(DPNum))
+    target.write('AO Filter: %i\n' %(AONum))
     target.close()
 
 ############################
