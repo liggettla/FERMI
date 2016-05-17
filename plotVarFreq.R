@@ -1,4 +1,5 @@
-#library(ggplot2)
+library(ggplot2)
+library(reshape)
 
 setwd("/media/alex/Extra/Dropbox/Code/R/Sequencing Work/4.6.2015 Attempt/")
 
@@ -48,3 +49,14 @@ hist(allelefreqshort$AO, breaks=100, ylim = c(0,10), main='Sample 36 AF=0', xlab
 setwd('/home/alex/Dropbox/Degregori_Lab/5.10.2016/f1r1')
 allelefreqshort <- read.table('AF1_plottable.txt', header = TRUE)
 hist(allelefreqshort$AO, breaks=100, ylim = c(0,10), main='Sample 36 AF=1', xlab='AO', ylab='# Unique Variants')
+
+##########
+#Onc Prob#
+##########
+setwd('~/Desktop')
+chanceOnc <- read.table('chanceOnc.txt', header = TRUE)
+dat.m <- melt(chanceOnc, 'Sample')
+qplot(variable, value, data=dat.m, geom='boxplot',
+      main='Freq of Mutation by Region',
+      xlab='Genomic Region',
+      ylab='Probability of a Base to be Mutated')
