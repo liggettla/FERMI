@@ -19,7 +19,7 @@ inputDir = args.indir
 outputDir = args.outdir
 inSample = args.sample
 sample = inputDir + '/' + inSample + '/' + 'finalOutputBlockDecomposed.vcf'
-output = outputDir + '/' + inSample + '/' + 'baseChangeBias.txt'
+outDir = outputDir + '/' + inSample + '/'
 
 target = open(sample, 'r')
 
@@ -77,8 +77,16 @@ for i in target:
                         elif str(int(loc)/1000) in TIIIRegions: #is the var TIII?
                             site = 'TIIIRegions'
                             fullDict['TIIIRegions'][j][k] += 1
-from pprint import pprint
 
-with open(output, 'wt') as out:
-    pprint(fullDict, stream=out)
-out.close()
+##################
+# Export Results #
+##################
+for region in fullDict:
+    output = outDir + region + '.txt' # output individual files for oncoGenes, TIII, oncoSites
+    with open(output, 'w') as out:
+        out.write('Ref\tVar\tObs\n') # headers
+        for ref in fullDict[region]:
+            for var in fullDict[region][ref]:
+                num = fullDict[region][ref][var]
+                out.write('%s\t%s\t%i\n' % (ref, var, num))
+        out.close()
