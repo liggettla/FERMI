@@ -73,4 +73,5 @@ df=data.frame('Ref'=rep(seq, each=4), 'Var'=rep(seq, 4), 'Obs'=oncoGenes$Obs)
 
 ggplot(data=df) + aes(x=Var, y=Obs) + 
   geom_bar(stat='identity', position="dodge", fill="grey", color="black")  +
-  facet_grid(~Ref)
+  facet_grid(~Ref) +
+  labs(title = "Cord (Sample 35) Oncogene Sites")
