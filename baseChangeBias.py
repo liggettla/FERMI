@@ -18,7 +18,7 @@ args = parser.parse_args()
 inputDir = args.indir
 outputDir = args.outdir
 inSample = args.sample
-sample = inputDir + '/' + inSample + '/' + 'finalOutputBlockDecomposed.vcf'
+sample = inputDir + '/' + inSample + '/' + 'total_filtered.vcf'
 outDir = outputDir + '/' + inSample + '/'
 
 target = open(sample, 'r')
