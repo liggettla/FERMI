@@ -17,3 +17,8 @@
 # sample repeatability #
 ########################
 #./sampleRepeatability.py -i /vol3/home/liggettl/sequencingData/3.21.2016/analysis/2016-05- 03_3_0.51 -o /vol3/home/liggettl/sequencingData/3.21.2016/analysis/2016-05-03_3_0.51/BlockDecomposed -s a1r1.fastq b1r1.fastq
+
+#############
+# base bias #
+#############
+./baseChangeBias.py -i /vol3/home/liggettl/sequencingData/3.21.2016/analysis/2016-05-03_3_0.51 -o /vol3/home/liggettl/sequencingData/3.21.2016/analysis/2016-05-03_3_0.51 -s f1r1.fastq
