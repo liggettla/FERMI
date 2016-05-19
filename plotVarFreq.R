@@ -50,9 +50,9 @@ setwd('/home/alex/Dropbox/Degregori_Lab/5.10.2016/f1r1')
 allelefreqshort <- read.table('AF1_plottable.txt', header = TRUE)
 hist(allelefreqshort$AO, breaks=100, ylim = c(0,10), main='Sample 36 AF=1', xlab='AO', ylab='# Unique Variants')
 
-##########
-#Onc Prob#
-##########
+############
+# Onc Prob #
+############
 setwd('~/Desktop')
 chanceOnc <- read.table('chanceOnc.txt', header = TRUE)
 dat.m <- melt(chanceOnc, 'Sample')
@@ -60,3 +60,17 @@ qplot(variable, value, data=dat.m, geom='boxplot',
       main='Freq of Mutation by Region',
       xlab='Genomic Region',
       ylab='Probability of a Base to be Mutated')
+
+####################
+# Base Change Bias #
+####################
+setwd('~/Desktop')
+oncoGenes <- read.table('oncoGenes.txt', header = TRUE)
+
+seq=c("A", "C", "T", "G")
+
+df=data.frame('Ref'=rep(seq, each=4), 'Var'=rep(seq, 4), 'Obs'=oncoGenes$Obs)
+
+ggplot(data=df) + aes(x=Var, y=Obs) + 
+  geom_bar(stat='identity', position="dodge", fill="grey", color="black")  +
+  facet_grid(~Ref)
