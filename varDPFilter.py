@@ -15,10 +15,10 @@ def vcfFilter(inDir, outputDir, inputFile, AOCutoff, DPCuttoff):
     for file in inFiles:
         vcfOutputAF0 = outputDir + '/AF0_filtered.vcf' # includes AF=0
         vcfOutputAF1 = outputDir + '/AF1_filtered.vcf' # includes AF=1,0.5
-        totalFiltered = outdir + '/total_filtered.vcf' # includes all good vars
+        totalFiltered = outputDir + '/total_filtered.vcf' # includes all good vars
         plottable0 = outputDir + '/AF0_plottable.txt'
         plottable1 = outputDir + '/AF1_plottable.txt'
-        totalPlottable = outdir + '/total_plottable.txt'
+        totalPlottable = outputDir + '/total_plottable.txt'
 
         target = open(inputFile, 'r')
         vcfOut0 = open(vcfOutputAF0, 'w')
