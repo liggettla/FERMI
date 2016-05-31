@@ -21,7 +21,9 @@ Install bwa
 
 Download freebayes
 `git clone --recursive git://github.com/ekg/freebayes.git`
+
 `cd freebayes`
+
 `make`
 
 ##Example Runs
