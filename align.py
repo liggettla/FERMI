@@ -28,11 +28,11 @@ def align(final_output_file, REF):
 
     # this all-in-one call seems to be problematic with the new cluster memory limitations
     system("bwa mem %s %s | samtools view -bS - | samtools sort > %s" % (REF, final_output_file, bamOut))
+    system("samtools index %s" % (bamOut))
     '''
     system("bwa mem %s %s > temp.sam" % (REF, final_output_file))
     system("samtools view -bS temp.sam > temp.txt")
     system("samtools sort temp.txt > %s" % (bamOut))
-    system("samtools index %s" % (bamOut))
     system("rm temp.sam")
     system("rm temp.txt")
     '''
