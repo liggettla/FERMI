@@ -10,6 +10,20 @@ Please see the [FERMI Homepage](http://liggettla.github.io/FERMI/) for
 download and usage instructrions. This page will be progressively updated
 to be as complete as possible.
 
+##Installation
+The following instructions are for Debian Linux, but with some adjustment should work anywhere.
+
+Download FERMI
+`git clone https://github.com/liggettla/FERMI`
+
+Install bwa
+`sudo apt-get install bwa`
+
+Download freebayes
+`git clone --recursive git://github.com/ekg/freebayes.git`
+`cd freebayes`
+`make`
+
 ##Example Runs
 Take input files from testInput and put analyzed files in testOutput:
 
