@@ -3,7 +3,7 @@
 #BSUB -o ~/logs/FERMI%I.%J.out
 #BSUB -R "span[hosts=1]"
 #BSUB -n 1
-#BSUB -R "rusage[mem=25]"
+#BSUB -R "rusage[mem=55]"
 
 #########
 # fermi #
@@ -11,7 +11,8 @@
 #module load vt
 #module load bwa
 
-./fermi.py -i ./testInput -o ./testOutput -u 1 -v 0.51 -r 3 -c -f 1
+#./fermi.py -i ./testInput -o ./testOutput -u 1 -v 0.51 -r 3 -c -f 1
+./fermi.py -i /vol3/home/liggettl/sequencingData/3.21.2016/unzipped/untrimmed/unzipped -o /vol3/home/liggettl/sequencingData/3.21.2016/analysis -u 1 -v 0.51 -r 3 -c
 
 #~/FERMI/fermi.py -i /vol3/home/liggettl/sequencingData/3.21.2016/unzipped/untrimmed/unzipped -o /vol3/home/liggettl/sequencingData/3.21.2016/analysis -u 1 -v 0.51 -r 3 -c -f 1
 

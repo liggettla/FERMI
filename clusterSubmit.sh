@@ -1,4 +1,4 @@
-#BSUB -J FERMI[1]
+#BSUB -J FERMI
 #BSUB -R "span[hosts=1]"
 #BSUB -n 1
 #BSUB -R "rusage[mem=55]"

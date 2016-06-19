@@ -283,7 +283,7 @@ def writePickle(one, two, specificOut):
 #look in ~/testScripts on Tesla for example
 if __name__ == "__main__":
 
-    # remove any existing queueFile
+    # wait for any existing queueFile from still submitting jobs
     while os.path.exists('queueFile'):
         time.sleep(10)
 
