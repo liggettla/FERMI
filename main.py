@@ -39,6 +39,7 @@ noBigFiles = vardb['noBigFiles']
 alignAndVar = vardb['alignAndVar']
 DPNum = vardb['dpnum']
 AONum = vardb['aonum']
+freebayes = vardb['freebayes']
 
 read1 = inputDir + '/' + read1
 read2 = inputDir + '/' + read2
@@ -94,7 +95,7 @@ if alignAndVar == 'Y':
 if alignAndVar == 'Y':
     from callVar import callVar
     vcfOut = bamOut.strip('bam') + 'vcf'
-    callVar(REF, bamOut, vcfOut)
+    callVar(varCaller, REF, bamOut, vcfOut)
 
 ###################
 #VCF Decomposition#

@@ -9,9 +9,10 @@ from os import system
 
 def callVar(REF, bamOut, vcfOut):
 
-    system("/vol3/home/liggettl/programs/freebayes/bin/freebayes -X -F 0.0000001 --fasta-reference %s %s > %s" % (REF, bamOut, vcfOut))
+    system("%s -X -F 0.0000001 --fasta-reference %s %s > %s" % (freebayes, REF, bamOut, vcfOut))
 
 #Using pooled continuous makes frequency based calls without using number of samples as input
 #This might help in adjusting for different copy numbers without knowing the exact number of individual captures
 #in a given reaction
 #freebayes -f %s -F 0.0000001 -C 1 --pooled-continuous %s > %s % (REF, bamOut, vcfOut))
+
