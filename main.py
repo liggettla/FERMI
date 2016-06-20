@@ -95,7 +95,7 @@ if alignAndVar == 'Y':
 if alignAndVar == 'Y':
     from callVar import callVar
     vcfOut = bamOut.strip('bam') + 'vcf'
-    callVar(varCaller, REF, bamOut, vcfOut)
+    callVar(freebayes, REF, bamOut, vcfOut)
 
 ###################
 #VCF Decomposition#

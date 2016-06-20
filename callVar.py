@@ -7,7 +7,7 @@
 
 from os import system
 
-def callVar(REF, bamOut, vcfOut):
+def callVar(freebayes, REF, bamOut, vcfOut):
 
     system("%s -X -F 0.0000001 --fasta-reference %s %s > %s" % (freebayes, REF, bamOut, vcfOut))
 
