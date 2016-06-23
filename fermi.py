@@ -55,7 +55,7 @@ args = parser.parse_args()
 # info writeup
 today = str(date.today())
 if args.nfo:
-    infoOutput = args.info
+    infoOutput = args.nfo
 else:
     infoOutput = 'n'
 #infoOutput = raw_input('Info Writeup About This Run (info/n): ')
@@ -220,7 +220,7 @@ if not path.exists(outputDir):
 #############################
 #Record Files and Parameters#
 #############################
-def recordParams(parametersUsed, inputDir, read1, read2, varThresh, supportingReads):
+def recordParams(parametersUsed, inputDir, read1, read2, varThresh, supportingReads, infoFile):
     if infoOutput != 'n':
         info = open(infoFile, 'w')
         info.write(infoOutput)
@@ -253,7 +253,7 @@ def writePickle(one, two, specificOut):
     pickleOutput = specificOut + '/sortedSeqData.pkl'
 
     # this also records the parameters used in the run
-    recordParams(parametersUsed, inputDir, read1, read2, varThresh, supportingReads)
+    recordParams(parametersUsed, inputDir, read1, read2, varThresh, supportingReads, infoFile)
 
     vardb['outputDir'] = specificOut
     vardb['varThresh'] = varThresh
