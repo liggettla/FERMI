@@ -53,9 +53,26 @@ for x in range(1,3):
             AFNum = AONum / DPNum
 
             dataframe[loc] = {'var': var, 'vaf': AFNum}
+
+###################
+# Get Common Vars #
+###################
+outputFile = outputDir + '/vafRepeatability.txt'
+output = open('outputFile', 'w')
+output.write('Sample1\tSample2\n')
+
 for i in df1:
-    print i
-    print df1[i]
+    if i in df2:
+        output.write('%s\t%s\n' % (df1[i]['vaf'], df2[i]['vaf']))
+
+output.close()
+
+################
+# Move Results #
+################
+from os import system
+command = 'mv outputFile %s' % (outputFile)
+system(command)
 
 
 
