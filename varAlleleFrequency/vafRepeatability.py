@@ -58,6 +58,7 @@ for x in range(1,3):
 # Get Common Vars #
 ###################
 outputFile = outputDir + '/vafRepeatability.txt'
+plotFile = outputDir + '/vafRepeatability.jpg'
 output = open('outputFile', 'w')
 output.write('Sample1\tSample2\n')
 
@@ -67,11 +68,20 @@ for i in df1:
 
 output.close()
 
+#############
+# Plot Data #
+#############
+from os import system
+command = 'Rscript plotvafRepeatability.R'
+system(command)
+
+
 ################
 # Move Results #
 ################
-from os import system
 command = 'mv outputFile %s' % (outputFile)
+system(command)
+command = 'mv output.jpg %s' % (plotFile)
 system(command)
 
 
