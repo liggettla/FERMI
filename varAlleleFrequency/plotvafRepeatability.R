@@ -1,3 +1,8 @@
+# cool little script that checks if ggplot2 is already installed and if not, installs it
+list.of.packages <- c("ggplot2")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages, dep=TRUE)
+
 library(ggplot2)
 
 # read in the data

@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # the purpose of this script is to compare two repeatedly sequenced samples originating
 # from the same DNA sample to understand how repeatable the VAF is for a given mutation
 # in each of the analysis files
@@ -83,7 +84,6 @@ command = 'mv outputFile %s' % (outputFile)
 system(command)
 command = 'mv output.jpg %s' % (plotFile)
 system(command)
-
 
 
 
