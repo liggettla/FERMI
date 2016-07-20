@@ -55,7 +55,7 @@ for x in range(1,3):
             AFNum = AONum / DPNum
 
             if args.rarevars:
-                if AFNum < 0.3:
+                if AFNum < 0.003:
                     dataframe[loc] = {'var': var, 'vaf': AFNum}
             else:
                 dataframe[loc] = {'var': var, 'vaf': AFNum}
