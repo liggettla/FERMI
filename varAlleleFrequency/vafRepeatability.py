@@ -13,6 +13,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--indir', '-i', type=str, required=True, help='Input directory containing the vcf files to be analyzed')
 parser.add_argument('--outdir', '-o', type=str, required=True, help='Output directory for plots')
 parser.add_argument('--samples', '-s', type=str, nargs='*', required=True, help='Filenames of the two samples to be compared')
+parser.add_argument('--rarevars', '-r', action='store_true', help='Only include rare variants in the analysis that are at an AF<0.30')
 
 args = parser.parse_args()
 
@@ -53,7 +54,11 @@ for x in range(1,3):
             DPNum = float(DP.split(',')[0][3:])
             AFNum = AONum / DPNum
 
-            dataframe[loc] = {'var': var, 'vaf': AFNum}
+            if args.rarevars:
+                if AFNum < 0.3:
+                    dataframe[loc] = {'var': var, 'vaf': AFNum}
+            else:
+                dataframe[loc] = {'var': var, 'vaf': AFNum}
 
 ###################
 # Get Common Vars #
