@@ -16,6 +16,8 @@ from collections import defaultdict
 from Levenshtein import distance #string length can be different
 from itertools import islice
 import pickle
+from numpy import mean
+from errorRate import calcErrorRate
 
 #Tracks quality score and header as well as sequence and UMI
 #by reading in info from input_file into a dict containing three nested lists
@@ -131,7 +133,8 @@ def buildNestedDict(input_file, distance_stringency, pickleOut):
     return sortedSeqs
 
 #Collapses reads that come as a nested list dictionary
-def collapseReadsListDict(sequences, varThresh, final_output_file, supportingReads, readLength):
+def collapseReadsListDict(sequences, varThresh, final_output_file, supportingReads, readLength, errorRate):
+    errorRateList = []
     plus = '+'
     target = open(final_output_file, 'w')
 
@@ -161,6 +164,8 @@ def collapseReadsListDict(sequences, varThresh, final_output_file, supportingRea
                     elif seq[base] == 'C':
                         C += 1
 
+                calcError = True # used to include a base in error rate calc
+
                 if float(A)/numReads >= varThresh:
                     finalRead += 'A'
                 elif float(T)/numReads >= varThresh:
@@ -172,11 +177,20 @@ def collapseReadsListDict(sequences, varThresh, final_output_file, supportingRea
                 else:
                     #if too many errors ignore reads
                     isReadGood = False
+                    calcError = False
+
+                if errorRate == 'Y' and calcError:
+                    rate = calcErrorRate(A,T,G,C)
+                    errorRateList.append(rate)
 
         if isReadGood and numReads >= supportingReads:
             target = open(final_output_file, 'a')
             trimmed_quality = quality[6:-6] #MiSeq run
             target.write(header + '\n' + finalRead + '\n' + plus + '\n' + trimmed_quality + '\n')
+
+    if errorRate == 'Y': # clunky but passes to outputCov
+        averageErrorRate = mean(errorRateList)
+        return averageErrorRate
 
 #Collapses reads that are sorted by buildNestedDict()
 def collapseNestedDict(sequences, varThresh, final_output_file, supportingReads, readLength):
@@ -236,6 +250,12 @@ def outputCov(distance_stringency):
     if not inputLines/4 == 0:
         target.write("Total # of Original UMIs: %d\n" % (inputLines/4))
         target.write("# of Unique UMIs: %d\n" % (outputLines/4))
+
+    if errorRate == 'Y':
+        print 'helo'
+        averageErrorRate = mean(errorRateList)
+        target.write("Average Error Rate: %f\n" % (averageErrorRate))
+
     #avgCov = float(inputLines)/outputLines
     #target.write("Avg UMI Coverage: %r\n" % (avgCov))
 

@@ -1,5 +1,5 @@
 #This calculates the average coverage of each individual capture
-def outputCov(input_file, final_output_file, distance_stringency, coverage_file):
+def outputCov(input_file, final_output_file, distance_stringency, coverage_file, averageErrorRate):
     target = open(coverage_file, 'w')
 
     inputLines = sum(1 for line in open(input_file))
@@ -11,5 +11,6 @@ def outputCov(input_file, final_output_file, distance_stringency, coverage_file)
         target.write("# of Unique UMIs: %d\n" % (outputLines/4))
         avgCov = float(inputLines)/outputLines
         target.write("Avg UMI Coverage: %r\n" % (avgCov))
+    target.write("Average Error Rate: %f\n" % (averageErrorRate))
 
     target.close()

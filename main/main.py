@@ -40,6 +40,7 @@ alignAndVar = vardb['alignAndVar']
 DPNum = vardb['dpnum']
 AONum = vardb['aonum']
 freebayes = vardb['freebayes']
+errorRate = vardb['errorRate']
 
 read1 = inputDir + '/' + read1
 read2 = inputDir + '/' + read2
@@ -74,12 +75,12 @@ with open(twoUmiOut, 'r') as target:
 
 #collapse reads on binned UMI data structure
 #collapseNestedDict(seqDict, varThresh, final_output_file, supportingReads, readLength)
-collapseReadsListDict(seqDict, varThresh, final_output_file, supportingReads, readLength)
+averageErrorRate = collapseReadsListDict(seqDict, varThresh, final_output_file, supportingReads, readLength, errorRate)
 
 #####################
 #Output Seq Coverage#
 #####################
-outputCov(twoUmiOut, final_output_file, distance_stringency, coverage_file)
+outputCov(twoUmiOut, final_output_file, distance_stringency, coverage_file, averageErrorRate)
 
 ####################
 #Align to Reference#
