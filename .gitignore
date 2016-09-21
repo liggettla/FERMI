@@ -1,5 +1,11 @@
+# to ignore previous checked-in folders
+# git rm -r --cached folder
 *pyc
 testInput/personal
 testOutput/personal
 changedFiles
 testOutput
+dependencies
+testInput
+dependencies/freebayes
+dependencies/vt
