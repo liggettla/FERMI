@@ -81,6 +81,8 @@ for i in target:
 ##################
 # Export Results #
 ##################
+from os import system
+system('mkdir %s' % (outDir))
 for region in fullDict:
     output = outDir + region + '.txt' # output individual files for oncoGenes, TIII, oncoSites
     with open(output, 'w') as out:
