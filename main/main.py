@@ -41,6 +41,7 @@ DPNum = vardb['dpnum']
 AONum = vardb['aonum']
 freebayes = vardb['freebayes']
 errorRate = vardb['errorRate']
+readLength = vardb['readLength']
 
 read1 = inputDir + '/' + read1
 read2 = inputDir + '/' + read2
@@ -71,7 +72,9 @@ elif previousDict == 'Y':
 with open(twoUmiOut, 'r') as target:
     header = next(target)
     readSeq = next(target).rstrip('\n')
-    readLength = len(readSeq) - 12
+    # if readLength not set use full seq, else use specified num
+    if not readLength:
+        readLength = len(readSeq) - 12
 
 #collapse reads on binned UMI data structure
 #collapseNestedDict(seqDict, varThresh, final_output_file, supportingReads, readLength)

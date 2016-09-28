@@ -47,6 +47,7 @@ parser.add_argument('--filterao', '-f', type=int, help='Specifies the AO cuttoff
 parser.add_argument('--dpfilter', '-d', type=int, help='Read depth elimination threshold. If specified as -d 500 only variants found in a locus read greater than 500 times will be reported. Default == 500.')
 parser.add_argument('--freebayes', '-b', type=str, help='Location of freebayes in the format of /dir/freebayes')
 parser.add_argument('--errorrate', '-e', action='store_true', help='Overall pcr amplification + sequencing error rates will be estimated and returned')
+parser.add_argument('--readLength', '-q', type=int, help='Manually set the read length. If this is not set, length will be automatically set as the number of bases found between the two UMI sequences.')
 
 args = parser.parse_args()
 
@@ -174,6 +175,12 @@ if args.freebayes:
 else:
     freebayes = '/vol3/home/liggettl/programs/freebayes/bin/freebayes'
 
+# read length
+if args.readLength:
+    readLength = args.readLength
+else:
+    readLength = False
+
 #useDefaults = raw_input('Use Default Parameters? (Y/n): ')
 #useDefaults = 'Y'
 '''
@@ -283,6 +290,7 @@ def writePickle(one, two, specificOut):
     vardb['aonum'] = AONum
     vardb['freebayes'] = freebayes
     vardb['errorRate'] = errorRate
+    vardb['readLength'] = readLength
 
     pickleVars = './variables.pkl'
 
