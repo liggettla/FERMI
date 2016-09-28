@@ -237,6 +237,7 @@ def collapseNestedDict(sequences, varThresh, final_output_file, supportingReads,
         if isReadGood and numReads >= supportingReads:
             target = open(final_output_file, 'a')
             trimmed_quality = quality[6:-6]
+            trimmed_quality = trimmed_quality[0:readLength] # make quality string match read length
             target.write(header + '\n' + finalRead + '\n' + plus + '\n' + trimmed_quality + '\n')
 
 #Outdated and should be unused
