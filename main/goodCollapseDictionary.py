@@ -186,6 +186,7 @@ def collapseReadsListDict(sequences, varThresh, final_output_file, supportingRea
         if isReadGood and numReads >= supportingReads:
             target = open(final_output_file, 'a')
             trimmed_quality = quality[6:-6] #MiSeq run
+            trimmed_quality = trimmed_quality[0:readLength] # make quality string match read length
             target.write(header + '\n' + finalRead + '\n' + plus + '\n' + trimmed_quality + '\n')
 
     if errorRate == 'Y': # clunky but passes to outputCov
