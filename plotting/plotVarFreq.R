@@ -1,7 +1,8 @@
 library(ggplot2)
 library(reshape)
 
-setwd("/media/alex/Extra/Dropbox/Code/R/Sequencing Work/4.6.2015 Attempt/")
+setwd("/media/alex/Extra/Dropbox/Code/R/sequencingWork/4.6.2015 Attempt/")
+setwd('/home/alex/Dropbox/Code/R/sequencingWork/4.6.2015 Attempt/')
 
 #subset of the data
 allelefreqshort <- read.table("sortedAlleleFreqs.txt", header = FALSE)
