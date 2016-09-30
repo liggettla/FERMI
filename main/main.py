@@ -78,12 +78,12 @@ with open(twoUmiOut, 'r') as target:
 
 #collapse reads on binned UMI data structure
 #collapseNestedDict(seqDict, varThresh, final_output_file, supportingReads, readLength)
-averageErrorRate = collapseReadsListDict(seqDict, varThresh, final_output_file, supportingReads, readLength, errorRate)
+averageErrorRate, averageCoverage = collapseReadsListDict(seqDict, varThresh, final_output_file, supportingReads, readLength, errorRate)
 
 #####################
 #Output Seq Coverage#
 #####################
-outputCov(twoUmiOut, final_output_file, distance_stringency, coverage_file, averageErrorRate)
+outputCov(twoUmiOut, final_output_file, distance_stringency, coverage_file, averageErrorRate, averageCoverage)
 
 ####################
 #Align to Reference#

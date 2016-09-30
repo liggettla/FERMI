@@ -11,7 +11,13 @@
 #module load vt
 #module load bwa
 
-#./fermi.py -i ./testInput -o ./testOutput -e -u 1 -v 0.51 -r 3 -f 1 -n 'This is some information.'
+###############
+# Run Locally #
+###############
+./fermi.py -i ../testInput -o ../testOutput -e -u 1 -v 0.8 -r 5 -f 5 -a -n 'This is some information.'
+
+
+
 #./fermi.py -i ./testInput -o ./testOutput -u 1 -v 0.51 -r 3 -c -f 1
 #./fermi.py -i /vol3/home/liggettl/sequencingData/3.21.2016/unzipped/untrimmed/unzipped -o /vol3/home/liggettl/sequencingData/3.21.2016/analysis -u 1 -v 0.51 -r 3 -c
 
@@ -20,7 +26,7 @@
 #################
 # 8.3.2016 data #
 #################
-~/FERMI/main/fermi.py -i /vol3/home/liggettl/sequencingData/8.3.2016/unzipped -o /vol3/home/liggettl/sequencingData/8.3.2016/analysis -u 1 -v 0.6 -r 3 -c -f 1 -e -n 'This is the first run of the 8.3.2016 dataset. Everything is being run with routine settings for an initial look at the data.'
+#~/FERMI/main/fermi.py -i /vol3/home/liggettl/sequencingData/8.3.2016/unzipped -o /vol3/home/liggettl/sequencingData/8.3.2016/analysis -u 1 -v 0.6 -r 3 -c -f 1 -e -n 'This is the first run of the 8.3.2016 dataset. Everything is being run with routine settings for an initial look at the data.'
 
 ########################
 # sample repeatability #

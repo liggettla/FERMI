@@ -1,7 +1,7 @@
 #This calculates the average coverage of each individual capture
 from numpy import asscalar
 
-def outputCov(input_file, final_output_file, distance_stringency, coverage_file, averageErrorRate):
+def outputCov(input_file, final_output_file, distance_stringency, coverage_file, averageErrorRate, averageCoverage):
     target = open(coverage_file, 'w')
 
     inputLines = sum(1 for line in open(input_file))
@@ -12,10 +12,12 @@ def outputCov(input_file, final_output_file, distance_stringency, coverage_file,
         target.write("Total # of Original UMIs: %d\n" % (inputLines/4))
         target.write("# of Unique UMIs: %d\n" % (outputLines/4))
         avgCov = float(inputLines)/outputLines
-        target.write("Avg UMI Coverage: %r\n" % (avgCov))
+        target.write("Avg UMI Coverage (Incl Unused Reads): %r\n" % (avgCov))
+
+        averageCoverage = asscalar(averageCoverage)
+        target.write("Avg UMI Coverage (Only Used Reads): %f\n" % (averageCoverage))
 
     averageErrorRate = asscalar(averageErrorRate)
-    print type(averageErrorRate)
     target.write("Average Error Rate: %f\n" % (averageErrorRate))
 
     target.close()

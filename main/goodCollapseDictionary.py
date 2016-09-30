@@ -137,6 +137,7 @@ def collapseReadsListDict(sequences, varThresh, final_output_file, supportingRea
     errorRateList = []
     plus = '+'
     target = open(final_output_file, 'w')
+    coverageList = [] # used to tally coverage for each UMI pair
 
     for umi in sequences:
         isReadGood = True
@@ -148,6 +149,8 @@ def collapseReadsListDict(sequences, varThresh, final_output_file, supportingRea
         quality = ''.join(quality)
 
         for base in range(readLength):
+            covCounter = 0 # used for quality coverage calc
+
             if isReadGood:
                 A = 0
                 T = 0
@@ -155,6 +158,8 @@ def collapseReadsListDict(sequences, varThresh, final_output_file, supportingRea
                 C = 0
 
                 for seq in sequences[umi][0]:
+                    covCounter += 1 # count number of supporting reads
+
                     if seq[base] == 'A':
                         A += 1
                     elif seq[base] == 'T':
@@ -184,14 +189,20 @@ def collapseReadsListDict(sequences, varThresh, final_output_file, supportingRea
                     errorRateList.append(rate)
 
         if isReadGood and numReads >= supportingReads:
+            coverageList.append(covCounter) # if read checks out, record its coverage
+
             target = open(final_output_file, 'a')
             trimmed_quality = quality[6:-6] #MiSeq run
             trimmed_quality = trimmed_quality[0:readLength] # make quality string match read length
             target.write(header + '\n' + finalRead + '\n' + plus + '\n' + trimmed_quality + '\n')
 
+    averageCoverage = mean(coverageList)
+
     if errorRate == 'Y': # clunky but passes to outputCov
         averageErrorRate = mean(errorRateList)
-        return averageErrorRate
+        return averageErrorRate, averageCoverage
+    else:
+        return 0, averageCoverage
 
 #Collapses reads that are sorted by buildNestedDict()
 def collapseNestedDict(sequences, varThresh, final_output_file, supportingReads, readLength):
@@ -254,7 +265,6 @@ def outputCov(distance_stringency):
         target.write("# of Unique UMIs: %d\n" % (outputLines/4))
 
     if errorRate == 'Y':
-        print 'helo'
         averageErrorRate = mean(errorRateList)
         target.write("Average Error Rate: %f\n" % (averageErrorRate))
 
