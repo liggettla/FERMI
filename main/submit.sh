@@ -14,7 +14,7 @@
 ###############
 # Run Locally #
 ###############
-./fermi.py -i ../testInput -o ../testOutput -e -u 1 -v 0.8 -r 5 -f 5 -a -n 'This is some information.'
+./fermi.py -i ../testInput -o ../testOutput -q 50 -e -u 1 -v 0.8 -r 5 -f 5 -a -n 'This is some information.'
 
 
 
