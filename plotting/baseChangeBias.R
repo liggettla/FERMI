@@ -1,6 +1,6 @@
 library(ggplot2)
 
-setwd('/media/alex/Extra/Dropbox/Degregori_Lab/Experiments/9.26.2016_SequencingAnalysis/C1-R1.fastq')
+setwd('/home/alex/Dropbox/Degregori_Lab/Experiments/10.4.2016/A1-R2.fastq')
 oncoGenes <- read.table('oncoGenes.txt', header = TRUE)
 seq=c("A", "C", "T", "G")
 df=data.frame('Ref'=rep(seq, each=4), 'Var'=rep(seq, 4), 'Obs'=oncoGenes$Obs)
