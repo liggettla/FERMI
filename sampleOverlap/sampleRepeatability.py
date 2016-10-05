@@ -2,6 +2,8 @@
 # The purpose of this script is to understand how well mutations are
 # repeatedly seen between multiple sequence runs of DNA originating from
 # the same source.
+# This script can also be used to simply understand how similar two samples
+# are, and can then be plotted with vennDiagrams.R
 import argparse
 parser = argparse.ArgumentParser()
 
