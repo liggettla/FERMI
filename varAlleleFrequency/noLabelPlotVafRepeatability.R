@@ -22,9 +22,8 @@ identity <- vafs$Identity
 lm_fit  = lm(sample1 ~ sample2)
 x = data.frame(vafs, predict(lm_fit, interval = 'prediction'))
 
-p <- ggplot(x, aes(x=sample1, y=sample2, alpha=0.5, label=identity)) +
-  #geom_text(aes(label=identity),hjust=0, vjust=0) + # this labels all points
-  geom_text(aes(label=ifelse(sample2>0.005,as.character(identity),'')),hjust=0,vjust=0) + # this labels points above particular frequency
+p <- ggplot(x, aes(x=sample1, y=sample2, alpha=0.5)) +
+  geom_text(aes(label=identity),hjust=0, vjust=0) +
   xlab('Sample 1') +
   ylab('Sample 2') +
   labs(title = 'VAF Repeatability') +

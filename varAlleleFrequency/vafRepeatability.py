@@ -57,7 +57,7 @@ for x in range(1,3):
             AFNum = AONum / DPNum
 
             if args.rarevars:
-                args.rarevars = cutoff
+                cutoff = args.rarevars
                 if AFNum < cutoff:
                     dataframe[loc] = {'var': var, 'vaf': AFNum, 'chr': chrom}
             else:
@@ -73,7 +73,7 @@ output.write('Sample1\tSample2\tIdentity\n')
 
 for i in df1:
     if i in df2:
-        output.write('%s\t%s\t%s:%s\n' % (df1[i]['vaf'], df2[i]['vaf'], df1['chr'], i))
+        output.write('%s\t%s\t%s:%s\n' % (df1[i]['vaf'], df2[i]['vaf'], df1[i]['chr'], i))
 
 output.close()
 
@@ -83,7 +83,6 @@ output.close()
 from os import system
 command = 'Rscript plotvafRepeatability.R'
 system(command)
-
 
 ################
 # Move Results #
