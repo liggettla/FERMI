@@ -13,7 +13,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--indir', '-i', type=str, required=True, help='Input directory containing the vcf files to be analyzed: /dir')
 parser.add_argument('--outdir', '-o', type=str, required=True, help='Output directory for plots: /dir')
 parser.add_argument('--samples', '-s', type=str, nargs='*', required=True, help='Filenames of the two samples to be compared: A1-R1.fastq')
-parser.add_argument('--rarevars', '-r', action='store_true', help='Only include rare variants in the analysis that are at an AF<0.30')
+#parser.add_argument('--rarevars', '-r', action='store_true', help='Only include rare variants in the analysis that are at an AF<0.30')
+parser.add_argument('--rarevars', '-r', type=float, help='This can be set to cutoff the data at a certain allele frequency and only include variants below a particular frequencyc like 0.03 or 0.003.')
 
 args = parser.parse_args()
 
@@ -45,6 +46,7 @@ for x in range(1,3):
 # populate dataframes
     for i in target:
         if '#' not in i and 'chr' in i: # skip the info
+            chrom = str(i.split('\t')[0])
             loc = str(i.split('\t')[1])
             AO = i.split(';')[5]
             DP = i.split(';')[7]
@@ -55,10 +57,11 @@ for x in range(1,3):
             AFNum = AONum / DPNum
 
             if args.rarevars:
-                if AFNum < 0.03:
-                    dataframe[loc] = {'var': var, 'vaf': AFNum}
+                args.rarevars = cutoff
+                if AFNum < cutoff:
+                    dataframe[loc] = {'var': var, 'vaf': AFNum, 'chr': chrom}
             else:
-                dataframe[loc] = {'var': var, 'vaf': AFNum}
+                dataframe[loc] = {'var': var, 'vaf': AFNum, 'chr': chrom}
 
 ###################
 # Get Common Vars #
@@ -66,11 +69,11 @@ for x in range(1,3):
 outputFile = outputDir + '/vafRepeatability.txt'
 plotFile = outputDir + '/vafRepeatability.jpg'
 output = open('outputFile', 'w')
-output.write('Sample1\tSample2\n')
+output.write('Sample1\tSample2\tIdentity\n')
 
 for i in df1:
     if i in df2:
-        output.write('%s\t%s\n' % (df1[i]['vaf'], df2[i]['vaf']))
+        output.write('%s\t%s\t%s:%s\n' % (df1[i]['vaf'], df2[i]['vaf'], df1['chr'], i))
 
 output.close()
 
