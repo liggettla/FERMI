@@ -89,11 +89,9 @@ else:
             output.write('%s\t%s\t%s:%s\n' % (df1[i]['vaf'], 0, df1[i]['chr'], i))
 
     # write variants found only in df2
-    '''
     for i in df2:
         if i not in df1:
-            output.write('%s\t%s\t%s:%s\n' % (0, df2[i]['vaf'], df1[i]['chr'], i))
-            '''
+            output.write('%s\t%s\t%s:%s\n' % (0, df2[i]['vaf'], df2[i]['chr'], i))
 
 
 
