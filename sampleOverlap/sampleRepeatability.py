@@ -7,9 +7,9 @@
 import argparse
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--indir', '-i', required=True, type=str, help='Specifies the input directory containing all folders containing output analysis from a fermi analysis run.')
-parser.add_argument('--outdir', '-o', required=True, type=str, help='Specifies the output directory location for the analysis output file')
-parser.add_argument('--samples', '-s', required=True, nargs='*', type=str, help='Name of the directories containing fermi analysis of samples to be compared.')
+parser.add_argument('--indir', '-i', required=True, type=str, help='Specifies the input directory containing all folders containing output analysis from a fermi analysis run. Ex: /dir')
+parser.add_argument('--outdir', '-o', required=True, type=str, help='Specifies the output directory location for the analysis output file. Ex: /dir')
+parser.add_argument('--samples', '-s', required=True, nargs='*', type=str, help='Name of the directories containing fermi analysis of samples to be compared. Ex: A1-R1')
 
 args = parser.parse_args()
 
@@ -26,8 +26,8 @@ from itertools import combinations
 #sample2 = inputDir + '/' + samples[1] + '/' + 'finalOutputBlockDecomposed.vcf'
 
 for a, b in combinations(samples, 2):
-    sample1 = inputDir + '/' + a + '/' + 'AF1_filtered.vcf'
-    sample2 = inputDir + '/' + b + '/' + 'AF1_filtered.vcf'
+    sample1 = inputDir + '/' + a + '/' + 'total_filtered.vcf'
+    sample2 = inputDir + '/' + b + '/' + 'total_filtered.vcf'
 
     file1 = open(sample1, 'r')
 
