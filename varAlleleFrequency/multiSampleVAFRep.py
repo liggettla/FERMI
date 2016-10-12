@@ -13,7 +13,7 @@ from numpy import mean
 parser = argparse.ArgumentParser()
 parser.add_argument('--indir', '-i', type=str, required=True, help='Input directory containing the vcf files to be analyzed: /dir')
 parser.add_argument('--outdir', '-o', type=str, required=True, help='Output directory for plots: /dir')
-parser.add_arguemnt('--principle', '-p', type=str, required=True, help='This is the principle sample being compared to an averaged set of other samples. Ex: A1-R1')
+parser.add_argument('--principle', '-p', type=str, required=True, help='This is the principle sample being compared to an averaged set of other samples. Ex: A1-R1')
 parser.add_argument('--samples', '-s', type=str, nargs='*', required=True, help='List of samples to be averaged and compared to the principle sample. Ex: A1-R1')
 parser.add_argument('--rarevars', '-r', type=float, help='This can be set to cutoff the data at a certain allele frequency and only include variants below a particular frequency like 0.03 or 0.003.')
 parser.add_argument('--commonVars', '-c', action='store_true', help='This will only plot variants that are found in both samples and ignore those variants that are only found in one of the samples.')
@@ -58,7 +58,7 @@ def parseLine(i):
     DPNum = float(DP.split(',')[0][3:])
     AFNum = AONum / DPNum
 
-    location = '%s:%s:%s' % (chrom, str(loc), str(var)
+    location = '%s-%s-%s' % (chrom, str(loc), str(var))
     return location, AFNum
 
 ###################
@@ -82,9 +82,9 @@ def buildAverageStructure(samples):
     for i in samples:
         target = open(inputDir + '/' + i + '/' +'total_filtered.vcf', 'r')
         for line in target:
-            if '#' not in i and 'chr' in i: # skip the info
+            if '#' not in line and 'chr' in line: # skip the info
                 # Ex: loc = chr1:1234:A
-                loc, AFNum = parseLine(i)
+                loc, AFNum = parseLine(line)
 
                 # decide if variant is unique or not
                 if rareEnough(AFNum):
@@ -106,13 +106,11 @@ def buildPrincipleStructure(principle):
     principleData = {}
     target = open(principle, 'r')
     for i in target:
-        loc, AFNum = parseLine(i)
-        # decide if variant is unique or not
-        if rareEnough(AFNum):
-            if loc in principleData:
-                principleData[loc]['vaf'].append(AFNum)
-            else:
-                principleData[loc] = {'vaf':[AFNum]}
+        if '#' not in i and 'chr' in i: # skip the info
+            loc, AFNum = parseLine(i)
+            # decide if variant is unique or not
+            if rareEnough(AFNum):
+                principleData[loc] = AFNum
 
     return principleData
 
@@ -128,22 +126,22 @@ def outputData(commonVars, avgData, principleData):
     if commonVars:
         for i in avgData:
             if i in principleData:
-                output.write('%s\t%s\t%s\n' % (avgData[i]['vaf'], principleData[i]['vaf'], i))
+                output.write('%s\t%s\t%s\n' % (principleData[i], avgData[i], i))
 
     # output all variants including those not observed in both samples
     else:
         for i in avgData:
             # write overlapping variants
             if i in principleData:
-                output.write('%s\t%s\t%s\n' % (avgData[i]['vaf'], principleData[i]['vaf'], i))
+                output.write('%s\t%s\t%s\n' % (principleData[i], avgData[i], i))
             # write variants found only in avgData
             else:
-                output.write('%s\t%s\t%s\n' % (avgData[i]['vaf'], 0, i))
+                output.write('%s\t%s\t%s\n' % (0, avgData[i], i))
 
         # write variants found only in principleData
         for i in principleData:
             if i not in avgData:
-                output.write('%s\t%s\t%s\n' % (0, principleData[i]['vaf'], i))
+                output.write('%s\t%s\t%s\n' % (principleData[i], 0, i))
 
     output.close()
 
@@ -176,5 +174,5 @@ def plotAndDisplay(outputFile, plotFile1, plotFile2):
 ##################
 avgData = buildAverageStructure(samples)
 principleData = buildPrincipleStructure(principle)
-outputData(commonVars, outputFile, principleData)
-plotAndDispaly(outputFile, plotFile1, plotFile2)
+outputData(commonVars, avgData, principleData)
+plotAndDisplay(outputFile, plotFile1, plotFile2)
