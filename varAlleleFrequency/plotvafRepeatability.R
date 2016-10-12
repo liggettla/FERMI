@@ -31,7 +31,7 @@ x = data.frame(vafs, predict(lm_fit, interval = 'prediction'))
 
 p <- ggplot(x, aes(x=sample1, y=sample2, alpha=0.5, label=identity)) +
   #geom_text(aes(label=identity),hjust=0, vjust=0) + # this labels all points
-  geom_text(aes(label=ifelse(sample2>0.005,as.character(identity),'')),hjust=0,vjust=0) + # this labels points above particular frequency
+  #geom_text(aes(label=ifelse(sample2>0.005,as.character(identity),'')),hjust=0,vjust=0) + # this labels points above particular frequency
   #xlab('Sample 1') +
   #ylab('Sample 2') +
   xlab('Individual') +
@@ -47,7 +47,7 @@ dev.off()
 
 p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity)) +
   geom_point() +
-  geom_text(aes(label=ifelse(sample2>0.005,as.character(identity),'')),hjust=0,vjust=0) + # this labels points above particular frequency
+  #geom_text(aes(label=ifelse(sample2>0.005,as.character(identity),'')),hjust=0,vjust=0) + # this labels points above particular frequency
   geom_abline(intercept = 0, slope = 1) +
   #xlab('Sample 1') +
   #ylab('Sample 2') +
