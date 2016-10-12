@@ -25,6 +25,7 @@ outputDir = args.outdir
 principle = inputDir + '/' + args.principle + '/' +'total_filtered.vcf'
 samples = args.samples # this is a list
 commonVars = args.commonVars
+cutoff = args.rarevars
 
 # define output files
 outputFile = outputDir + '/vafRepeatability.txt'
@@ -37,10 +38,10 @@ plotFile2 = outputDir + '/vafRepeatabilityNoRegression.jpg'
 # check if rare variants are expected
 # and if so, if variant is rare enough
 def rareEnough(AFNum):
-    if args.rarevars:
-        cutoff = args.rarevars
-        if AFNum < cutoff:
-            return True
+    if not cutoff:
+        return True
+    if cutoff and AFNum <= cutoff:
+        return True
     else:
         return False
 
@@ -149,7 +150,9 @@ def outputData(commonVars, avgData, principleData):
 # Plot and Display #
 ####################
 def plotAndDisplay(outputFile, plotFile1, plotFile2):
+    print outputFile, plotFile1, plotFile2
     from os import system
+    #import pdb; pdb.set_trace()
 
     # plot the results
     command = 'Rscript plotvafRepeatability.R'

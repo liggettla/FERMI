@@ -16,7 +16,7 @@ if(length(new.packages)) install.packages(new.packages, dep=TRUE)
 
 # read in the data
 #vafs <- read.table("outputFile", header = TRUE)
-vafs <- read.table("vafRepeatability.txt", header = TRUE)
+vafs <- read.table("outputFile", header = TRUE)
 sample1 <- vafs$Sample1
 sample2 <- vafs$Sample2
 identity <- vafs$Identity
