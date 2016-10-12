@@ -68,7 +68,8 @@ for x in range(1,3):
 # Get Common Vars #
 ###################
 outputFile = outputDir + '/vafRepeatability.txt'
-plotFile = outputDir + '/vafRepeatability.jpg'
+plotFile1 = outputDir + '/vafRepeatabilityRegression.jpg'
+plotFile2 = outputDir + '/vafRepeatabilityNoRegression.jpg'
 output = open('outputFile', 'w')
 output.write('Sample1\tSample2\tIdentity\n')
 
@@ -110,13 +111,17 @@ system(command)
 ################
 command = 'mv outputFile %s' % (outputFile)
 system(command)
-command = 'mv output.jpg %s' % (plotFile)
+command = 'mv output1.jpg %s' % (plotFile1)
+system(command)
+command = 'mv output2.jpg %s' % (plotFile2)
 system(command)
 
 #############
 # Plot Data #
 #############
-command = 'eog vafRepeatability.jpg'
+command = 'eog vafRepeatabilityRegression.jpg'
+system(command)
+command = 'eog vafRepeatabilityNoRegression.jpg'
 system(command)
 
 
