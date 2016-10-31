@@ -49,7 +49,6 @@ def rareEnough(AFNum):
 # Parse Line #
 ##############
 def parseLine(i):
-    print 'hello'
     chrom = str(i.split('\t')[0])
     loc = str(i.split('\t')[1])
     AO = i.split(';')[5]
@@ -84,7 +83,8 @@ def buildAverageStructure(samples):
     for i in samples:
         target = open(inputDir + '/' + i + '/' +'total_filtered.vcf', 'r')
         for line in target:
-            if '#' not in line and 'chr' in line: # skip the info
+            #if '#' not in line and 'chr' in line: # skip the info
+            if True:
                 # Ex: loc = chr1:1234:A
                 loc, AFNum = parseLine(line)
 
@@ -107,13 +107,14 @@ def buildAverageStructure(samples):
 def buildPrincipleStructure(principle):
     principleData = {}
     target = open(principle, 'r')
+    print target
     for i in target:
-        if '#' not in i and 'chr' in i: # skip the info
+        #if '#' not in i and 'chr' in i: # skip the info
+        if True:
             loc, AFNum = parseLine(i)
             # decide if variant is unique or not
             if rareEnough(AFNum):
                 principleData[loc] = AFNum
-
     return principleData
 
 #########################
@@ -151,7 +152,6 @@ def outputData(commonVars, avgData, principleData):
 # Plot and Display #
 ####################
 def plotAndDisplay(outputFile, plotFile1, plotFile2):
-    print outputFile, plotFile1, plotFile2
     from os import system
     #import pdb; pdb.set_trace()
 

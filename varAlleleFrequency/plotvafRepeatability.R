@@ -34,8 +34,8 @@ p <- ggplot(x, aes(x=sample1, y=sample2, alpha=0.5, label=identity)) +
   #geom_text(aes(label=ifelse(sample2>0.005,as.character(identity),'')),hjust=0,vjust=0) + # this labels points above particular frequency
   #xlab('Sample 1') +
   #ylab('Sample 2') +
-  xlab('Sample 1') +
-  ylab('Sample 2') +
+  xlab('Mutation VAFs Sample 1') +
+  ylab('Mutation VAFs Average') +
   labs(title = 'VAF Repeatability (W/ Regression)') +
   geom_point() +
   geom_smooth(method = 'lm', aes(fill = 'confidence'), alpha = 0.15) +
@@ -51,8 +51,8 @@ p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity)) +
   geom_abline(intercept = 0, slope = 1) +
   #xlab('Sample 1') +
   #ylab('Sample 2') +
-  xlab('Mutation VAFs Sample 1') +
-  ylab('Mutation VAFs Sample 2') +
+  xlab('Mutation VAFs Sample 3') +
+  ylab('Mutation VAFs Average') +
   labs(title = 'Variant Allele Frequencies of Putative Mutations')
 # print(p)
 jpeg('output2.jpg')
