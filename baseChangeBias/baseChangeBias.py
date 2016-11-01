@@ -19,7 +19,8 @@ inputDir = args.indir
 outputDir = args.outdir
 inSample = args.sample
 sample = inputDir + '/' + inSample + '/' + 'total_filtered.vcf'
-outDir = outputDir + '/' + inSample + '/'
+#outDir = outputDir + '/' + inSample + '/'
+outDir = outputDir + '/'
 
 target = open(sample, 'r')
 
