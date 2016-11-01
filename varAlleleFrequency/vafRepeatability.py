@@ -52,6 +52,7 @@ for x in range(1,3):
             AO = i.split(';')[5]
             DP = i.split(';')[7]
             var = i.split('\t')[4] # the observed bp change
+            WT = i.split('\t')[3] # WT base
 
             AONum = float(AO.split(',')[0][3:])
             DPNum = float(DP.split(',')[0][3:])
@@ -60,9 +61,9 @@ for x in range(1,3):
             if args.rarevars:
                 cutoff = args.rarevars
                 if AFNum < cutoff:
-                    dataframe[loc] = {'var': var, 'vaf': AFNum, 'chr': chrom}
+                    dataframe[loc] = {'var': var, 'vaf': AFNum, 'chr': chrom, 'wt': WT}
             else:
-                dataframe[loc] = {'var': var, 'vaf': AFNum, 'chr': chrom}
+                dataframe[loc] = {'var': var, 'vaf': AFNum, 'chr': chrom, 'wt': WT}
 
 ###################
 # Get Common Vars #
@@ -77,23 +78,22 @@ output.write('Sample1\tSample2\tIdentity\n')
 if args.commonVars:
     for i in df1:
         if i in df2:
-            output.write('%s\t%s\t%s:%s\n' % (df1[i]['vaf'], df2[i]['vaf'], df1[i]['chr'], i))
+            output.write('%s\t%s\t%s:%s:%s->%s\n' % (df1[i]['vaf'], df2[i]['vaf'], df1[i]['chr'], i, df1[i]['wt'], df1[i]['var']))
 
 # output all variants including those not observed in both samples
 else:
     for i in df1:
         # write overlapping variants
         if i in df2:
-            pass
-            #output.write('%s\t%s\t%s:%s\n' % (df1[i]['vaf'], df2[i]['vaf'], df1[i]['chr'], i))
+            output.write('%s\t%s\t%s:%s:%s->%s\n' % (df1[i]['vaf'], df2[i]['vaf'], df1[i]['chr'], i, df1[i]['wt'], df1[i]['var']))
         # write variants found only in df1
         else:
-            output.write('%s\t%s\t%s:%s\n' % (df1[i]['vaf'], 0, df1[i]['chr'], i))
+            output.write('%s\t%s\t%s:%s:%s->%s\n' % (df1[i]['vaf'], 0, df1[i]['chr'], i, df1[i]['wt'], df1[i]['var']))
 
     # write variants found only in df2
     for i in df2:
         if i not in df1:
-            output.write('%s\t%s\t%s:%s\n' % (0, df2[i]['vaf'], df2[i]['chr'], i))
+            output.write('%s\t%s\t%s:%s:%s->%s\n' % (0, df2[i]['vaf'], df2[i]['chr'], i, df2[i]['wt'], df2[i]['var']))
 
 
 

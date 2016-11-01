@@ -55,6 +55,7 @@ def parseLine(i):
     AO = i.split(';')[5]
     DP = i.split(';')[7]
     var = i.split('\t')[4] # the observed bp change
+    WT = i.split('\t')[3]
 
     AONum = float(AO.split(',')[0][3:])
     DPNum = float(DP.split(',')[0][3:])
