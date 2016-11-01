@@ -84,7 +84,8 @@ else:
     for i in df1:
         # write overlapping variants
         if i in df2:
-            output.write('%s\t%s\t%s:%s\n' % (df1[i]['vaf'], df2[i]['vaf'], df1[i]['chr'], i))
+            pass
+            #output.write('%s\t%s\t%s:%s\n' % (df1[i]['vaf'], df2[i]['vaf'], df1[i]['chr'], i))
         # write variants found only in df1
         else:
             output.write('%s\t%s\t%s:%s\n' % (df1[i]['vaf'], 0, df1[i]['chr'], i))
