@@ -16,8 +16,8 @@ parser.add_argument('--samples', '-s', type=str, nargs='*', required=True, help=
 #parser.add_argument('--rarevars', '-r', action='store_true', help='Only include rare variants in the analysis that are at an AF<0.30')
 parser.add_argument('--rarevars', '-r', type=float, help='This can be set to cutoff the data at a certain allele frequency and only include variants below a particular frequency like 0.03 or 0.003.')
 parser.add_argument('--commonVars', '-c', action='store_true', help='This will only plot variants that are found in both samples and ignore those variants that are only found in one of the samples.')
-parser.add_argument('--germline', '-g', type=str, nargs='*', help='Only output those variants that changed from this base.')
-parser.add_argument('--variant', '-v', type=str, nargs='*', help='Only output those variants that change to this base.')
+parser.add_argument('--germline', '-g', type=str, nargs='*', help='Only output those variants that changed from these bases.')
+parser.add_argument('--variant', '-v', type=str, nargs='*', help='Only output those variants that change to these bases.')
 
 args = parser.parse_args()
 
