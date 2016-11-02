@@ -16,14 +16,24 @@ parser.add_argument('--samples', '-s', type=str, nargs='*', required=True, help=
 #parser.add_argument('--rarevars', '-r', action='store_true', help='Only include rare variants in the analysis that are at an AF<0.30')
 parser.add_argument('--rarevars', '-r', type=float, help='This can be set to cutoff the data at a certain allele frequency and only include variants below a particular frequency like 0.03 or 0.003.')
 parser.add_argument('--commonVars', '-c', action='store_true', help='This will only plot variants that are found in both samples and ignore those variants that are only found in one of the samples.')
-parser.add_argument('--wildtype', '-w', type=str, help='Only output those variants that changed from this base.')
-parser.add_argument('--variant', '-v', type=str, help='Only output those variants that change to this base.')
+parser.add_argument('--germline', '-g', type=str, nargs='*', help='Only output those variants that changed from this base.')
+parser.add_argument('--variant', '-v', type=str, nargs='*', help='Only output those variants that change to this base.')
 
 args = parser.parse_args()
 
 inputDir = args.indir
 outputDir = args.outdir
 samples = args.samples # this is a list
+
+if args.germline:
+    germline = args.germline
+else:
+    germline = ['A','T','G','C']
+
+if args.variant:
+    variant = args.variant
+else:
+    variant = ['A','T','G','C']
 
 #################
 # Read In Files #
@@ -80,22 +90,25 @@ output.write('Sample1\tSample2\tIdentity\n')
 if args.commonVars:
     for i in df1:
         if i in df2:
-            output.write('%s\t%s\t%s:%s:%s->%s\n' % (df1[i]['vaf'], df2[i]['vaf'], df1[i]['chr'], i, df1[i]['wt'], df1[i]['var']))
+            if df1[i]['wt'] in germline and df1[i]['var'] in variant:
+                output.write('%s\t%s\t%s:%s:%s->%s\n' % (df1[i]['vaf'], df2[i]['vaf'], df1[i]['chr'], i, df1[i]['wt'], df1[i]['var']))
 
 # output all variants including those not observed in both samples
 else:
     for i in df1:
-        # write overlapping variants
-        if i in df2:
-            output.write('%s\t%s\t%s:%s:%s->%s\n' % (df1[i]['vaf'], df2[i]['vaf'], df1[i]['chr'], i, df1[i]['wt'], df1[i]['var']))
-        # write variants found only in df1
-        else:
-            output.write('%s\t%s\t%s:%s:%s->%s\n' % (df1[i]['vaf'], 0, df1[i]['chr'], i, df1[i]['wt'], df1[i]['var']))
+        if df1[i]['wt'] in germline and df1[i]['var'] in variant:
+            # write overlapping variants
+            if i in df2:
+                output.write('%s\t%s\t%s:%s:%s->%s\n' % (df1[i]['vaf'], df2[i]['vaf'], df1[i]['chr'], i, df1[i]['wt'], df1[i]['var']))
+            # write variants found only in df1
+            else:
+                output.write('%s\t%s\t%s:%s:%s->%s\n' % (df1[i]['vaf'], 0, df1[i]['chr'], i, df1[i]['wt'], df1[i]['var']))
 
     # write variants found only in df2
     for i in df2:
-        if i not in df1:
-            output.write('%s\t%s\t%s:%s:%s->%s\n' % (0, df2[i]['vaf'], df2[i]['chr'], i, df2[i]['wt'], df2[i]['var']))
+        if df2[i]['wt'] in germline and df2[i]['var'] in variant:
+            if i not in df1:
+                output.write('%s\t%s\t%s:%s:%s->%s\n' % (0, df2[i]['vaf'], df2[i]['chr'], i, df2[i]['wt'], df2[i]['var']))
 
 output.close()
 

@@ -7,16 +7,16 @@ library(ggrepel) # this avoids overlapping labels
 
 # Note that this script cannot begin with a comment for some reason
 
-#setwd('/media/alex/Extra/Dropbox/Code/FERMI/varAlleleFrequency')
-setwd('/home/alex/Dropbox/Code/FERMI/varAlleleFrequency')
+setwd('/media/alex/Extra/Dropbox/Code/FERMI/varAlleleFrequency')
+#setwd('/home/alex/Dropbox/Code/FERMI/varAlleleFrequency')
 
 # This script plots the VAFs of each mutation found between two samples along with a regression
 # line and 95% confidence interval in order to understand how repeatable the AFs are for the 
 # same variants between samples
 
 # read in the data
+vafs <- read.table("vafRepeatability.txt", header = TRUE)
 #vafs <- read.table("outputFile", header = TRUE)
-vafs <- read.table("outputFile", header = TRUE)
 sample1 <- vafs$Sample1
 sample2 <- vafs$Sample2
 identity <- vafs$Identity
