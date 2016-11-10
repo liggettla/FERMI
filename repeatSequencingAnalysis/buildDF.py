@@ -63,6 +63,7 @@ def buildAverageStructure(inputDir, samples):
 # computes the average AFNum for each unique variant
 # and returns averaged data structure
 def takeAverage(tempData):
+    from numpy import mean
     avgData = {}
     for loc in tempData:
         x = mean(tempData[loc]['vaf'])
