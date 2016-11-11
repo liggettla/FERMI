@@ -21,16 +21,17 @@ def buildDF(inputDir, sampleList):
 # Single Sample Data Structure #
 ################################
 def buildSingleDF(sample):
-    from parseLine import parseLine
+    from parseLine import seqRead
     target = open(sample, 'r')
     dataframe = {}
 
     for line in target:
         if '#' not in line and 'chr' in line: # skip vcf info
-            chrom, loc, AONum, DPNum, var, WT, AFNum = parseLine(line)
-            variant = '%s-%s-%s' % (chrom, str(loc), str(var))
+            lineObj = seqRead(line)
+            # Ex: variant = chr1-1234-G-A
+            variant = '%s-%s-%s-%s' % (lineObj.chrom(), lineObj.loc(), lineObj.wt(), lineObj.var())
 
-            dataframe[variant] = {'var': var, 'vaf': AFNum, 'chr': chrom, 'wt': WT}
+            dataframe[variant] = {'var': lineObj.var(), 'vaf': lineObj.af(), 'chr': lineObj.chrom(), 'wt': lineObj.wt(), 'loc': lineObj.loc()}
 
     return dataframe
 
@@ -38,20 +39,20 @@ def buildSingleDF(sample):
 # Build Avg Data Structure #
 ############################
 def buildAverageStructure(inputDir, samples):
-    from parseLine import parseLine
+    from parseLine import seqRead
     tempData = {}
     for i in samples:
         target = open(inputDir + '/' + i + '/' +'total_filtered.vcf', 'r')
         for line in target:
             if '#' not in line and 'chr' in line: # skip the info
-                chrom, loc, AONum, DPNum, var, WT, AFNum = parseLine(line)
-                # Ex: variant = chr1:1234:A
-                variant = '%s-%s-%s' % (chrom, str(loc), str(var))
+                lineObj = seqRead(line)
+                # Ex: variant = chr1-1234-G-A
+                variant = '%s-%s-%s-%s' % (lineObj.chrom(), lineObj.loc(), lineObj.wt(), lineObj.var())
 
                 if variant in tempData:
-                    tempData[variant]['vaf'].append(AFNum)
+                    tempData[variant]['vaf'].append(lineObj.af())
                 else:
-                    tempData[variant] = {'vaf':[AFNum]}
+                    tempData[variant] = {'vaf':[lineObj.af()], 'var': lineObj.var(), 'chr': lineObj.chrom(), 'wt': lineObj.wt(), 'loc': lineObj.loc()}
 
     # average all of the AFNum values
     avgData = takeAverage(tempData)
@@ -67,6 +68,6 @@ def takeAverage(tempData):
     avgData = {}
     for loc in tempData:
         x = mean(tempData[loc]['vaf'])
-        avgData[loc] = x
+        tempData[loc]['vaf'] = x
 
-    return avgData
+    return tempData
