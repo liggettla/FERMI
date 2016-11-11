@@ -23,12 +23,12 @@ def buildDF(inputDir, sampleList):
 def buildSingleDF(sample):
     from parseLine import parseLine
     target = open(sample, 'r')
-    dataFrame = {}
+    dataframe = {}
 
     for line in target:
-        if '#' not in i and 'chr' in i: # skip vcf info
+        if '#' not in line and 'chr' in line: # skip vcf info
             chrom, loc, AONum, DPNum, var, WT, AFNum = parseLine(line)
-            location = '%s-%s-%s' % (chrom, str(loc), str(var))
+            variant = '%s-%s-%s' % (chrom, str(loc), str(var))
 
             dataframe[variant] = {'var': var, 'vaf': AFNum, 'chr': chrom, 'wt': WT}
 
@@ -45,13 +45,13 @@ def buildAverageStructure(inputDir, samples):
         for line in target:
             if '#' not in line and 'chr' in line: # skip the info
                 chrom, loc, AONum, DPNum, var, WT, AFNum = parseLine(line)
-                # Ex: location = chr1:1234:A
-                location = '%s-%s-%s' % (chrom, str(loc), str(var))
+                # Ex: variant = chr1:1234:A
+                variant = '%s-%s-%s' % (chrom, str(loc), str(var))
 
-                if location in tempData:
-                    tempData[location]['vaf'].append(AFNum)
+                if variant in tempData:
+                    tempData[variant]['vaf'].append(AFNum)
                 else:
-                    tempData[location] = {'vaf':[AFNum]}
+                    tempData[variant] = {'vaf':[AFNum]}
 
     # average all of the AFNum values
     avgData = takeAverage(tempData)

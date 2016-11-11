@@ -14,8 +14,8 @@ def runArgParse():
     parser.add_argument('--indir', '-i', type=str, required=True, help='Input directory containing the vcf files to be analyzed: /dir')
     parser.add_argument('--outdir', '-o', type=str, required=True, help='Output directory for plots: /dir')
     parser.add_argument('--averageSamples', '-c', type=str, nargs='*', required=True, help='List of samples to be averaged and compared to the principle samples. Ex: A1-R1')
-    parser.add_argument('--sampleOne', '-a', type=str, required=True, help='The first of the two samples to be compared to average and to its technical replicate.')
-    parser.add_argument('--sampleTwo', '-b', type=str, required=True, help='The second of the two samples to be compared to average and to its technical replicate.')
+    parser.add_argument('--sampleOne', '-a', type=str, nargs='*', required=True, help='The first of the two samples to be compared to average and to its technical replicate.')
+    parser.add_argument('--sampleTwo', '-b', type=str, nargs='*', required=True, help='The second of the two samples to be compared to average and to its technical replicate.')
 
     args = parser.parse_args()
 
