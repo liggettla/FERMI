@@ -28,10 +28,17 @@ def runArgParse():
     return inputDir, outputDir, avgSamples, sampleOne, sampleTwo
 
 if __name__ == '__main__':
-    from buildDF import buildDF
 
+    # parse input arguments
     inputDir, outputDir, avgSamples, sampleOne, sampleTwo = runArgParse()
 
+    # below is the structure of the dataframes being constructed here
+    # 'chr16-82455094-C-A': {'var': 'A', 'loc': '82455094', 'chr': 'chr16', 'wt': 'C', 'vaf': 0.00073987950533770217}
+    from buildDF import buildDF
     dfAvg = buildDF(inputDir, avgSamples)
     df1 = buildDF(inputDir, sampleOne)
     df2 = buildDF(inputDir, sampleTwo)
+
+    # compare the three dataframes
+    from uniqCommon import uniqCommon
+    dfAvgComp, df1Comp, df2Comp = uniqCommon(dfAvg, df1, df2)
