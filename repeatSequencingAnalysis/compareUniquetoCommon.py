@@ -42,4 +42,3 @@ if __name__ == '__main__':
     # compare the three dataframes
     from uniqCommon import uniqCommon
     dfAvgComp, df1Comp, df2Comp = uniqCommon(dfAvg, df1, df2)
-    print dfAvgComp

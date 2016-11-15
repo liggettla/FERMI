@@ -61,20 +61,3 @@ def compareDF(i, df):
         return True
     else:
         return False
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
