@@ -42,3 +42,22 @@ if __name__ == '__main__':
     # compare the three dataframes
     from uniqCommon import uniqCommon
     dfAvgComp, df1Comp, df2Comp = uniqCommon(dfAvg, df1, df2)
+
+    # output the number of variants in each category
+    '''
+    print 'AvgU ' + str(len(df1Comp['AvgU']))
+    print 'AvgC ' + str(len(df1Comp['AvgC']))
+    print 'RSeqU ' + str(len(df1Comp['RSeqU']))
+    print 'RSeqC ' + str(len(df1Comp['RSeqC']))
+    print 'AvgURSeqU ' + str(len(df1Comp['AvgURSeqU']))
+    print 'AvgURSeqC ' + str(len(df1Comp['AvgURSeqC']))
+    '''
+    # simple way to output avg vaf
+    avg = []
+    for i in df1Comp['AvgC']:
+        num = df1Comp['AvgC'][i]['vaf']
+        avg.append(num)
+    from numpy import average
+    print average(avg)
+
+
