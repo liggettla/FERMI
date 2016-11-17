@@ -53,11 +53,13 @@ if __name__ == '__main__':
     print 'AvgURSeqC ' + str(len(df1Comp['AvgURSeqC']))
     '''
     # simple way to output avg vaf
-    avg = []
-    for i in df1Comp['AvgC']:
-        num = df1Comp['AvgC'][i]['vaf']
-        avg.append(num)
-    from numpy import average
-    print average(avg)
+    itemList = ['AvgU', 'AvgC', 'RSeqU', 'RSeqC', 'AvgURSeqU', 'AvgURSeqC']
+    for item in itemList:
+        avg = []
+        for i in df1Comp[item]:
+            num = df1Comp[item][i]['vaf']
+            avg.append(num)
+        from numpy import average
+        print item, average(avg)
 
 
