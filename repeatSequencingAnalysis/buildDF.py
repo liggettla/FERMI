@@ -31,7 +31,11 @@ def buildSingleDF(sample):
             # Ex: variant = chr1-1234-G-A
             variant = '%s-%s-%s-%s' % (lineObj.chrom(), lineObj.loc(), lineObj.wt(), lineObj.var())
 
-            dataframe[variant] = {'var': lineObj.var(), 'vaf': lineObj.af(), 'chr': lineObj.chrom(), 'wt': lineObj.wt(), 'loc': lineObj.loc()}
+            # ignore snps in the analysis
+            if lineObj.af() < 0.4:
+                dataframe[variant] = {'var': lineObj.var(), 'vaf': lineObj.af(), 'chr': lineObj.chrom(), 'wt': lineObj.wt(), 'loc': lineObj.loc()}
+            else:
+                pass
 
     return dataframe
 

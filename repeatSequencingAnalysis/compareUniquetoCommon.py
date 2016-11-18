@@ -59,7 +59,10 @@ if __name__ == '__main__':
         for i in df1Comp[item]:
             num = df1Comp[item][i]['vaf']
             avg.append(num)
+
+        # number of variants in each category
+        numVars = str(len(df1Comp[item]))
         from numpy import average
-        print item, average(avg)
+        print item, numVars, average(avg)
 
 
