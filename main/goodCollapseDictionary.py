@@ -133,7 +133,7 @@ def buildNestedDict(input_file, distance_stringency, pickleOut):
     return sortedSeqs
 
 #Collapses reads that come as a nested list dictionary
-def collapseReadsListDict(sequences, varThresh, final_output_file, supportingReads, readLength, errorRate):
+def collapseReadsListDict(sequences, varThresh, final_output_file, supportingReads, readLength, errorRate, badBaseSubstitute):
     errorRateList = []
     plus = '+'
     target = open(final_output_file, 'w')
@@ -180,8 +180,13 @@ def collapseReadsListDict(sequences, varThresh, final_output_file, supportingRea
                 elif float(C)/numReads >= varThresh:
                     finalRead += 'C'
                 else:
-                    #if too many errors ignore reads
-                    isReadGood = False
+                    # if there are too many errors either substitute or invalidate
+                    if badBaseSubstitute: # ignore base but keep read
+                        isReadGood = True
+                        finalRead += 'N'
+                    else: # ignore entire read
+                        isReadGood = False
+
                     calcError = False
 
                 if errorRate == 'Y' and calcError:

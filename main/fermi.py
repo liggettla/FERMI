@@ -48,6 +48,7 @@ parser.add_argument('--dpfilter', '-d', type=int, help='Read depth elimination t
 parser.add_argument('--freebayes', '-b', type=str, help='Location of freebayes in the format of /dir/freebayes')
 parser.add_argument('--errorrate', '-e', action='store_true', help='Overall pcr amplification + sequencing error rates will be estimated and returned')
 parser.add_argument('--readLength', '-q', type=int, help='Manually set the read length. If this is not set, length will be automatically set as the number of bases found between the two UMI sequences.')
+parser.add_argument('--badBaseSubstitute', '-x', action='store_true', help='This flag will trigger replacement of bad bases with N instead of invalidating an entire capture.')
 
 args = parser.parse_args()
 
@@ -214,6 +215,12 @@ if args.errorrate:
 else:
     errorRate = 'n'
 
+# trigger replacement of bad bases rather than elimination of entire capture
+if args.badBaseSubstitute:
+    badBaseSubstitute = True
+else:
+    badBaseSubstitute = False
+
 ########################
 #Write Dated Output Dir#
 ########################
@@ -291,6 +298,7 @@ def writePickle(one, two, specificOut):
     vardb['freebayes'] = freebayes
     vardb['errorRate'] = errorRate
     vardb['readLength'] = readLength
+    vardb['badBaseSubstitute'] = badBaseSubstitute
 
     pickleVars = './variables.pkl'
 

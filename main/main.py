@@ -42,6 +42,7 @@ AONum = vardb['aonum']
 freebayes = vardb['freebayes']
 errorRate = vardb['errorRate']
 readLength = vardb['readLength']
+badBaseSubstitute = vardb['badBaseSubstitute']
 
 read1 = inputDir + '/' + read1
 read2 = inputDir + '/' + read2
@@ -78,7 +79,7 @@ with open(twoUmiOut, 'r') as target:
 
 #collapse reads on binned UMI data structure
 #collapseNestedDict(seqDict, varThresh, final_output_file, supportingReads, readLength)
-averageErrorRate, averageCoverage = collapseReadsListDict(seqDict, varThresh, final_output_file, supportingReads, readLength, errorRate)
+averageErrorRate, averageCoverage = collapseReadsListDict(seqDict, varThresh, final_output_file, supportingReads, readLength, errorRate, badBaseSubstitute)
 
 #####################
 #Output Seq Coverage#
