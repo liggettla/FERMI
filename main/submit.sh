@@ -19,7 +19,7 @@
 ###############
 # Cluster Run #
 ###############
-~/FERMI/main/fermi.py -i /vol3/home/liggettl/sequencingData/8.3.2016/unzipped -o /vol3/home/liggettl/sequencingData/8.3.2016/analysis -u 1 -v 0.95 -r 5 -c -f 5 -e -n 'The purpose of this run is to compare variant dropout rates with previous data but instead of using the artificial hg19, this is using the original hg19.'
+~/FERMI/main/fermi.py -i /vol3/home/liggettl/sequencingData/8.3.2016/unzipped -o /vol3/home/liggettl/sequencingData/8.3.2016/analysis -xce -u 1 -v 0.95 -r 5 -f 5 -q 120 -n 'The purpose of this run is to compare variant dropout rates with previous data but instead of using the artificial hg19, this is using the original hg19.'
 
 #./fermi.py -i ./testInput -o ./testOutput -u 1 -v 0.51 -r 3 -c -f 1
 #./fermi.py -i /vol3/home/liggettl/sequencingData/3.21.2016/unzipped/untrimmed/unzipped -o /vol3/home/liggettl/sequencingData/3.21.2016/analysis -u 1 -v 0.51 -r 3 -c
