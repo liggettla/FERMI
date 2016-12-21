@@ -56,11 +56,16 @@ p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity)) +
   #geom_text(aes(label=ifelse(sample2>0.002|sample1>0.002,as.character(identity),'')),hjust=0,vjust=0) + # this labels points above particular frequency
   
     #geom_text_repel(aes(label=ifelse(sample2>0.4|sample1>0.4,as.character(identity),''))) + # this labels points above freq and does not allow overlap
-    geom_text_repel(aes(label=ifelse(sample2>0.003|sample1>0.003,as.character(identity),''))) + # this labels points above freq and does not allow overlap
+    geom_text_repel(aes(label=ifelse(sample2>0.0035|sample1>0.0035,as.character(identity),''))) + # this labels points above freq and does not allow overlap
     #geom_text_repel(aes(label=ifelse(sample2>0.4|sample1>0.002,as.character(identity),''))) + # this labels points above freq and does not allow overlap
   geom_abline(intercept = 0, slope = 1) +
-  xlab('Mutation VAFs C2 304 M30') +
-  ylab('Muation VAFs D2 304 M30') +
+  xlab('Mutation VAFs A1 305 Cord') + ylab('Muation VAFs C1 300 F34') +
+    #xlab('Mutation VAFs A1 305 Cord') + ylab('Muation VAFs B1 305 Cord') +
+    #xlab('Mutation VAFs C1 300 F34') + ylab('Muation VAFs D1 300 F34') +
+    #xlab('Mutation VAFs E1 301 F41') + ylab('Muation VAFs F1 301 F41') +
+    #xlab('Mutation VAFs G1 302 F34') + ylab('Muation VAFs H1 302 F34') +
+    #xlab('Mutation VAFs A2 303 F46') + ylab('Muation VAFs B2 303 F46') +
+    #xlab('Mutation VAFs C2 304 M30') + ylab('Muation VAFs D2 304 M30') +
   labs(title = 'Variant Allele Frequencies of Putative Mutations')
 # print(p)
 jpeg('output2.jpg')
