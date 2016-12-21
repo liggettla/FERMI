@@ -132,9 +132,13 @@ system(command)
 #############
 # Plot Data #
 #############
+'''
 command = 'eog vafRepeatabilityRegression.jpg'
 system(command)
 command = 'eog vafRepeatabilityNoRegression.jpg'
+system(command)
+'''
+command = 'eog %s' % (plotFile2)
 system(command)
 
 

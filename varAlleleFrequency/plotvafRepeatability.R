@@ -29,21 +29,23 @@ x = data.frame(vafs, predict(lm_fit, interval = 'prediction'))
 # coef(lm(sample1 ~ sample2, data = vafs))
 # geom_smooth(method = "lm", se = TRUE) +
 
-p <- ggplot(x, aes(x=sample1, y=sample2, alpha=0.5, label=identity)) +
-  #geom_text(aes(label=identity),hjust='inward', vjust='inward', angle=0) + # this labels all points
-  #geom_text(aes(label=ifelse(sample2>0.002|sample1>0.002,as.character(identity),'')),hjust=0,vjust=0) + # this labels points above particular frequency
-  #geom_text_repel(aes(label=ifelse(sample2>0.002|sample1>0.002,as.character(identity),''))) + # this labels points above freq and does not allow overlap
-  xlab('Mutation VAFs C1 F34') +
-  ylab('Muation VAFs E1 F41') +
-  labs(title = 'Variant Allele Frequencies of Putative Mutations (W/ Regression)') +
-  geom_point() +
-  geom_smooth(method = 'lm', aes(fill = 'confidence'), alpha = 0.15) +
-  scale_fill_manual('Interval', values = c('green', 'blue'))
+# plot with regression line
+#p <- ggplot(x, aes(x=sample1, y=sample2, alpha=0.5, label=identity)) +
+    #geom_text(aes(label=identity),hjust='inward', vjust='inward', angle=0) + # this labels all points
+    #geom_text(aes(label=ifelse(sample2>0.002|sample1>0.002,as.character(identity),'')),hjust=0,vjust=0) + # this labels points above particular frequency
+    #geom_text_repel(aes(label=ifelse(sample2>0.002|sample1>0.002,as.character(identity),''))) + # this labels points above freq and does not allow overlap
+#  xlab('Mutation VAFs C1 F34') +
+#  ylab('Muation VAFs E1 F41') +
+#  labs(title = 'Variant Allele Frequencies of Putative Mutations (W/ Regression)') +
+#  geom_point() +
+#  geom_smooth(method = 'lm', aes(fill = 'confidence'), alpha = 0.15) +
+#  scale_fill_manual('Interval', values = c('green', 'blue'))
 # print(p)
-jpeg('output1.jpg')
-print(p)
-dev.off()
+#jpeg('output1.jpg')
+#print(p)
+#dev.off()
 
+# plot with y=x line
 p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity)) +
   geom_point() +
   xlim(0,1) +
@@ -52,8 +54,8 @@ p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity)) +
   #geom_text(aes(label=ifelse(sample2>0.002|sample1>0.002,as.character(identity),'')),hjust=0,vjust=0) + # this labels points above particular frequency
   geom_text_repel(aes(label=ifelse(sample2>0.4|sample1>0.4,as.character(identity),''))) + # this labels points above freq and does not allow overlap
   geom_abline(intercept = 0, slope = 1) +
-  xlab('Mutation VAFs C1 F34') +
-  ylab('Muation VAFs E1 F41') +
+  xlab('Mutation VAFs A1 305 Cord') +
+  ylab('Muation VAFs B1 305 Cord') +
   labs(title = 'Variant Allele Frequencies of Putative Mutations')
 # print(p)
 jpeg('output2.jpg')
