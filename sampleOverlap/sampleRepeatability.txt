@@ -1,9 +1,9 @@
-Counting the number of variants from sample /home/alex/Dropbox/Degregori_Lab/Experiments/10.11.2016_SequencingAnalysis/2016-09-20_3_0.6/D2-R1.fastq/total_filtered.vcf that are found in sample /home/alex/Dropbox/Degregori_Lab/Experiments/10.11.2016_SequencingAnalysis/2016-09-20_3_0.6/A2-R1.fastq/total_filtered.vcf 
+Counting the number of variants from sample /media/alex/Extra/Dropbox/Degregori_Lab/Experiments/12.21.2016_0.75_120bp_Analysis/2016-12-16_5_0.75/E1-R1.fastq/total_filtered.vcf that are found in sample /media/alex/Extra/Dropbox/Degregori_Lab/Experiments/12.21.2016_0.75_120bp_Analysis/2016-12-16_5_0.75/C1-R1.fastq/total_filtered.vcf 
 Low Freq Var Present: 
-2768
+2290
 High Freq Var Present: 
 2
 Percent Low Freq Var Present: 
-0.802086351782
+0.863499245852
 Percent High Freq Var Present: 
 0.666666666667
