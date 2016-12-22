@@ -10,18 +10,18 @@ from datetime import date
 import os
 from os import mkdir
 from os import path
-from concatenateUMI import concatenateUMI
-from goodCollapseDictionary import buildNestedDict
-from goodCollapseDictionary import collapseNestedDict
+#from concatenateUMI import concatenateUMI
+#from goodCollapseDictionary import buildNestedDict
+#from goodCollapseDictionary import collapseNestedDict
 import pickle
-from outputCoverage import outputCov
-import pdb
+#from outputCoverage import outputCov
+#import pdb
 from os import system
 import os.path
 import time
 
-from goodCollapseDictionary import buildListDict
-from goodCollapseDictionary import collapseReadsListDict
+#from goodCollapseDictionary import buildListDict
+#from goodCollapseDictionary import collapseReadsListDict
 
 #####################
 #Argparse Flag Input#
@@ -256,6 +256,7 @@ def recordParams(parametersUsed, inputDir, read1, read2, varThresh, supportingRe
     target.write("Supporting Reads: %d\n" %(supportingReads))
     target.write('DP Filter: %i\n' %(DPNum))
     target.write('AO Filter: %i\n' %(AONum))
+    target.write('Read Length: %sbp\n' %(str(readLength)))
     target.close()
 
 ############################
