@@ -209,6 +209,10 @@ def collapseReadsListDict(sequences, varThresh, final_output_file, supportingRea
     else:
         return 0, averageCoverage
 
+# This is similar to the conventional usage of UMIs and simply selects
+# one of the reads for use and discards the others rather than collapsing
+def selectFirstRead(sequences, varThresh, final_output_file, supportingReads, readLength, errorRate, badBaseSubstitute):
+
 #Collapses reads that are sorted by buildNestedDict()
 def collapseNestedDict(sequences, varThresh, final_output_file, supportingReads, readLength):
 
