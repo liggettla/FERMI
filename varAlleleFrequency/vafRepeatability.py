@@ -41,6 +41,8 @@ else:
 from itertools import combinations
 sample1 = inputDir + '/' + samples[0] + '/' + 'total_filtered.vcf'
 sample2 = inputDir + '/' + samples[1] + '/' + 'total_filtered.vcf'
+#sample1 = inputDir + '/' + samples[0] + '/' + 'onlyProbedRegions.vcf'
+#sample2 = inputDir + '/' + samples[1] + '/' + 'onlyProbedRegions.vcf'
 
 file1 = open(sample1, 'r')
 df1 = {}
