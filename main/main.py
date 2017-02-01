@@ -43,6 +43,7 @@ freebayes = vardb['freebayes']
 errorRate = vardb['errorRate']
 readLength = vardb['readLength']
 badBaseSubstitute = vardb['badBaseSubstitute']
+REF = vardb['REF']
 
 read1 = inputDir + '/' + read1
 read2 = inputDir + '/' + read2
@@ -91,8 +92,8 @@ outputCov(twoUmiOut, final_output_file, distance_stringency, coverage_file, aver
 ####################
 if alignAndVar == 'Y':
     from align import align
-    REF = '/vol3/home/liggettl/refgenomes/hg19.fa'
-    #REF = '/media/alex/Extra/Dropbox/Code/ReferenceGenomes/hg19.fa'
+    #REF = '/vol3/home/liggettl/refgenomes/hg19.fa'
+    REF = '/media/alex/Extra/Dropbox/Code/ReferenceGenomes/hg19.fa'
     bamOut = align(final_output_file, REF) # align and index
 
 ###############

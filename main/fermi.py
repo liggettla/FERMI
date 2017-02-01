@@ -49,6 +49,7 @@ parser.add_argument('--freebayes', '-b', type=str, help='Location of freebayes i
 parser.add_argument('--errorrate', '-e', action='store_true', help='Overall pcr amplification + sequencing error rates will be estimated and returned')
 parser.add_argument('--readLength', '-q', type=int, help='Manually set the read length. If this is not set, length will be automatically set as the number of bases found between the two UMI sequences.')
 parser.add_argument('--badBaseSubstitute', '-x', action='store_true', help='This flag will trigger replacement of bad bases with N instead of invalidating an entire capture.')
+parser.add_argument('--reference', '-y', type=str, help='Set the location of the human reference genome hg19.fa and supporting files.')
 
 args = parser.parse_args()
 
@@ -82,6 +83,9 @@ else:
 outputDir = args.outdir
 #outputDir = raw_input('Output Location (/dir): ')
 #outputDir = './testOutput'
+
+# reference genome location
+REF = args.reference
 
 ###################
 #Get Input File(s)#
@@ -300,6 +304,7 @@ def writePickle(one, two, specificOut):
     vardb['errorRate'] = errorRate
     vardb['readLength'] = readLength
     vardb['badBaseSubstitute'] = badBaseSubstitute
+    vardb['REF'] = REF
 
     pickleVars = './variables.pkl'
 
