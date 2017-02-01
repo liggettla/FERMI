@@ -18,7 +18,7 @@
 # ./fermi.py -i /media/alex/Extra/Dropbox/Code/FERMI/testInput -o /media/alex/Extra/Dropbox/Code/FERMI/testOutput -q 50 -e -u 1 -v 0.8 -r 5 -f 5 -a -n 'This is some information.'
 
 # this will run a complete run
-./fermi.py -i /media/alex/Extra/Dropbox/Code/FERMI/testInput -o /media/alex/Extra/Dropbox/Code/FERMI/testOutput -q 120 -ex -u 1 -v 0.55 -r 5 -f 5 -b 'freebayes' -y '/media/alex/Extra/Dropbox/Code/ReferenceGenomes/hg19.fa' -n 'This is some information.'
+./fermi.py -i /media/alex/Extra/Dropbox/Code/FERMI/testInput -o /media/alex/Extra/Dropbox/Code/FERMI/testOutput -q 120 -exa -u 1 -v 0.55 -r 5 -f 5 -b 'freebayes' -y '/media/alex/Extra/Dropbox/Code/ReferenceGenomes/hg19.fa' -n 'This is some information.'
 
 ###############
 # Cluster Run #

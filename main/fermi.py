@@ -245,7 +245,7 @@ if not path.exists(outputDir):
 #############################
 #Record Files and Parameters#
 #############################
-def recordParams(parametersUsed, inputDir, read1, read2, varThresh, supportingReads, infoFile):
+def recordParams(parametersUsed, inputDir, read1, read2, varThresh, supportingReads, infoFile, REF, badBaseSubstitute):
     if infoOutput != 'n':
         info = open(infoFile, 'w')
         info.write(infoOutput)
@@ -253,6 +253,7 @@ def recordParams(parametersUsed, inputDir, read1, read2, varThresh, supportingRe
 
     target = open(parametersUsed, 'w')
     target.write('Input File Location: %s\n' %(inputDir))
+    target.write('HG Ref File Location: %s\n' %(REF))
     target.write("Read 1: %s\n" %(read1))
     target.write("Read 2: %s\n" %(read2))
     target.write("Distance Stringency: %d\n" %(distance_stringency))
@@ -261,6 +262,11 @@ def recordParams(parametersUsed, inputDir, read1, read2, varThresh, supportingRe
     target.write('DP Filter: %i\n' %(DPNum))
     target.write('AO Filter: %i\n' %(AONum))
     target.write('Read Length: %sbp\n' %(str(readLength)))
+    if badBaseSubstitute:
+        target.write('Bad Base Substitution Used\n')
+    else:
+        target.write('Bad Base Substitution Not Used\n')
+
     target.close()
 
 ############################
@@ -279,7 +285,7 @@ def writePickle(one, two, specificOut):
     pickleOutput = specificOut + '/sortedSeqData.pkl'
 
     # this also records the parameters used in the run
-    recordParams(parametersUsed, inputDir, read1, read2, varThresh, supportingReads, infoFile)
+    recordParams(parametersUsed, inputDir, read1, read2, varThresh, supportingReads, infoFile, REF, badBaseSubstitute)
 
     vardb['outputDir'] = specificOut
     vardb['varThresh'] = varThresh
