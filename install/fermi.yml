@@ -1,0 +1,47 @@
+name: fermi
+channels:
+- !!python/unicode
+  'faircloth-lab'
+- !!python/unicode
+  'bioconda'
+- !!python/unicode
+  'anaconda'
+- !!python/unicode
+  'defaults'
+dependencies:
+- !!python/unicode
+  'biopython=1.68=np111py27_0'
+- !!python/unicode
+  'mkl=2017.0.1=0'
+- !!python/unicode
+  'numpy=1.11.3=py27_0'
+- !!python/unicode
+  'bwa=0.7.15=0'
+- !!python/unicode
+  'freebayes=1.1.0=py27_0'
+- !!python/unicode
+  'vt=2015.11.10=1'
+- !!python/unicode
+  'libgcc=5.2.0=0'
+- !!python/unicode
+  'openssl=1.0.2k=0'
+- !!python/unicode
+  'pip=9.0.1=py27_1'
+- !!python/unicode
+  'python=2.7.13=0'
+- !!python/unicode
+  'readline=6.2=2'
+- !!python/unicode
+  'setuptools=27.2.0=py27_0'
+- !!python/unicode
+  'sqlite=3.13.0=0'
+- !!python/unicode
+  'tk=8.5.18=0'
+- !!python/unicode
+  'wheel=0.29.0=py27_0'
+- !!python/unicode
+  'zlib=1.2.8=3'
+- !!python/unicode
+  'python-levenshtein=0.10.2=py27_1'
+prefix: !!python/unicode '/home/alex/anaconda2/envs/fermi'
+
