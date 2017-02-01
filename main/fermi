@@ -1,9 +1,4 @@
-#BSUB -J FERMI[1]
-#BSUB -e ~/logs/FERMI%I.%J.err
-#BSUB -o ~/logs/FERMI%I.%J.out
-#BSUB -R "span[hosts=1]"
-#BSUB -n 1
-#BSUB -R "rusage[mem=40]"
+#!/usr/bin/env bash
 
 #########
 # fermi #
@@ -17,8 +12,12 @@
 # this will avoid aligning
 # ./fermi.py -i /media/alex/Extra/Dropbox/Code/FERMI/testInput -o /media/alex/Extra/Dropbox/Code/FERMI/testOutput -q 50 -e -u 1 -v 0.8 -r 5 -f 5 -a -n 'This is some information.'
 
-# this will run a complete run
-./fermi.py -i /media/alex/Extra/Dropbox/Code/FERMI/testInput -o /media/alex/Extra/Dropbox/Code/FERMI/testOutput -q 120 -ex -u 1 -v 0.55 -r 5 -f 5 -b 'freebayes' -y '/media/alex/Extra/Dropbox/Code/ReferenceGenomes/hg19.fa' -n 'This is some information.'
+# laptop 
+getInput -i /media/alex/Extra/Dropbox/Code/FERMI/testInput -o /media/alex/Extra/Dropbox/Code/FERMI/testOutput -q 120 -ex -u 1 -v 0.55 -r 5 -f 5 -b 'freebayes' -y '/media/alex/Extra/Dropbox/Code/ReferenceGenomes/hg19.fa' -n 'This is some information.'
+
+# desktop
+#fermi -i /home/alex/Dropbox/Code/FERMI/testInput -o /home/alex/Dropbox/Code/FERMI/testOutput -q 120 -ex -u 1 -v 0.55 -r 5 -f 5 -b 'freebayes' -y '/home/alex/Dropbox/Code/ReferenceGenomes/hg19.fa' -n 'This is some information.'
+
 
 ###############
 # Cluster Run #
