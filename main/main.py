@@ -92,6 +92,7 @@ outputCov(twoUmiOut, final_output_file, distance_stringency, coverage_file, aver
 if alignAndVar == 'Y':
     from align import align
     REF = '/vol3/home/liggettl/refgenomes/hg19.fa'
+    #REF = '/media/alex/Extra/Dropbox/Code/ReferenceGenomes/hg19.fa'
     bamOut = align(final_output_file, REF) # align and index
 
 ###############
@@ -118,13 +119,6 @@ if alignAndVar == 'Y':
     from varDPFilter import vcfFilter
     vcfFilter(inputDir, outputDir, blockDecomposedOut, AONum, DPNum)
 
-################
-#Output Runtime#
-################
-target = open(outputDir + '/runTime.txt', 'w')
-target.write("Total Runtime:\n%s seconds" % (time() - start_time))
-print("Total Runtime:\n%s seconds" % (time() - start_time))
-
 ##########################
 #Remove Large Fastq Files#
 ##########################
@@ -132,3 +126,22 @@ print("Total Runtime:\n%s seconds" % (time() - start_time))
 # unless otherwise needed to prevent the use of unnecessary space
 if noBigFiles == 'Y':
     system('rm %s' % (twoUmiOut))
+
+##############################
+# Remove Non-Probed Variants #
+##############################
+# the purpose of this is to create a final vcf file that only contains
+# those variants that fall within probed regions of the genome
+if alignAndVar == 'Y':
+    from eliminateNonspecificReads import elimBadAligns
+    unFiltered = outputDir + '/total_filtered.vcf'
+    filtered = outputDir + '/onlyProbedRegions.vcf'
+    elimBadAligns(unFiltered, filtered)
+
+################
+#Output Runtime#
+################
+# keep this as the final task that is run
+target = open(outputDir + '/runTime.txt', 'w')
+target.write("Total Runtime:\n%s seconds" % (time() - start_time))
+print("Total Runtime:\n%s seconds" % (time() - start_time))
