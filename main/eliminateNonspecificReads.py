@@ -35,6 +35,8 @@ def elimBadAligns(inFile, outFile):
                         goodLoc = True
                 if goodLoc == True:
                     outTarget.write(line)
+        elif '#' in line:
+            outTarget.write(line)
 
     inTarget.close()
     outTarget.close()
