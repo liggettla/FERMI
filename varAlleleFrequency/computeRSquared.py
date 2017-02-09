@@ -67,6 +67,5 @@ if __name__ == '__main__':
         y = parsedFile[i]['y']
         sqrMeanDist = meanDistance(yMean, y)
         parsedFile[i]['sqrMeanDist'] = sqrMeanDist
-
-    r2 = computeRSquared(parsedFile)
+r2 = computeRSquared(parsedFile)
     print r2
