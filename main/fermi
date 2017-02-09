@@ -10,19 +10,19 @@
 # Run Locally #
 ###############
 # this will avoid aligning
-# ./fermi.py -i /media/alex/Extra/Dropbox/Code/FERMI/testInput -o /media/alex/Extra/Dropbox/Code/FERMI/testOutput -q 50 -e -u 1 -v 0.8 -r 5 -f 5 -a -n 'This is some information.'
+# ./getInput -i /media/alex/Extra/Dropbox/Code/FERMI/testInput -o /media/alex/Extra/Dropbox/Code/FERMI/testOutput -q 50 -e -u 1 -v 0.8 -r 5 -f 5 -a -n 'This is some information.'
 
 # laptop 
-fermi -i /media/alex/Extra/Dropbox/Code/FERMI/testInput -o /media/alex/Extra/Dropbox/Code/FERMI/testOutput -q 120 -ex -u 1 -v 0.55 -r 5 -f 5 -b 'freebayes' -y '/media/alex/Extra/Dropbox/Code/ReferenceGenomes/hg19.fa' -n 'This is some information.'
+getInput -i /media/alex/Extra/Dropbox/Code/FERMI/testInput -o /media/alex/Extra/Dropbox/Code/FERMI/testOutput -q 120 -ex -u 1 -v 0.55 -r 5 -f 5 -b 'freebayes' -y '/media/alex/Extra/Dropbox/Code/ReferenceGenomes/hg19.fa' -n 'This is some information.'
 
 # desktop
-#fermi -i /home/alex/Dropbox/Code/FERMI/testInput -o /home/alex/Dropbox/Code/FERMI/testOutput -q 120 -ex -u 1 -v 0.55 -r 5 -f 5 -b 'freebayes' -y '/home/alex/Dropbox/Code/ReferenceGenomes/hg19.fa' -n 'This is some information.'
+#getInput -i /home/alex/Dropbox/Code/FERMI/testInput -o /home/alex/Dropbox/Code/FERMI/testOutput -q 120 -ex -u 1 -v 0.55 -r 5 -f 5 -b 'freebayes' -y '/home/alex/Dropbox/Code/ReferenceGenomes/hg19.fa' -n 'This is some information.'
 
 
 ###############
 # Cluster Run #
 ###############
-#~/FERMI/main/fermi.py -i /vol3/home/liggettl/sequencingData/8.3.2016/unzipped -o /vol3/home/liggettl/sequencingData/8.3.2016/analysis -xce -u 1 -v 0.95 -r 5 -f 5 -q 120 -y '/vol3/home/liggettl/refgenomes/hg19.fa' -n 'The purpose of this run is to compare variant dropout rates with previous data but instead of using the artificial hg19, this is using the original hg19.'
+#getInput -i /vol3/home/liggettl/sequencingData/8.3.2016/unzipped -o /vol3/home/liggettl/sequencingData/8.3.2016/analysis -xce -u 1 -v 0.95 -r 5 -f 5 -q 120 -y '/vol3/home/liggettl/refgenomes/hg19.fa' -n 'The purpose of this run is to compare variant dropout rates with previous data but instead of using the artificial hg19, this is using the original hg19.'
 
 #################
 # 8.3.2016 data #
