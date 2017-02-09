@@ -40,8 +40,8 @@ def computeRSquared(parsedFile):
     meanSum = 0
 
     for i in parsedFile:
-        errorSum = parsedFile[i]['sqrError']
-        meanSum = parsedFile[i]['sqrMeanDist']
+        errorSum = errorSum + parsedFile[i]['sqrError']
+        meanSum = meanSum + parsedFile[i]['sqrMeanDist']
 
     r2 = 1 - errorSum / meanSum
     return r2
@@ -49,7 +49,8 @@ def computeRSquared(parsedFile):
 def getRSquared(target='vafRepeatability.txt'):
     from math import pow
 
-    target = 'vafRepeatability.txt'
+    #target='/media/alex/Extra/Dropbox/Degregori_Lab/Experiments/12.21.2016_0.75_120bp_Analysis/vafRepeatabilityCommon.txt'
+    #target='/media/alex/Extra/Dropbox/Degregori_Lab/Experiments/12.21.2016_0.75_120bp_Analysis/vafRepeatability.txt'
     inputFile = open(target, 'r')
     parsedFile = {}
 
