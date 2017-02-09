@@ -46,7 +46,7 @@ def computeRSquared(parsedFile):
     r2 = 1 - errorSum / meanSum
     return r2
 
-if __name__ == '__main__':
+def getRSquared(target='vafRepeatability.txt'):
     from math import pow
 
     target = 'vafRepeatability.txt'
@@ -67,5 +67,8 @@ if __name__ == '__main__':
         y = parsedFile[i]['y']
         sqrMeanDist = meanDistance(yMean, y)
         parsedFile[i]['sqrMeanDist'] = sqrMeanDist
-r2 = computeRSquared(parsedFile)
+    r2 = computeRSquared(parsedFile)
     print r2
+
+if __name__ == '__main__':
+    getRSquared()
