@@ -17,9 +17,16 @@ def getFileList():
     for file in os.listdir(indir):
         if file.endswith('.fastq'):
             inFile = indir + '/' + file
+
+            outputFile = indir + '/' + 'tripleSNPCounts.txt'
+            target = open(outputFile, 'a')
+
             countVars(inFile, file)
 
 def countVars(inFile, file):
+    outputFile = indir + '/' + 'tripleSNPCounts.txt'
+    target = open(outputFile, 'a')
+    target.write(file)
     print '\n'
     print file
     target = open(inFile, 'r')
@@ -42,7 +49,10 @@ def countVars(inFile, file):
                 counts[seq] += 1
 
     for i in counts:
+        target = open(outputFile, 'a')
         print str(i) + ':' + str(counts[i])
+        target.write(str(i) + ':' + str(counts[i]) + '\n')
+        target.close()
 
 if __name__ == "__main__":
     getFileList()
