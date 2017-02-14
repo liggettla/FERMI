@@ -4,7 +4,7 @@
 # is making.
 
 def argParse():
-    print('\nParsing Arguments\n')
+    print('\nParsing Arguments')
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--indir', '-i', type=str, help='Location of input file.')
@@ -22,7 +22,7 @@ def argParse():
     return inDir, filename, readLength, REF, freebayes
 
 def trimUMI(inDir, inFile, readLength):
-    print 'Trimming UMIs\n'
+    print 'Trimming UMIs'
     target = open(inFile, 'r')
     outputFile = inDir + '/noUMI'
     outTarget = open(outputFile, 'w')
@@ -49,16 +49,16 @@ def trimUMI(inDir, inFile, readLength):
     return outputFile
 
 def alignAndVarCall(final_output_file, REF, freebayes):
-    print 'Aligning Reads\n'
+    print 'Aligning Reads'
     from align import align
     bamOut = align(final_output_file, REF) # align and index
 
-    print '\nCalling Variants\n'
+    print 'Calling Variants'
     from callVar import callVar
     vcfOut = bamOut.strip('bam') + '.vcf'
     callVar(freebayes, REF, bamOut, vcfOut)
 
-    print '\nDecomposing\n'
+    print 'Decomposing'
     from decomposeVCF import decompose
     blockDecomposedOut = decompose(vcfOut)
     
@@ -67,7 +67,7 @@ def alignAndVarCall(final_output_file, REF, freebayes):
 def filterProbedRegions(blockDecomposedOut):
     print 'Filtering Out Non-Probed Regions\n'
     from eliminateNonspecificReads import elimBadAligns
-    unFiltered = vcfOut
+    unFiltered = blockDecomposedOut 
     filtered = vcfOut.strip('.vcf') + 'OnlyProbedRegions.vcf'
     elimBadAligns(unFiltered, filtered)
 
