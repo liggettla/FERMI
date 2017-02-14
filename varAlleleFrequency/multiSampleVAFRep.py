@@ -22,7 +22,8 @@ args = parser.parse_args()
 
 inputDir = args.indir
 outputDir = args.outdir
-principle = inputDir + '/' + args.principle + '/' +'total_filtered.vcf'
+#principle = inputDir + '/' + args.principle + '/' +'total_filtered.vcf'
+principle = inputDir + '/' + args.principle + '/' +'onlyProbedRegions.vcf'
 samples = args.samples # this is a list
 commonVars = args.commonVars
 cutoff = args.rarevars
@@ -49,7 +50,6 @@ def rareEnough(AFNum):
 # Parse Line #
 ##############
 def parseLine(i):
-    print 'hello'
     chrom = str(i.split('\t')[0])
     loc = str(i.split('\t')[1])
     AO = i.split(';')[5]
@@ -169,8 +169,8 @@ def plotAndDisplay(outputFile, plotFile1, plotFile2):
     system(command)
 
     # display the plots
-    command = 'eog vafRepeatabilityRegression.jpg'
-    system(command)
+    #command = 'eog vafRepeatabilityRegression.jpg'
+    #system(command)
     command = 'eog vafRepeatabilityNoRegression.jpg'
     system(command)
 
