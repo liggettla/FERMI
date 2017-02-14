@@ -4,22 +4,25 @@
 # is making.
 
 def argParse():
+    print('\nParsing Arguments\n')
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--indir', '-i', type=str, help='Location of input file.')
     parser.add_argument('--filename', '-f', type=str, help='The name of the file to be processed.')
-    parser.add_argument('--readlength', '-r', type=int, help='The number of bases from the 5 prime end to analyse.')
+    parser.add_argument('--readlength', '-r', default=120, type=int, help='The number of bases from the 5 prime end to analyse.')
     parser.add_argument('--reference', '-y', default='/home/alex/Dropbox/Code/ReferenceGenomes/hg19.fa', type=str, help='Location of hg19.')
+    parser.add_argument('--freebayes', '-b', default='freebayes', type=str, help='Location of freebayes.')
 
     args = parser.parse_args()
     inDir = args.indir
     filename = args.filename
     readLength = args.readlength
     REF = args.reference
-    print REF
-    return inDir, filename, readLength, REF
+    freebayes = args.freebayes
+    return inDir, filename, readLength, REF, freebayes
 
 def trimUMI(inDir, inFile, readLength):
+    print 'Trimming UMIs\n'
     target = open(inFile, 'r')
     outputFile = inDir + '/noUMI'
     outTarget = open(outputFile, 'w')
@@ -45,12 +48,32 @@ def trimUMI(inDir, inFile, readLength):
 
     return outputFile
 
-def alignAndVarCall(final_output_file, REF):
+def alignAndVarCall(final_output_file, REF, freebayes):
+    print 'Aligning Reads\n'
     from align import align
     bamOut = align(final_output_file, REF) # align and index
 
+    print '\nCalling Variants\n'
+    from callVar import callVar
+    vcfOut = bamOut.strip('bam') + '.vcf'
+    callVar(freebayes, REF, bamOut, vcfOut)
+
+    print '\nDecomposing\n'
+    from decomposeVCF import decompose
+    blockDecomposedOut = decompose(vcfOut)
+    
+    return blockDecomposedOut
+
+def filterProbedRegions(blockDecomposedOut):
+    print 'Filtering Out Non-Probed Regions\n'
+    from eliminateNonspecificReads import elimBadAligns
+    unFiltered = vcfOut
+    filtered = vcfOut.strip('.vcf') + 'OnlyProbedRegions.vcf'
+    elimBadAligns(unFiltered, filtered)
+
 if __name__ == '__main__':
-    inDir, filename, readLength, REF = argParse()
+    inDir, filename, readLength, REF, freebayes = argParse()
     inFile = inDir + '/' + filename
     outputFile = trimUMI(inDir, inFile, readLength)
-    alignAndVarCall(outputFile, REF)
+    blockDecomposedOut = alignAndVarCall(outputFile, REF, freebayes)
+    filterProbedRegions(blockDecomposedOut)
