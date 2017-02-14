@@ -59,7 +59,7 @@ p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity)) +
     geom_text_repel(aes(label=ifelse(sample2>0.001|sample1>0.001,as.character(identity),''))) + # this labels points above freq and does not allow overlap
     #geom_text_repel(aes(label=ifelse(sample2>0.4|sample1>0.002,as.character(identity),''))) + # this labels points above freq and does not allow overlap
   geom_abline(intercept = 0, slope = 1) +
-  xlab('Mutation VAFs f1r1 Cord') + ylab('Muation VAFs e1r1 Cord') +
+  xlab('Mutation VAFs f1r1 Cord No Substitution') + ylab('Muation VAFs f1r1 Cord Substitution') +
     #xlab('Mutation VAFs A1 305 Cord') + ylab('Muation VAFs B1 305 Cord') +
     #xlab('Mutation VAFs C1 300 F34') + ylab('Muation VAFs D1 300 F34') +
     #xlab('Mutation VAFs E1 301 F41') + ylab('Muation VAFs F1 301 F41') +

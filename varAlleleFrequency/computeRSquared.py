@@ -51,7 +51,7 @@ def getRSquared(target='vafRepeatability.txt'):
 
     #target='/media/alex/Extra/Dropbox/Degregori_Lab/Experiments/12.21.2016_0.75_120bp_Analysis/vafRepeatabilityCommon.txt'
     #target='/media/alex/Extra/Dropbox/Degregori_Lab/Experiments/12.21.2016_0.75_120bp_Analysis/vafRepeatability.txt'
-    target = '/home/alex/Dropbox/Code/FERMI/varAlleleFrequency/vafRepeatability.txt'
+    #target = '/home/alex/Dropbox/Code/FERMI/varAlleleFrequency/vafRepeatability.txt'
     inputFile = open(target, 'r')
     parsedFile = {}
 
@@ -70,7 +70,8 @@ def getRSquared(target='vafRepeatability.txt'):
         sqrMeanDist = meanDistance(yMean, y)
         parsedFile[i]['sqrMeanDist'] = sqrMeanDist
     r2 = computeRSquared(parsedFile)
-    print r2
+    return r2
 
 if __name__ == '__main__':
-    getRSquared()
+    r2 = getRSquared()
+    print r2

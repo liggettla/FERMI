@@ -163,8 +163,8 @@ def plotAndDisplay(outputFile, plotFile1, plotFile2):
     # move the results
     command = 'mv outputFile %s' % (outputFile)
     system(command)
-    command = 'mv output1.jpg %s' % (plotFile1)
-    system(command)
+    #command = 'mv output1.jpg %s' % (plotFile1)
+    #system(command)
     command = 'mv output2.jpg %s' % (plotFile2)
     system(command)
 
@@ -181,3 +181,8 @@ avgData = buildAverageStructure(samples)
 principleData = buildPrincipleStructure(principle)
 outputData(commonVars, avgData, principleData)
 plotAndDisplay(outputFile, plotFile1, plotFile2)
+
+from computeRSquared import getRSquared
+r2 = getRSquared()
+print('R-Squared = %f' % (r2))
+
