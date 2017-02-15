@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # The purpose of this script is to provide vcf parsing functionality
 
 # This class takes an individual line from a vcf file and outputs important info
