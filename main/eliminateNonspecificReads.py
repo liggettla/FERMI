@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # The purpose of this script is to eliminate all variants that did not fall within
 # the specifically probed regions. It is strange that these can occur with such
 # large frequencies, but ignoring them may be a good choice until a better
