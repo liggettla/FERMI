@@ -1,0 +1,44 @@
+#!/usr/bin/env python
+# The purpose of this script is to ask how many variants are found within
+# a given probed region to see if there is any bias among the probes.
+
+def runArgParse():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--inFile', '-i', type=str, required=True, help='The input vcf to be analyzed.')
+
+    args = parser.parse_args()
+    inFile = args.inFile
+
+    return inFile
+
+def identifyProbe(location):
+    probes = {'1':['1152278','1152279'],'2':['1152564','1152565','1152566'],'3':['1152587','1152588'],'4':['254572','254573'],'5':['2091130','2091131','2091132'],'6':['1982668','1982669'],'7':['2231906','2231907','2231908'],'8':['2290411','2290412'],'9':['1061972','1061973','1061974'],'10':['1061551','1061552'],'11':['1105411','1105412','1105413'],'12':['1129972','1129973'],'14':['1211677','1211678'],'15':['1235477','1235478','1235479'],'16':['1244286','1244287'],'17':['50737','50738'],'18':['21262','21263','21264'],'19':['23899'],'20':['2390'],'21':['2593','2594'],'22':['114865','114866','114867'],'23':['5342','5343'],'24':['253982','253983','253984'],'25':['253802','253803'],'26':['925270','925271'],'27':['906318','906319'],'28':['733796','733797','733798'],'29':['824550','824551'],'30':['859491','859492'],'31':['75775','75776'],'32':['75783','75784','75785'],'33':['75770','75771','75772'],'34':['486496','486497','486498']}
+
+    for i in probes:
+        for j in probes[i]:
+            if j in location:
+                return i
+
+def displayTally(tally):
+    print('Probe Num\tNum Vars\n')
+    for i in tally:
+        print('%s\t%s' % (i, tally))
+
+if __name__ == '__main__':
+    from parseLine.py import seqRead
+    inFile = runArgParse()
+    target = open(inFile, 'r')
+
+    # create dict with every probe num and counts
+    tally = {}
+    for i in range(1,35):
+        tally[str(i)]=0
+
+    for line in target:
+        if '#' not in line and 'chr' in line:
+            lineObj = seqRead(line)
+            probeNum = identifyProbe(lineObj.loc())
+            tally[probeNum] += 1
+    
+    displayTally(tally)
