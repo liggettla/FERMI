@@ -83,7 +83,7 @@ if __name__ == '__main__':
                 totalCoverage[probeNum].append(lineObj.dp())
 
     from matplotlib.backends.backend_pdf import PdfPages
-    pdf = PdfPages('multipage.pdf')
+    pdf = PdfPages('probeBias.pdf')
 
     totalCoverage = getMeanCoverage(totalCoverage)
     pdf = plotTally(totalCoverage, pdf, 'Probe Bias', 'Avg Num of Captures')
@@ -93,7 +93,7 @@ if __name__ == '__main__':
     pdf = plotTally(uniqVars, pdf, 'Normalized Unique Variants Per Probe', 'Number of Variants')
 
     totalVars = normalizeCounts(totalVars, totalCoverage)
-    displayTally(totalVars)
+    #displayTally(totalVars)
     pdf = plotTally(totalVars, pdf, 'Normalized Total Variants Per Probe', 'Number of Variants')
 
     pdf.close()
