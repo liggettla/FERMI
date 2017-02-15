@@ -21,12 +21,26 @@ def identifyProbe(location):
                 return i
 
 def displayTally(tally):
-    print('Probe Num\tNum Vars\n')
+    print('Probe\tNum Vars')
     for i in tally:
-        print('%s\t%s' % (i, tally))
+        print('%s\t%s' % (i, tally[i]))
+
+def plotTally(tally):
+    import matplotlib.pyplot as plt
+
+    plt.bar(range(len(tally)), tally.values(), align='center')
+    plt.title('Variants Per Probe')
+    plt.xlabel('Probes')
+    plt.ylabel('Number of Variants')
+    plt.xticks(range(len(tally)), tally.keys())
+
+    plt.show()
+    #fig = plt.figure()
+    #plt.savefig('output')
+    #plt.close(fig)
 
 if __name__ == '__main__':
-    from parseLine.py import seqRead
+    from parseLine import seqRead
     inFile = runArgParse()
     target = open(inFile, 'r')
 
@@ -42,3 +56,4 @@ if __name__ == '__main__':
             tally[probeNum] += 1
     
     displayTally(tally)
+    plotTally(tally)
