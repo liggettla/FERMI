@@ -83,7 +83,7 @@ def takeAverage(tempData):
 def buildAverageStructure(samples):
     tempData = {}
     for i in samples:
-        target = open(inputDir + '/' + i + '/' +'total_filtered.vcf', 'r')
+        target = open(inputDir + '/' + i + '/' +'onlyProbedRegions.vcf', 'r')
         for line in target:
             if '#' not in line and 'chr' in line: # skip the info
                 # Ex: loc = chr1:1234:A
@@ -178,6 +178,7 @@ def plotAndDisplay(outputFile, plotFile1, plotFile2):
 # Run the Script #
 ##################
 avgData = buildAverageStructure(samples)
+
 principleData = buildPrincipleStructure(principle)
 outputData(commonVars, avgData, principleData)
 plotAndDisplay(outputFile, plotFile1, plotFile2)
