@@ -27,19 +27,22 @@ def displayTally(tally):
     for i in tally:
         print('%s\t%s' % (i, tally[i]))
 
-def plotTally(tally, title='Variants Per Probe', xlabel='Number of Variants'):
+def plotTally(tally, pdf, title='Variants Per Probe', xlabel='Number of Variants'):
     import matplotlib.pyplot as plt
 
     plt.bar(range(len(tally)), tally.values(), align='center')
     plt.title(title)
-    plt.xlabel('Probes')
+    plt.xlabel('Probes', fontsize=1)
     plt.ylabel(xlabel)
-    plt.xticks(range(len(tally)), tally.keys(), rotation='45')
+    plt.xticks(range(len(tally)), tally.keys(), rotation='90')
 
-    plt.show()
+
     #fig = plt.figure()
-    #plt.savefig('output')
-    #plt.close(fig)
+    #plt.savefig(output, format='png')
+    pdf.savefig()
+    #plt.show()
+
+    return pdf
 
 # Averages each of the depths for all variants at a probed region
 def getMeanCoverage(totalCoverage):
@@ -79,14 +82,19 @@ if __name__ == '__main__':
                     totalVars[probeNum] += lineObj.ao()
                 totalCoverage[probeNum].append(lineObj.dp())
 
+    from matplotlib.backends.backend_pdf import PdfPages
+    pdf = PdfPages('multipage.pdf')
+
     totalCoverage = getMeanCoverage(totalCoverage)
-    plotTally(totalCoverage, 'Probe Bias', 'Avg Num of Captures')
+    pdf = plotTally(totalCoverage, pdf, 'Probe Bias', 'Avg Num of Captures')
     
     uniqVars = normalizeCounts(uniqVars, totalCoverage)
     #displayTally(uniqVars)
-    plotTally(uniqVars, 'Normalized Unique Variants Per Probe', 'Number of Variants')
+    pdf = plotTally(uniqVars, pdf, 'Normalized Unique Variants Per Probe', 'Number of Variants')
 
     totalVars = normalizeCounts(totalVars, totalCoverage)
     displayTally(totalVars)
-    plotTally(totalVars, 'Normalized Total Variants Per Probe', 'Number of Variants')
+    pdf = plotTally(totalVars, pdf, 'Normalized Total Variants Per Probe', 'Number of Variants')
+
+    pdf.close()
     
