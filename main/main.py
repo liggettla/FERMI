@@ -2,10 +2,9 @@ import pickle
 from os import system
 from os import makedirs
 from concatenateUMI import concatenateUMI
-from goodCollapseDictionary import buildNestedDict
 from goodCollapseDictionary import buildListDict
-from goodCollapseDictionary import collapseNestedDict
 from goodCollapseDictionary import collapseReadsListDict
+from goodCollapseDictionary import duplexCollapse
 from outputCoverage import outputCov
 from time import time
 
@@ -44,6 +43,7 @@ errorRate = vardb['errorRate']
 readLength = vardb['readLength']
 badBaseSubstitute = vardb['badBaseSubstitute']
 REF = vardb['REF']
+duplex = vardb['duplex']
 
 read1 = inputDir + '/' + read1
 read2 = inputDir + '/' + read2
@@ -58,7 +58,6 @@ concatenateUMI(read1, read2, twoUmiOut)
 ##############################
 #build dict binning reads by concatenated UMIs
 if previousDict == 'n':
-    #seqDict = buildNestedDict(twoUmiOut, distance_stringency, pickleOutput)
     seqDict = buildListDict(twoUmiOut, distance_stringency, pickleOutput)
 
 #retrieve previous seq data structure
@@ -67,20 +66,32 @@ elif previousDict == 'Y':
     seqDict = pickle.load(prevData)
     prevData.close()
 
-################
-#Collapse Reads#
-################
+####################
+# Calc Read Length #
+####################
 #calculate individual read length between the UMIs
 with open(twoUmiOut, 'r') as target:
     header = next(target)
     readSeq = next(target).rstrip('\n')
+
     # if readLength not set use full seq, else use specified num
     if not readLength:
         readLength = len(readSeq) - 12
 
+################
+#Collapse Reads#
+################
 #collapse reads on binned UMI data structure
-#collapseNestedDict(seqDict, varThresh, final_output_file, supportingReads, readLength)
-averageErrorRate, averageCoverage = collapseReadsListDict(seqDict, varThresh, final_output_file, supportingReads, readLength, errorRate, badBaseSubstitute)
+if not duplex:
+    averageErrorRate, averageCoverage = collapseReadsListDict(seqDict, varThresh, final_output_file, supportingReads, readLength, errorRate, badBaseSubstitute)
+
+###################
+# Duplex Collapse #
+###################
+# Duplex collapse using the two initial two strands of every capture
+# to eliminate any dissimilar variants
+if duplex:
+    averageErrorRate, averageCoverage = duplexCollapse(seqDict, varThresh, final_output_file, supportingReads, readLength, errorRate, badBaseSubstitute)
 
 #####################
 #Output Seq Coverage#

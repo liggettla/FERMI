@@ -10,7 +10,11 @@ def outputCov(input_file, final_output_file, distance_stringency, coverage_file,
     target.write("# of Allowed UMI Mismatches: %d\n" %(distance_stringency))
     if not inputLines == 0:
         target.write("Total # of Original UMIs: %d\n" % (inputLines/4))
-        target.write("# of Unique UMIs: %d\n" % (outputLines/4))
+
+        # because of duplexCollapsing there are two unique UMIs per capture
+        target.write("# of Unique UMIs: %d\n" % (outputLines/2))
+        target.write("# of Unique Captures: %d\n" % (outputLines/4))
+
         avgCov = float(inputLines)/outputLines
         target.write("Avg UMI Coverage (Incl Unused Reads): %r\n" % (avgCov))
 

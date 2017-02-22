@@ -50,6 +50,7 @@ parser.add_argument('--errorrate', '-e', action='store_true', help='Overall pcr 
 parser.add_argument('--readLength', '-q', type=int, help='Manually set the read length. If this is not set, length will be automatically set as the number of bases found between the two UMI sequences.')
 parser.add_argument('--badBaseSubstitute', '-x', action='store_true', help='This flag will trigger replacement of bad bases with N instead of invalidating an entire capture.')
 parser.add_argument('--reference', '-y', type=str, help='Set the location of the human reference genome hg19.fa and supporting files.')
+parser.add_argument('--duplexcollapse', '-w', action='store_true', help='This will run duplex collapsing instead of the original collapsing that treats two complementary strands as different captures.')
 
 args = parser.parse_args()
 
@@ -186,6 +187,12 @@ if args.readLength:
 else:
     readLength = False
 
+# duplex collapsing
+if args.duplexcollapse:
+    duplex = True
+else:
+    duplex = False
+
 #useDefaults = raw_input('Use Default Parameters? (Y/n): ')
 #useDefaults = 'Y'
 '''
@@ -266,6 +273,10 @@ def recordParams(parametersUsed, inputDir, read1, read2, varThresh, supportingRe
         target.write('Bad Base Substitution Used\n')
     else:
         target.write('Bad Base Substitution Not Used\n')
+    if duplex:
+        target.write('Duplex Collapsing Used\n')
+    else:
+        target.write('Duplex Collapsing Not Used\n')
 
     target.close()
 
@@ -311,6 +322,7 @@ def writePickle(one, two, specificOut):
     vardb['readLength'] = readLength
     vardb['badBaseSubstitute'] = badBaseSubstitute
     vardb['REF'] = REF
+    vardb['duplex'] = duplex
 
     pickleVars = './variables.pkl'
 

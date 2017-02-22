@@ -19,6 +19,10 @@ import pickle
 from numpy import mean
 from errorRate import calcErrorRate
 
+####################
+# Build Dictionary #
+####################
+
 #Tracks quality score and header as well as sequence and UMI
 #by reading in info from input_file into a dict containing three nested lists
 #associated with each UMI key
@@ -66,71 +70,9 @@ def buildListDict(input_file, distance_stringency, pickleOut):
     target.close()
     return sequences
 
-'''
-This is an improvement on the original dictionary containing a lamda defined group of
-lists.
-This method should provide the same result as the previous lamdba dictionary but
-should do so more quickly and in a more easily understood manner.
-'''
-
-def buildNestedDict(input_file, distance_stringency, pickleOut):
-    #Dict format:
-    #sortedSeqs = {'UMI':{'header': header, 'quality': quality, 'seqs':[seq1, seq2]}}
-    sortedSeqs = {}
-    target = open(input_file, 'r')
-    umi_list = []
-    position = 1
-    is_unique = True
-
-    #import pdb
-    #pdb.set_trace()
-    for line in target:
-        if position == 1:
-            header = line.rstrip('\n')
-            position += 1
-        elif position == 2:
-            #Assumes UMI is flanking first and last 6bp of read
-            umi_seq = line[0:6]+line[-6:] #Abs dist from start/end
-            umi_seq = umi_seq.rstrip('\n')
-            read_seq = line[6:-6]
-            position += 1
-        elif position == 3:
-            position += 1
-        elif position == 4:
-            quality = line.rstrip('\n')
-            position = 1
-
-            if not bool(umi_list):
-                umi_list.append(umi_seq)
-                sortedSeqs[umi_seq] = {'header': header, 'quality': quality, 'seqs': [read_seq]}
-            else:
-                is_unique = True
-                for umi in umi_list:
-                    if is_unique:
-                        if distance(umi_seq, umi) <= distance_stringency:
-                            is_unique = False
-                            umi_seq = umi
-
-                #add to sortedSeqs database
-                if is_unique:
-                    umi_list.append(umi_seq)
-                    sortedSeqs[umi_seq] = {'header': header, 'quality': quality, 'seqs': [read_seq]}
-                elif not is_unique:
-                    sortedSeqs[umi_seq]['seqs'].append(read_seq)
-    target.close()
-
-    ###########################
-    #Write Full Data Structure#
-    ###########################
-    '''
-    pickleFile = open(pickleOut, 'wb')
-    pickle.dump(sortedSeqs, pickleFile)
-    pickleFile.close()
-    '''
-
-    #import pprint
-    #pprint.pprint(sortedSeqs)
-    return sortedSeqs
+#######################
+# Collapse Dictionary #
+#######################
 
 #Collapses reads that come as a nested list dictionary
 def collapseReadsListDict(sequences, varThresh, final_output_file, supportingReads, readLength, errorRate, badBaseSubstitute):
@@ -209,38 +151,41 @@ def collapseReadsListDict(sequences, varThresh, final_output_file, supportingRea
     else:
         return 0, averageCoverage
 
-# This is similar to the conventional usage of UMIs and simply selects
-# one of the reads for use and discards the others rather than collapsing
-'''
-def selectFirstRead(sequences, varThresh, final_output_file, supportingReads, readLength, errorRate, badBaseSubstitute):
-    for umi in sequences:
+###################
+# Duplex Collapse #
+###################
+def duplexCollapse(sequences, varThresh, final_output_file, supportingReads, readLength, errorRate, badBaseSubstitute):
+    from Bio.Seq import Seq
 
-# This method acts as though UMIs were never used by just trimming them off
-# and then sending for alignment
-def trimAndAlign():
-'''
-
-#Collapses reads that are sorted by buildNestedDict()
-def collapseNestedDict(sequences, varThresh, final_output_file, supportingReads, readLength):
-
+    duplexDict = {}
+    errorRateList = []
     plus = '+'
     target = open(final_output_file, 'w')
+    coverageList = [] # used to tally coverage for each UMI pair
 
     for umi in sequences:
         isReadGood = True
         finalRead = ''
-        numReads = len(sequences[umi]['seqs'])
-        header = sequences[umi]['header']
-        quality = sequences[umi]['quality']
+        numReads = len(sequences[umi][0])
+        header = sequences[umi][1]
+        header = ''.join(header)
+        quality = sequences[umi][2]
+        quality = ''.join(quality)
+        trimmed_quality = quality[0:readLength] # make quality string match read length
+
 
         for base in range(readLength):
+            covCounter = 0 # used for quality coverage calc
+
             if isReadGood:
                 A = 0
                 T = 0
                 G = 0
                 C = 0
 
-                for seq in sequences[umi]['seqs']:
+                for seq in sequences[umi][0]:
+                    covCounter += 1 # count number of supporting reads
+
                     if seq[base] == 'A':
                         A += 1
                     elif seq[base] == 'T':
@@ -249,6 +194,8 @@ def collapseNestedDict(sequences, varThresh, final_output_file, supportingReads,
                         G += 1
                     elif seq[base] == 'C':
                         C += 1
+
+                calcError = True # used to include a base in error rate calc
 
                 if float(A)/numReads >= varThresh:
                     finalRead += 'A'
@@ -259,35 +206,82 @@ def collapseNestedDict(sequences, varThresh, final_output_file, supportingReads,
                 elif float(C)/numReads >= varThresh:
                     finalRead += 'C'
                 else:
-                    #if too many errors ignore reads
-                    isReadGood = False
+                    # if there are too many errors either substitute or invalidate
+                    if badBaseSubstitute: # ignore base but keep read
+                        isReadGood = True
+                        finalRead += 'N'
+                    else: # ignore entire read
+                        isReadGood = False
+
+                    calcError = False
+
+                if errorRate == 'Y' and calcError:
+                    rate = calcErrorRate(A,T,G,C)
+                    errorRateList.append(rate)
 
         if isReadGood and numReads >= supportingReads:
+            # if read checks out, record its coverage
+            coverageList.append(covCounter)
+            # add info to dataframe
+            duplexDict[umi] = {'header':header, 'seq':finalRead, 'qual':trimmed_quality}
+
+    ###########################
+    # Find Complementary UMIs #
+    ###########################
+    deDuplexDict = {}
+    for umi in duplexDict.keys():
+        complement = str(Seq(umi).complement())
+        if complement in duplexDict:
+            deDuplexDict[umi] = duplexDict[umi]
+            deDuplexDict[complement] = duplexDict[complement]
+            del duplexDict[umi]
+            del duplexDict[complement]
+        else:
+            tempDict = {}
+            for i in duplexDict:
+                if distance(complement, i) == 1:
+                    tempDict[i]=duplexDict[i]
+
+            if len(tempDict) == 1:
+                deDuplexDict[umi] = duplexDict[umi]
+                deDuplexDict[complement] = duplexDict[complement]
+                del duplexDict[i]
+                del duplexDict[umi]
+
+    ###############################
+    # Collapse Complementary UMIs #
+    ###############################
+    plus = '+'
+    for umi in deDuplexDict.keys():
+        finalRead = ''
+
+        try:
+            refRead = deDuplexDict[umi]['seq']
+            complement = str(Seq(umi).complement())
+            complementaryRead = str(Seq(deDuplexDict[complement]['seq']).complement())
+
+            for base in range(readLength):
+                if refRead[base] == complementaryRead[base]:
+                    finalRead += refRead[base]
+                else:
+                    finalRead += 'N'
+
             target = open(final_output_file, 'a')
-            trimmed_quality = quality[6:-6]
-            trimmed_quality = trimmed_quality[0:readLength] # make quality string match read length
-            target.write(header + '\n' + finalRead + '\n' + plus + '\n' + trimmed_quality + '\n')
+            target.write(deDuplexDict[umi]['header'] + '\n' + finalRead + '\n' + plus + '\n' + deDuplexDict[umi]['qual'] + '\n')
 
-#Outdated and should be unused
-def outputCov(distance_stringency):
-    target = open(coverage_file, 'w')
+            del deDuplexDict[umi]
+            del deDuplexDict[complement]
 
-    inputLines = sum(1 for line in open(input_file))
-    outputLines = sum(1 for line in open(final_output_file))
-    target.write("Eliminating only exact and close UMI matches:\n")
-    target.write("# of Allowed UMI Mismatches: %d\n" %(distance_stringency))
-    if not inputLines/4 == 0:
-        target.write("Total # of Original UMIs: %d\n" % (inputLines/4))
-        target.write("# of Unique UMIs: %d\n" % (outputLines/4))
+        except:
+            pass
 
-    if errorRate == 'Y':
+    averageCoverage = mean(coverageList)
+
+    if errorRate == 'Y': # clunky but passes to outputCov
         averageErrorRate = mean(errorRateList)
-        target.write("Average Error Rate: %f\n" % (averageErrorRate))
-
-    #avgCov = float(inputLines)/outputLines
-    #target.write("Avg UMI Coverage: %r\n" % (avgCov))
-
-    target.close()
+        return averageErrorRate, averageCoverage
+    else:
+        return 0, averageCoverage
 
 def main():
-    outputCov(distance_stringency)
+    pass
