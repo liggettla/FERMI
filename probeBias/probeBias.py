@@ -1,3 +1,5 @@
+from ..main import parseLine
+
 '''
 The purpose of this script is to look at probe bias and uses the data
 coming from probeBias.sh.
