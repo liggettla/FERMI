@@ -21,7 +21,7 @@ getInput -exaw -q 120 -u 1 -v 0.55 -r 5 -f 5 -i /media/alex/Extra/Dropbox/Code/F
 ###############
 # Cluster Run #
 ###############
-#getInput -exawc -u 1 -v 0.55 -r 5 -f 5 -q 120 -i /vol3/home/liggettl/sequencingData/8.3.2016/unzipped -o /vol3/home/liggettl/sequencingData/8.3.2016/analysis -y '/vol3/home/liggettl/refgenomes/hg19.fa' -n ''
+#getInput -exawc -u 1 -v 0.75 -r 5 -f 5 -q 120 -i /vol3/home/liggettl/sequencingData/8.3.2016/unzipped -o /vol3/home/liggettl/sequencingData/8.3.2016/analysis -b 'freebayes' -y '/vol3/home/liggettl/refgenomes/hg19.fa' -n ''
 
 #################
 # 8.3.2016 data #
