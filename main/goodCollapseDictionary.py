@@ -163,7 +163,12 @@ def duplexCollapse(sequences, varThresh, final_output_file, supportingReads, rea
     target = open(final_output_file, 'w')
     coverageList = [] # used to tally coverage for each UMI pair
 
+    ########################
+    # Collapse Unique UMIs #
+    ########################
+    # bin unique umis and derive consensus read based on input parameters of error tolerance
     for umi in sequences:
+        # parse through the sequences defaultdict
         isReadGood = True
         finalRead = ''
         numReads = len(sequences[umi][0])
@@ -173,7 +178,7 @@ def duplexCollapse(sequences, varThresh, final_output_file, supportingReads, rea
         quality = ''.join(quality)
         trimmed_quality = quality[0:readLength] # make quality string match read length
 
-
+        # iterate through loci compute consensus base
         for base in range(readLength):
             covCounter = 0 # used for quality coverage calc
 
@@ -215,6 +220,7 @@ def duplexCollapse(sequences, varThresh, final_output_file, supportingReads, rea
 
                     calcError = False
 
+                # calculate rate at which bases differ from consensus
                 if errorRate == 'Y' and calcError:
                     rate = calcErrorRate(A,T,G,C)
                     errorRateList.append(rate)
@@ -228,19 +234,22 @@ def duplexCollapse(sequences, varThresh, final_output_file, supportingReads, rea
     ###########################
     # Find Complementary UMIs #
     ###########################
+    # after deriving concensus reads, match up complementary strands
     deDuplexDict = {} # dict that will contain only complementary reads
     finalList = []
     for i in duplexDict:
         tempList = []
         for j in duplexDict:
             complement = str(Seq(j).complement())
-            if distance(i,complement) <= 1:
-                tempList.append(j)
+            if distance(i,complement) <= 1: # find similar umi/read seq pairs
+                tempList.append(j) # make a list of all similar pairs
+        # only keep a complementary pair if there are two matching consensus reads
         if len(tempList) == 1:
             if i not in finalList and j not in finalList:
                 finalList.append(i)
                 finalList.append(j)
 
+    # only retain those dict values that are true pairs
     for key in finalList:
         deDuplexDict[key] = duplexDict[key]
 
@@ -254,19 +263,23 @@ def duplexCollapse(sequences, varThresh, final_output_file, supportingReads, rea
     # only pairs now exist, just search for them
     for key1, key2 in combinations(deDuplexDict, 2):
         finalRead = ''
-        complement = str(Seq(key2).complement())
+        complement = str(Seq(key2).complement()) # complement of second read sequence
+        # if neither key has been analysed and they are a matching pair then use for consensus read
         if distance(key1, complement) <= 1 and key1 not in prevScanned and key2 not in prevScanned:
-            prevScanned.extend([key1,key2])
+            prevScanned.extend([key1,key2]) # keep track of analyzed keys
 
+            # convert to complementary matches
             refRead = deDuplexDict[key1]['seq']
             compRead = str(Seq(deDuplexDict[key2]['seq']).complement())
 
+            # iterate through by locus and derive consensus
             for base in range(readLength):
                 if refRead[base] == compRead[base]:
                     finalRead += refRead[base]
                 else:
-                    finalRead += 'N'
+                    finalRead += 'N' # only perfect matches are permitted
 
+            # output consensus and associated info
             target = open(final_output_file, 'a')
             target.write(deDuplexDict[umi]['header'] + '\n' + finalRead + '\n' + plus + '\n' + deDuplexDict[umi]['qual'] + '\n')
     target.close()
