@@ -40,7 +40,7 @@ def buildListDict(input_file, distance_stringency, pickleOut):
             position += 1
         elif position == 2:
             #Assumes UMI is flanking first and last 6bp of read
-            umi_seq = line[0:11]+line[-6:] #Abs dist from start/end compatible with miSeq/hiSeq
+            umi_seq = line[0:11]+line[-7:] #Abs dist from start/end compatible with miSeq/hiSeq
             umi_seq = umi_seq.rstrip('\n')
             read_seq = line[6:-6]
             position += 1
@@ -228,52 +228,48 @@ def duplexCollapse(sequences, varThresh, final_output_file, supportingReads, rea
     ###########################
     # Find Complementary UMIs #
     ###########################
-    deDuplexDict = {}
-    for umi in duplexDict.keys():
-        complement = str(Seq(umi).complement())
-        if complement in duplexDict:
-            deDuplexDict[umi] = duplexDict[umi]
-            deDuplexDict[complement] = duplexDict[complement]
-            del duplexDict[umi]
-            del duplexDict[complement]
-        else:
-            tempDict = {}
-            for i in duplexDict:
-                if distance(complement, i) == 1:
-                    tempDict[i]=duplexDict[i]
+    deDuplexDict = {} # dict that will contain only complementary reads
+    finalList = []
+    for i in duplexDict:
+        tempList = []
+        for j in duplexDict:
+            complement = str(Seq(j).complement())
+            if distance(i,complement) <= 1:
+                tempList.append(j)
+        if len(tempList) == 1:
+            if i not in finalList and j not in finalList:
+                finalList.append(i)
+                finalList.append(j)
 
-            if len(tempDict) == 1:
-                deDuplexDict[umi] = duplexDict[umi]
-                deDuplexDict[complement] = duplexDict[complement]
-                del duplexDict[i]
-                del duplexDict[umi]
+    for key in finalList:
+        deDuplexDict[key] = duplexDict[key]
 
     ###############################
     # Collapse Complementary UMIs #
     ###############################
+    from itertools import combinations
+    prevScanned=[]
     plus = '+'
-    for umi in deDuplexDict.keys():
-        finalRead = ''
 
-        try:
-            refRead = deDuplexDict[umi]['seq']
-            complement = str(Seq(umi).complement())
-            complementaryRead = str(Seq(deDuplexDict[complement]['seq']).complement())
+    # only pairs now exist, just search for them
+    for key1, key2 in combinations(deDuplexDict, 2):
+        finalRead = ''
+        complement = str(Seq(key2).complement())
+        if distance(key1, complement) <= 1 and key1 not in prevScanned and key2 not in prevScanned:
+            prevScanned.extend([key1,key2])
+
+            refRead = deDuplexDict[key1]['seq']
+            compRead = str(Seq(deDuplexDict[key2]['seq']).complement())
 
             for base in range(readLength):
-                if refRead[base] == complementaryRead[base]:
+                if refRead[base] == compRead[base]:
                     finalRead += refRead[base]
                 else:
                     finalRead += 'N'
 
             target = open(final_output_file, 'a')
             target.write(deDuplexDict[umi]['header'] + '\n' + finalRead + '\n' + plus + '\n' + deDuplexDict[umi]['qual'] + '\n')
-
-            del deDuplexDict[umi]
-            del deDuplexDict[complement]
-
-        except:
-            pass
+    target.close()
 
     averageCoverage = mean(coverageList)
 
