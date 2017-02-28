@@ -5,6 +5,10 @@ from concatenateUMI import concatenateUMI
 from goodCollapseDictionary import buildListDict
 from goodCollapseDictionary import collapseReadsListDict
 from goodCollapseDictionary import duplexCollapse
+from goodCollapseDictionary import get_one_bp_mismatches
+from goodCollapseDictionary import find_complementary_umis
+from goodCollapseDictionary import collapse_paired_reads
+from goodCollapseDictionary import calcCoverageError
 from outputCoverage import outputCov
 from time import time
 
@@ -91,7 +95,11 @@ if not duplex:
 # Duplex collapse using the two initial two strands of every capture
 # to eliminate any dissimilar variants
 if duplex:
-    averageErrorRate, averageCoverage = duplexCollapse(seqDict, varThresh, final_output_file, supportingReads, readLength, errorRate, badBaseSubstitute)
+    #averageErrorRate, averageCoverage = duplexCollapse(seqDict, varThresh, final_output_file, supportingReads, readLength, errorRate, badBaseSubstitute)
+    coverageList, errorRateList, duplexDict = duplexCollapse(seqDict, varThresh, final_output_file, supportingReads, readLength, errorRate, badBaseSubstitute)
+    deDuplexList = find_complementary_umis(duplexDict)
+    collapse_paired_reads(deDuplexList, readLength, final_output_file)
+    averageErrorRate, averageCoverage = calcCoverageError(coverageList, errorRateList, errorRate)
 
 #####################
 #Output Seq Coverage#

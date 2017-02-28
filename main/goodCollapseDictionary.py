@@ -230,7 +230,8 @@ def duplexCollapse(sequences, varThresh, final_output_file, supportingReads, rea
             coverageList.append(covCounter)
             # add info to dataframe
             duplexDict[umi] = {'header':header, 'seq':finalRead, 'qual':trimmed_quality}
-
+    return coverageList, errorRateList, duplexDict
+    '''
     ###########################
     # Find Complementary UMIs #
     ###########################
@@ -284,6 +285,67 @@ def duplexCollapse(sequences, varThresh, final_output_file, supportingReads, rea
             target.write(deDuplexDict[umi]['header'] + '\n' + finalRead + '\n' + plus + '\n' + deDuplexDict[umi]['qual'] + '\n')
     target.close()
 
+    averageCoverage = mean(coverageList)
+
+    if errorRate == 'Y': # clunky but passes to outputCov
+        averageErrorRate = mean(errorRateList)
+        return averageErrorRate, averageCoverage
+    else:
+        return 0, averageCoverage
+    '''
+
+def get_one_bp_mismatches(umi):
+    mismatches = []
+    bases = ['A','T','G','C']
+    for e,i in enumerate(umi):
+        for b in bases:
+            mismatches.append(umi[:e] + b + umi[e+1:])
+    mismatches=set(mismatches) # only includes unique strings
+    return mismatches
+
+def find_complementary_umis(duplexDict):
+    from Bio.Seq import Seq
+    # deDuplexList contains the sorted valid pairs for collapsing
+    # in the form: deDuplexList[dictPairList[{},{}]]
+    deDuplexList = []
+    pairList = []
+    dictPairList = []
+
+    for umi in duplexDict:
+        if umi not in pairList:
+            tempList = []
+            tempList.append(umi)
+            oneMismatchList = get_one_bp_mismatches(umi) # get all possible mismatches for this umi
+            for i in oneMismatchList:
+                complement = str(Seq(i).complement()) # just search duplexDict for possible mismatches
+                if complement in duplexDict:
+                    tempList.append(complement)
+            if len(tempList) == 2: # if only a pair then match then add to final dictionary
+                pairList.extend(tempList) # avoid repeat scanning
+                # record pair for collapsing
+                dictPairList.append(duplexDict[tempList[0]])
+                dictPairList.append(duplexDict[tempList[1]])
+                deDuplexList.append(dictPairList)
+
+    return deDuplexList
+
+def collapse_paired_reads(deDuplexList, readLength, final_output_file):
+    from Bio.Seq import Seq
+    for pairedList in deDuplexList:
+        seq1 = pairedList[0]['seq']
+        seq2 = str(Seq(pairedList[1]['seq']).complement())
+        print seq1
+        print seq2
+        finalRead = ''.join(
+                seq1[base] if seq1[base] == seq2[base] else 'N'
+                for base in range(readLength)
+                )
+        print finalRead
+
+        with open(final_output_file, 'a') as target:
+            target.write('%s\n%s\n+\n%s' % (pairedList[0]['header'], finalRead, pairedList[0]['qual']))
+
+def calcCoverageError(coverageList, errorRateList, errorRate):
     averageCoverage = mean(coverageList)
 
     if errorRate == 'Y': # clunky but passes to outputCov
