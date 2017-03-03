@@ -309,10 +309,10 @@ def find_complementary_umis(duplexDict):
     # in the form: deDuplexList[dictPairList[{},{}]]
     deDuplexList = []
     pairList = []
-    dictPairList = []
 
     for umi in duplexDict:
         if umi not in pairList:
+            dictPairList = []
             tempList = []
             tempList.append(umi)
             oneMismatchList = get_one_bp_mismatches(umi) # get all possible mismatches for this umi
@@ -334,16 +334,13 @@ def collapse_paired_reads(deDuplexList, readLength, final_output_file):
     for pairedList in deDuplexList:
         seq1 = pairedList[0]['seq']
         seq2 = str(Seq(pairedList[1]['seq']).complement())
-        print seq1
-        print seq2
         finalRead = ''.join(
                 seq1[base] if seq1[base] == seq2[base] else 'N'
                 for base in range(readLength)
                 )
-        print finalRead
 
         with open(final_output_file, 'a') as target:
-            target.write('%s\n%s\n+\n%s' % (pairedList[0]['header'], finalRead, pairedList[0]['qual']))
+            target.write('%s\n%s\n+\n%s\n' % (pairedList[0]['header'], finalRead, pairedList[0]['qual']))
 
 def calcCoverageError(coverageList, errorRateList, errorRate):
     averageCoverage = mean(coverageList)
