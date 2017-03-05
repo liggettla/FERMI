@@ -310,6 +310,9 @@ def find_complementary_umis(duplexDict):
     deDuplexList = []
     pairList = []
 
+    from pprint import pprint
+    pprint(duplexDict)
+
     for umi in duplexDict:
         if umi not in pairList:
             dictPairList = []
@@ -317,7 +320,7 @@ def find_complementary_umis(duplexDict):
             tempList.append(umi)
             oneMismatchList = get_one_bp_mismatches(umi) # get all possible mismatches for this umi
             for i in oneMismatchList:
-                complement = str(Seq(i).complement()) # just search duplexDict for possible mismatches
+                complement = str(Seq(i).reverse_complement()) # just search duplexDict for possible mismatches
                 if complement in duplexDict:
                     tempList.append(complement)
             if len(tempList) == 2: # if only a pair then match then add to final dictionary
@@ -333,7 +336,7 @@ def collapse_paired_reads(deDuplexList, readLength, final_output_file):
     from Bio.Seq import Seq
     for pairedList in deDuplexList:
         seq1 = pairedList[0]['seq']
-        seq2 = str(Seq(pairedList[1]['seq']).complement())
+        seq2 = str(Seq(pairedList[1]['seq']).reverse_complement())
         finalRead = ''.join(
                 seq1[base] if seq1[base] == seq2[base] else 'N'
                 for base in range(readLength)
