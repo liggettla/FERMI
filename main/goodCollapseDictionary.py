@@ -40,7 +40,9 @@ def buildListDict(input_file, distance_stringency, pickleOut):
             position += 1
         elif position == 2:
             #Assumes UMI is flanking first and last 6bp of read
-            umi_seq = line[0:11]+line[-7:] #Abs dist from start/end compatible with miSeq/hiSeq
+            #umi_seq = line[0:11]+line[-7:] #Abs dist from start/end compatible with miSeq/hiSeq
+            umi_seq = line[0:6]+line[-7:] #Abs dist from start/end compatible with miSeq/hiSeq
+            print umi_seq
             umi_seq = umi_seq.rstrip('\n')
             read_seq = line[6:-6]
             position += 1
@@ -231,68 +233,6 @@ def duplexCollapse(sequences, varThresh, final_output_file, supportingReads, rea
             # add info to dataframe
             duplexDict[umi] = {'header':header, 'seq':finalRead, 'qual':trimmed_quality}
     return coverageList, errorRateList, duplexDict
-    '''
-    ###########################
-    # Find Complementary UMIs #
-    ###########################
-    # after deriving concensus reads, match up complementary strands
-    deDuplexDict = {} # dict that will contain only complementary reads
-    finalList = []
-    for i in duplexDict:
-        tempList = []
-        for j in duplexDict:
-            complement = str(Seq(j).complement())
-            if distance(i,complement) <= 1: # find similar umi/read seq pairs
-                tempList.append(j) # make a list of all similar pairs
-        # only keep a complementary pair if there are two matching consensus reads
-        if len(tempList) == 1:
-            if i not in finalList and j not in finalList:
-                finalList.append(i)
-                finalList.append(j)
-
-    # only retain those dict values that are true pairs
-    for key in finalList:
-        deDuplexDict[key] = duplexDict[key]
-
-    ###############################
-    # Collapse Complementary UMIs #
-    ###############################
-    from itertools import combinations
-    prevScanned=[]
-    plus = '+'
-
-    # only pairs now exist, just search for them
-    for key1, key2 in combinations(deDuplexDict, 2):
-        finalRead = ''
-        complement = str(Seq(key2).complement()) # complement of second read sequence
-        # if neither key has been analysed and they are a matching pair then use for consensus read
-        if distance(key1, complement) <= 1 and key1 not in prevScanned and key2 not in prevScanned:
-            prevScanned.extend([key1,key2]) # keep track of analyzed keys
-
-            # convert to complementary matches
-            refRead = deDuplexDict[key1]['seq']
-            compRead = str(Seq(deDuplexDict[key2]['seq']).complement())
-
-            # iterate through by locus and derive consensus
-            for base in range(readLength):
-                if refRead[base] == compRead[base]:
-                    finalRead += refRead[base]
-                else:
-                    finalRead += 'N' # only perfect matches are permitted
-
-            # output consensus and associated info
-            target = open(final_output_file, 'a')
-            target.write(deDuplexDict[umi]['header'] + '\n' + finalRead + '\n' + plus + '\n' + deDuplexDict[umi]['qual'] + '\n')
-    target.close()
-
-    averageCoverage = mean(coverageList)
-
-    if errorRate == 'Y': # clunky but passes to outputCov
-        averageErrorRate = mean(errorRateList)
-        return averageErrorRate, averageCoverage
-    else:
-        return 0, averageCoverage
-    '''
 
 def get_one_bp_mismatches(umi):
     mismatches = []
@@ -310,8 +250,8 @@ def find_complementary_umis(duplexDict):
     deDuplexList = []
     pairList = []
 
-    from pprint import pprint
-    pprint(duplexDict)
+    #from pprint import pprint
+    #pprint(duplexDict)
 
     for umi in duplexDict:
         if umi not in pairList:
