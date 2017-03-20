@@ -41,7 +41,7 @@ def concatenateUMI(read1, read2, output):
 
                     #use read1 strand
                     revComp = str(seq2Obj.reverse_complement())
-                    r2UMI = revComp[-6:]
+                    r2UMI = revComp[-11:]
 
                     position += 1
                 elif position == 3:
