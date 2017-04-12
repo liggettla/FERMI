@@ -9,7 +9,8 @@ setwd("/media/alex/Extra/Dropbox/Code/R/sequencingWork/4.6.2015 Attempt/")
 setwd('/home/alex/Dropbox/Code/R/sequencingWork/4.6.2015 Attempt/')
 
 #subset of the data
-allelefreqshort <- read.table("sortedAlleleFreqs.txt", header = FALSE)
+#allelefreqshort <- read.table("sortedAlleleFreqs.txt", header = FALSE)
+allelefreqshort <- read.table("allelefreqs.txt", header = FALSE)
 hist(log10(allelefreqshort$V1), xlim = c(-4,0), breaks=100)
 
 hist(log(allelefreqshort$AlleleFreq), xlim = c(-15,0), breaks=100)
