@@ -4,7 +4,7 @@ new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"
 if(length(new.packages)) install.packages(new.packages, dep=TRUE)
 library(ggplot2)
 
-setwd('/home/alex/Dropbox/Degregori_Lab/Experiments/11.1.2016/2016-10-25_5_0.55_Run_1')
+setwd('/media/alex/Extra/Dropbox/Code/FERMI/baseChangeBias')
 oncoGenes <- read.table('oncoGenes.txt', header = TRUE)
 seq=c("A", "C", "T", "G")
 df=data.frame('Ref'=rep(seq, each=4), 'Var'=rep(seq, 4), 'Obs'=oncoGenes$Obs)
