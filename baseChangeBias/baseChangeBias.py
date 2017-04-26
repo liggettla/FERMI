@@ -11,14 +11,22 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('--indir', '-i', required=True, type=str, help='Specifies the input directory containing all folders containing output analysis from a fermi analysis run.')
 parser.add_argument('--outdir', '-o', required=True, type=str, help='Specifies the output directory location for the analysis output file')
-parser.add_argument('--sample', '-s', required=True, type=str, help='Name of the directory containing fermi analysis of sample to be compared.')
+parser.add_argument('--sampledir', '-s', type=str, help='This takes an input sample directory and will find total_filtered.vcf within it.')
+parser.add_argument('--exactfile', '-e', type=str, help='This points directly to the file that should be analyzed.')
 
 args = parser.parse_args()
 
 inputDir = args.indir
 outputDir = args.outdir
-inSample = args.sample
-sample = inputDir + '/' + inSample + '/' + 'total_filtered.vcf'
+
+if args.sampledir:
+    inSample = args.sampledir
+    sample = inputDir + '/' + inSample + '/' + 'total_filtered.vcf'
+
+if args.exactfile:
+    inSample = args.exactfile
+    sample = inputDir + '/' + inSample
+
 #outDir = outputDir + '/' + inSample + '/'
 outDir = outputDir + '/'
 
