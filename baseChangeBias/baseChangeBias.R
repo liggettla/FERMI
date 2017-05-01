@@ -1,10 +1,13 @@
-# cool little script that checks if ggplot2 is already installed and if not, installs it
+# cool little script that checks if ggplot3 is already installed and if not, installs it
 list.of.packages <- c('ggplot2')
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages, dep=TRUE)
 library(ggplot2)
 
-setwd('/media/alex/Extra/Dropbox/Code/FERMI/baseChangeBias')
+# Laptop
+# setwd('/media/alex/Extra/Dropbox/Code/FERMI/baseChangeBias')
+# Desktop
+setwd('/home/alex/Dropbox/Code/FERMI/baseChangeBias')
 oncoGenes <- read.table('oncoGenes.txt', header = TRUE)
 seq=c("A", "C", "T", "G")
 df=data.frame('Ref'=rep(seq, each=4), 'Var'=rep(seq, 4), 'Obs'=oncoGenes$Obs)
