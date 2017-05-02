@@ -156,6 +156,15 @@ if alignAndVar == 'Y':
     filtered = outputDir + '/onlyProbedRegions.vcf'
     elimBadAligns(unFiltered, filtered)
 
+############################
+# Plot Mutations Per Probe #
+############################
+# the purpose of this is to understand if mutations cluster within
+# particular probes more than others
+if alignAndVar == 'Y':
+    from mutationsPerProbe import mutationsPerProbe
+    mutationsPerProbe(filtered, outputDir)
+
 ################
 #Output Runtime#
 ################

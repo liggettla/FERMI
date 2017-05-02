@@ -6,11 +6,13 @@ def runArgParse():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--inFile', '-i', type=str, required=True, help='The input vcf to be analyzed.')
+    parser.add_argument('--outputDir', '-o', type=str, required=True, help='Output directory for plot file.')
 
     args = parser.parse_args()
     inFile = args.inFile
+    outputDir = args.outputDir
 
-    return inFile
+    return inFile, outputDir
 
 def identifyProbe(location):
     probes = {'TIIIa':['1152278','1152279'],'NRAS-1':['1152564','1152565','1152566'],'NRAS-2':['1152587','1152588'],'DNMT3a':['254572','254573'],'IDH1':['2091130','2091131','2091132'],'SF3B1':['1982668','1982669'],'TIIIb':['2231906','2231907','2231908'],'TIIIc':['2290411','2290412'],'TET2-1':['1061972','1061973','1061974'],'TET2-2':['1061551','1061552'],'TIIId':['1105411','1105412','1105413'],'TIIIe':['1129972','1129973'],'TIIIf':['1211677','1211678'],'TIIIg':['1235477','1235478','1235479'],'TIIIh':['1244286','1244287'],'JAK2':['50737','50738'],'TIIIj':['21262','21263','21264'],'TIIIk':['2390'],'TIIIl':['2593','2594'],'TIIIm':['114865','114866','114867'],'HRAS':['5342','5343'],'KRAS-1':['253982','253983','253984'],'KRAS-2':['253802','253803'],'TIIIn':['925270','925271'],'IDH2':['906318','906319'],'TIIIo':['733796','733797','733798'],'TIIIp':['824550','824551'],'TIIIq':['859491','859492'],'p53-1':['75775','75776'],'p53-2':['75783','75784','75785'],'p53-3':['75770','75771','75772'],'GATA1':['486496','486497','486498']}
@@ -27,7 +29,7 @@ def displayTally(tally):
     for i in tally:
         print('%s\t%s' % (i, tally[i]))
 
-def plotTally(tally, pdf, title='Variants Per Probe', xlabel='Number of Variants'):
+def plotTally(outputDir, tally, pdf, title='Variants Per Probe', xlabel='Number of Variants'):
     import matplotlib.pyplot as plt
 
     plt.bar(range(len(tally)), tally.values(), align='center')
@@ -60,9 +62,7 @@ def normalizeCounts(raw, totalCoverage):
 
     return raw
 
-if __name__ == '__main__':
-    from parseLine import seqRead
-    inFile = runArgParse()
+def mutationsPerProbe(inFile, outputDir):
     target = open(inFile, 'r')
 
     # Number of unique variants found within a particular capture region
@@ -83,18 +83,22 @@ if __name__ == '__main__':
                 totalCoverage[probeNum].append(lineObj.dp())
 
     from matplotlib.backends.backend_pdf import PdfPages
-    pdf = PdfPages('probeBias.pdf')
+    pdf = PdfPages(outputDir + '/probeBias.pdf')
 
     totalCoverage = getMeanCoverage(totalCoverage)
-    pdf = plotTally(totalCoverage, pdf, 'Probe Bias', 'Avg Num of Captures')
+    pdf = plotTally(outputDir, totalCoverage, pdf, 'Probe Bias', 'Avg Num of Captures')
     
     uniqVars = normalizeCounts(uniqVars, totalCoverage)
     #displayTally(uniqVars)
-    pdf = plotTally(uniqVars, pdf, 'Normalized Unique Variants Per Probe', 'Number of Variants')
+    pdf = plotTally(outputDir, uniqVars, pdf, 'Normalized Unique Variants Per Probe', 'Number of Variants')
 
     totalVars = normalizeCounts(totalVars, totalCoverage)
     #displayTally(totalVars)
-    pdf = plotTally(totalVars, pdf, 'Normalized Total Variants Per Probe', 'Number of Variants')
+    pdf = plotTally(outputDir, totalVars, pdf, 'Normalized Total Variants Per Probe', 'Number of Variants')
 
     pdf.close()
     
+if __name__ == '__main__':
+    from parseLine import seqRead
+    inFile, outputDir = runArgParse()
+    mutationsPerProbe(inFile, outputDir)
