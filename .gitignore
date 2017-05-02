@@ -9,3 +9,9 @@ dependencies
 testInput
 dependencies/freebayes
 dependencies/vt
+baseChangeBias/output
+baseChangeBias/.RData
+baseChangeBias/.Rhistory
+TIIIRegions.txt
+baseChangeBias/oncoSites.txt
+baseChangeBias/oncoGenes.txt
