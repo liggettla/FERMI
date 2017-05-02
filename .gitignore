@@ -20,3 +20,4 @@ varAlleleFrequency/vafRepeatability.jpg
 varAlleleFrequency/vafRepeatability.txt
 varAlleleFrequency/vafRepeatabilityNoRegression.jpg
 varAlleleFrequency/vafRepeatabilityRegression.jpg
+varAlleleFrequency/plotvafRepeatability.R
