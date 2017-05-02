@@ -15,3 +15,8 @@ baseChangeBias/.Rhistory
 TIIIRegions.txt
 baseChangeBias/oncoSites.txt
 baseChangeBias/oncoGenes.txt
+varAlleleFrequency/plotVarFreq.R
+varAlleleFrequency/vafRepeatability.jpg
+varAlleleFrequency/vafRepeatability.txt
+varAlleleFrequency/vafRepeatabilityNoRegression.jpg
+varAlleleFrequency/vafRepeatabilityRegression.jpg
