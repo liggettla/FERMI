@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+# The purpose of this script is to understand the distribution of base patterns within regions of DNA
+# the script will look through and quantify particular triplets as analyzed in the Alexandrov 2013 pipeline.
+
+
