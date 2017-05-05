@@ -4,7 +4,8 @@
 # the script will look through and quantify particular triplets as analyzed in the Alexandrov 2013 pipeline.
 
 def constructDicts():
-    combos=combinations_with_replacement('ATCG', 3)
+    bases=['A','T','G','C']
+    combos=p(bases, repeat=3)
     probeRegionCount={}
     hg19Count={}
     tripletList=[]
@@ -28,8 +29,10 @@ def analyzeFile(inFile, countDict, tripletList):
 
     return countDict
 
+
+
 if __name__ == '__main__':
-    from itertools import combinations_with_replacement
+    from itertools import product as p
 
     probedRegion='/media/alex/Extra/Dropbox/Code/FERMI/fastqHandling/entireProbedRegion.txt'
     hg19='/media/alex/Extra/Dropbox/Code/ReferenceGenomes/hg19.fa'
@@ -37,7 +40,7 @@ if __name__ == '__main__':
     probeRegionCount, hg19Count, tripletList = constructDicts()
 
     probeRegionCount = analyzeFile(probedRegion, probeRegionCount, tripletList)
-    hg19Count = analyzeFile(hg19, hg19Count, tripletList)
+    #hg19Count = analyzeFile(hg19, hg19Count, tripletList)
 
     from pprint import pprint
     pprint(probeRegionCount)
