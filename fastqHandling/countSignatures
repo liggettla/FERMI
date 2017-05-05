@@ -29,10 +29,28 @@ def analyzeFile(inFile, countDict, tripletList):
 
     return countDict
 
+def combineTriplets(counts):
+    # this will combine the triplets into just C/T changes
+    combinedTriplets={}
+    for triplet in counts:
+        if triplet[1] == 'C' or triplet[1] == 'T':
+            if triplet in combinedTriplets:
+                combinedTriplets[triplet] += counts[triplet]
+            else:
+                combinedTriplets[triplet] = counts[triplet]
 
+        else:
+            converted = str(Seq(triplet).reverse_complement())
+            if converted in combinedTriplets:
+                combinedTriplets[converted] += counts[triplet]
+            else:
+                combinedTriplets[converted] = counts[triplet]
+    
+    return combinedTriplets
 
 if __name__ == '__main__':
     from itertools import product as p
+    from Bio.Seq import Seq
 
     probedRegion='/media/alex/Extra/Dropbox/Code/FERMI/fastqHandling/entireProbedRegion.txt'
     hg19='/media/alex/Extra/Dropbox/Code/ReferenceGenomes/hg19.fa'
@@ -40,8 +58,15 @@ if __name__ == '__main__':
     probeRegionCount, hg19Count, tripletList = constructDicts()
 
     probeRegionCount = analyzeFile(probedRegion, probeRegionCount, tripletList)
-    #hg19Count = analyzeFile(hg19, hg19Count, tripletList)
+    hg19Count = analyzeFile(hg19, hg19Count, tripletList)
+
+    combinedProbed = combineTriplets(probeRegionCount)
+    combinedhg19 = combineTriplets(hg19Count)
 
     from pprint import pprint
-    pprint(probeRegionCount)
+    #pprint(probeRegionCount)
+    #pprint(combinedProbed)
+
     pprint(hg19Count)
+    pprint(combinedhg19)
+
