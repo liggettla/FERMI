@@ -3,4 +3,42 @@
 # The purpose of this script is to understand the distribution of base patterns within regions of DNA
 # the script will look through and quantify particular triplets as analyzed in the Alexandrov 2013 pipeline.
 
+def constructDicts():
+    combos=combinations_with_replacement('ATCG', 3)
+    probeRegionCount={}
+    hg19Count={}
+    tripletList=[]
 
+    for i in combos:
+        triplet = ''
+        for j in i:
+            triplet = triplet + j
+        probeRegionCount[triplet] = 0
+        hg19Count[triplet] = 0
+        tripletList.append(triplet)
+
+    return probeRegionCount, hg19Count, tripletList
+
+def analyzeFile(inFile, countDict, tripletList):
+    target = open(inFile, 'r')
+    for line in target:
+        for triplet in tripletList:
+            theCount = line.count(triplet)
+            countDict[triplet] += theCount
+
+    return countDict
+
+if __name__ == '__main__':
+    from itertools import combinations_with_replacement
+
+    probedRegion='/media/alex/Extra/Dropbox/Code/FERMI/fastqHandling/entireProbedRegion.txt'
+    hg19='/media/alex/Extra/Dropbox/Code/ReferenceGenomes/hg19.fa'
+
+    probeRegionCount, hg19Count, tripletList = constructDicts()
+
+    probeRegionCount = analyzeFile(probedRegion, probeRegionCount, tripletList)
+    hg19Count = analyzeFile(hg19, hg19Count, tripletList)
+
+    from pprint import pprint
+    pprint(probeRegionCount)
+    pprint(hg19Count)
