@@ -56,12 +56,14 @@ read2 = inputDir + '/' + read2
 #####################
 #Concatate R1 and R2#
 #####################
+print('Concatenating UMIs...')
 concatenateUMI(read1, read2, twoUmiOut)
 
 ##############################
 #Build/Get Seq Data Structure#
 ##############################
 #build dict binning reads by concatenated UMIs
+print('Building Dictionary...')
 if previousDict == 'n':
     seqDict = buildListDict(twoUmiOut, distance_stringency, pickleOutput)
 
@@ -75,6 +77,7 @@ elif previousDict == 'Y':
 # Calc Read Length #
 ####################
 #calculate individual read length between the UMIs
+print('Computing Read Lengths...')
 with open(twoUmiOut, 'r') as target:
     header = next(target)
     readSeq = next(target).rstrip('\n')
@@ -87,6 +90,7 @@ with open(twoUmiOut, 'r') as target:
 #Collapse Reads#
 ################
 #collapse reads on binned UMI data structure
+print('Collapsing Reads...')
 if not duplex:
     averageErrorRate, averageCoverage = collapseReadsListDict(seqDict, varThresh, final_output_file, supportingReads, readLength, errorRate, badBaseSubstitute)
 
@@ -105,11 +109,13 @@ if duplex:
 #####################
 #Output Seq Coverage#
 #####################
+print('Computing Coverages...')
 outputCov(twoUmiOut, final_output_file, distance_stringency, coverage_file, averageErrorRate, averageCoverage)
 
 ####################
 #Align to Reference#
 ####################
+print('Aligning to Reference...')
 if alignAndVar == 'Y':
     from align import align
     bamOut = align(final_output_file, REF) # align and index
@@ -117,6 +123,7 @@ if alignAndVar == 'Y':
 ###############
 #Call Variants#
 ###############
+print('Calling Variants...')
 if alignAndVar == 'Y':
     from callVar import callVar
     vcfOut = bamOut.strip('bam') + 'vcf'
@@ -125,6 +132,7 @@ if alignAndVar == 'Y':
 ###################
 #VCF Decomposition#
 ###################
+print('Decomposing VCFs...')
 if alignAndVar == 'Y':
     from decomposeVCF import decompose
     blockDecomposedOut = decompose(vcfOut)
@@ -134,6 +142,7 @@ if alignAndVar == 'Y':
 #################
 # filters final vcf file to output either only AF=0 reads
 # or AF=0.5 and AF=1 reads
+print('Filtering Allele Frequencies...')
 if alignAndVar == 'Y':
     from varDPFilter import vcfFilter
     vcfFilter(inputDir, outputDir, blockDecomposedOut, AONum, DPNum)
@@ -144,6 +153,7 @@ if alignAndVar == 'Y':
 # purpose of this is to suppress the output of large fastq files
 # unless otherwise needed to prevent the use of unnecessary space
 if noBigFiles == 'Y':
+    print('Cleaning up Fastqs...')
     system('rm %s' % (twoUmiOut))
 
 ##############################
@@ -152,6 +162,7 @@ if noBigFiles == 'Y':
 # the purpose of this is to create a final vcf file that only contains
 # those variants that fall within probed regions of the genome
 if alignAndVar == 'Y':
+    print('Eliminating Off-Target Alignments...')
     from eliminateNonspecificReads import elimBadAligns
     unFiltered = outputDir + '/total_filtered.vcf'
     filtered = outputDir + '/onlyProbedRegions.vcf'
@@ -163,6 +174,7 @@ if alignAndVar == 'Y':
 # the purpose of this is to understand if mutations cluster within
 # particular probes more than others
 if alignAndVar == 'Y':
+    print('Computing Probe Bias...')
     from mutationsPerProbe import mutationsPerProbe
     mutationsPerProbe(filtered, outputDir)
 
@@ -172,6 +184,7 @@ if alignAndVar == 'Y':
 # this will remove many of the output files that are mostly
 # used for troubleshooting and not for typical analysis
 if minimalOutput:
+    print('Cleaning up Outputs...')
     system('rm %s' % (outputDir + '/finalOutput.fastq'))
     system('rm %s' % (outputDir + '/finalOutput.vcf'))
     system('rm %s' % (outputDir + '/finalOutputDecomposed.vcf'))
@@ -184,6 +197,8 @@ if minimalOutput:
 #Output Runtime#
 ################
 # keep this as the final task that is run
+print('Computing Runtime...')
 target = open(outputDir + '/runTime.txt', 'w')
 target.write("Total Runtime:\n%s seconds" % (time() - start_time))
 print("Total Runtime:\n%s seconds" % (time() - start_time))
+print('\nAnalysis Complete.')
