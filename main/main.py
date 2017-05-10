@@ -48,6 +48,7 @@ readLength = vardb['readLength']
 badBaseSubstitute = vardb['badBaseSubstitute']
 REF = vardb['REF']
 duplex = vardb['duplex']
+minimalOutput = vardb['minimalOutput']
 
 read1 = inputDir + '/' + read1
 read2 = inputDir + '/' + read2
@@ -164,6 +165,20 @@ if alignAndVar == 'Y':
 if alignAndVar == 'Y':
     from mutationsPerProbe import mutationsPerProbe
     mutationsPerProbe(filtered, outputDir)
+
+##########################
+# Remove Undesired Files #
+##########################
+# this will remove many of the output files that are mostly
+# used for troubleshooting and not for typical analysis
+if minimalOutput:
+    system('rm %s' % (outputDir + '/finalOutput.fastq'))
+    system('rm %s' % (outputDir + '/finalOutput.vcf'))
+    system('rm %s' % (outputDir + '/finalOutputDecomposed.vcf'))
+    system('rm %s' % (outputDir + '/finalOutputBlockDecomposed.vcf'))
+    system('rm %s' % (outputDir + '/AF0_filtered.vcf'))
+    system('rm %s' % (outputDir + '/AF1_filtered.vcf'))
+    system('rm %s' % (outputDir + '/total_filtered.vcf'))
 
 ################
 #Output Runtime#

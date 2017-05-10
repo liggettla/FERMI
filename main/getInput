@@ -51,6 +51,7 @@ parser.add_argument('--readLength', '-q', type=int, help='Manually set the read 
 parser.add_argument('--badBaseSubstitute', '-x', action='store_true', help='This flag will trigger replacement of bad bases with N instead of invalidating an entire capture.')
 parser.add_argument('--reference', '-y', type=str, help='Set the location of the human reference genome hg19.fa and supporting files.')
 parser.add_argument('--duplexcollapse', '-w', action='store_true', help='This will run duplex collapsing instead of the original collapsing that treats two complementary strands as different captures.')
+parser.add_argument('--minimaloutput', '-z', action='store_true', help='This will suppress the output of most files, and only include the final vcf files and some of the info files.')
 
 args = parser.parse_args()
 
@@ -72,6 +73,12 @@ if args.largefiles:
 else:
     noBigFiles = 'Y'
 #noBigFiles = raw_input('Suppress Output of Large Files (Y/n): ')
+
+# minimal output
+if args.minimaloutput:
+    minimalOutput = True
+else:
+    minimalOutput = False
 
 # avoid alignment and var calling
 if args.avoidalign:
@@ -323,6 +330,7 @@ def writePickle(one, two, specificOut):
     vardb['badBaseSubstitute'] = badBaseSubstitute
     vardb['REF'] = REF
     vardb['duplex'] = duplex
+    vardb['minimalOutput'] = minimalOutput
 
     pickleVars = './variables.pkl'
 
