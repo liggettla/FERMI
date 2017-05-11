@@ -16,7 +16,7 @@
 #getInput -exzag -q 120 -u 1 -v 0.75 -r 5 -f 5 -i /media/alex/Extra/Dropbox/Code/FERMI/testInput -o /media/alex/Extra/Dropbox/Code/FERMI/testOutput -b 'freebayes' -y '/media/alex/Extra/Dropbox/Code/ReferenceGenomes/hg19.fa' -n 'This is some information.'
 
 # desktop
-getInput -exzag -q 120 -u 1 -v 0.75 -r 5 -f 5 -i /home/alex/Dropbox/Code/FERMI/testInput -o /home/alex/Dropbox/Code/FERMI/testOutput -b 'freebayes' -y '/home/alex/Dropbox/Code/ReferenceGenomes/hg19.fa' -n 'This is some information.'
+getInput -exzg -q 120 -u 1 -v 0.75 -r 5 -f 5 -i /home/alex/Dropbox/Code/FERMI/testInput -o /home/alex/Dropbox/Code/FERMI/testOutput -b 'freebayes' -y '/home/alex/Dropbox/Code/ReferenceGenomes/hg19.fa' -n 'This is some information.'
 
 ###############
 # Cluster Run #
