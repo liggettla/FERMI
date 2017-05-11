@@ -52,6 +52,7 @@ parser.add_argument('--badBaseSubstitute', '-x', action='store_true', help='This
 parser.add_argument('--reference', '-y', type=str, help='Set the location of the human reference genome hg19.fa and supporting files.')
 parser.add_argument('--duplexcollapse', '-w', action='store_true', help='This will run duplex collapsing instead of the original collapsing that treats two complementary strands as different captures.')
 parser.add_argument('--minimaloutput', '-z', action='store_true', help='This will suppress the output of most files, and only include the final vcf files and some of the info files.')
+parser.add_argument('--getsamplesautomatically', '-g', action='store_true', help='This will try and automatically grab and sort all files in a specified input directory so they dont need to be manually specified. Samples should fit the pattern xr1.fastq and xr2.fastq where x can be any string.')
 
 args = parser.parse_args()
 
@@ -98,35 +99,55 @@ REF = args.reference
 ###################
 #Get Input File(s)#
 ##################
-if args.single:
-    numFiles = 'Y'
+if args.getsamplesautomatically:
+    print('Parsing Samples...')
+    # this will attempt to automatically generate r1/r2 pairs
+    from glob import glob as g
+    from os.path import split as s
+    inputDir = args.indir
+    readList={}
+    r1List = g('%s/*r1.fastq' % (inputDir)) # get all r1.fastq
+    
+    for r1 in r1List:
+        r1 = s(r1)[1] # trim off dir 
+        r2 = r1.rstrip('1.fastq') + '2.fastq'
+        readList[r1] = r2
+
+    if len(readList) == 1:
+        numFiles = 'Y'
+    else:
+        numFiles = 'n'
+
 else:
-    numFiles = 'n'
-#numFiles = raw_input('Process only single file? (Y/n): ')
+    if args.single:
+        numFiles = 'Y'
+    else:
+        numFiles = 'n'
+    # numFiles = raw_input('Process only single file? (Y/n): ')
 
-# set input directory
-inputDir = args.indir
-#inputDir = raw_input('Input Dir (/dir): ')
+    # set input directory
+    inputDir = args.indir
+    #inputDir = raw_input('Input Dir (/dir): ')
 
-readList={}
+    readList={}
 
-if numFiles == 'Y':
-    read1 = raw_input('Read 1 fastq Location (R1.fastq): ')
-    read2 = raw_input('Read 2 fastq Location (R2.fastq): ')
+    if numFiles == 'Y':
+        read1 = raw_input('Read 1 fastq Location (R1.fastq): ')
+        read2 = raw_input('Read 2 fastq Location (R2.fastq): ')
 
-    readList[read1] = read2
+        readList[read1] = read2
 
-elif numFiles == 'n':
-    others = 'Y'
-    while others == 'Y':
-        temp = raw_input('Read 1 fastq Location (R1.fastq/n if done): ')
-        if not temp == 'n':
-            read1 = temp
-            read2 = raw_input('Read 2 fastq Location (R2.fastq): ')
-            readList[read1] = read2
-        elif temp == 'n':
-            others = 'n'
-        #others = raw_input('Enter more fastq files? (Y/n): ')
+    elif numFiles == 'n':
+        others = 'Y'
+        while others == 'Y':
+            temp = raw_input('Read 1 fastq Location (R1.fastq/n if done): ')
+            if not temp == 'n':
+                read1 = temp
+                read2 = raw_input('Read 2 fastq Location (R2.fastq): ')
+                readList[read1] = read2
+            elif temp == 'n':
+                others = 'n'
+            #others = raw_input('Enter more fastq files? (Y/n): ')
 
 ####################
 #Load Previous Data#
