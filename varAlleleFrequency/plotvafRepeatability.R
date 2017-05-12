@@ -15,6 +15,8 @@ setwd('/media/alex/Extra/Dropbox/Code/FERMI/varAlleleFrequency')
 # line and 95% confidence interval in order to understand how repeatable the AFs are for the 
 # same variants between samples
 
+oncosites <- c(5073770,7577539,7577119,115256529,115258747,115258744,534287,534288,534289,25398284,25380275,106197266,106197267,106197268,106197269,106155172,106155173,106155174,25457242,25457243,209113112,209113113,90631934,90631838,48649700)
+
 # read in the data
 #vafs <- read.table("vafRepeatability.txt", header = TRUE)
 vafs <- read.table("outputFile", header = TRUE)
@@ -57,10 +59,10 @@ p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity)) +
   #geom_text(aes(label=ifelse(sample2>0.002|sample1>0.002,as.character(identity),'')),hjust=0,vjust=0) + # this labels points above particular frequency
   
     #geom_text_repel(aes(label=ifelse(sample2>0.4|sample1>0.4,as.character(identity),''))) + # this labels points above freq and does not allow overlap
-    geom_text_repel(aes(label=ifelse(sample2>0.002|sample1>0.002,as.character(identity),''))) + # this labels points above freq and does not allow overlap
-    #geom_text_repel(aes(label=ifelse(sample2>0.4|sample1>0.002,as.character(identity),''))) + # this labels points above freq and does not allow overlap
+    #geom_text_repel(aes(label=ifelse(sample2>0.002|sample1>0.002,as.character(identity),''))) + # this labels points above freq and does not allow overlap
+    geom_text_repel(aes(label=ifelse(sample2>0.007 |sample1>0.007 ,as.character(identity),''))) + # this labels points above freq and does not allow overlap
   geom_abline(intercept = 0, slope = 1) +
-  xlab('Mutation VAFs f1r1 Minimum 5 Captures') + ylab('Muation VAFs f1r1 Minimum 1 Capture') +
+    xlab('Mutation VAFs 23r1') + ylab('Mutation VAFs 2r1') +
     #xlab('Mutation VAFs A1 305 Cord') + ylab('Muation VAFs B1 305 Cord') +
     #xlab('Mutation VAFs C1 300 F34') + ylab('Muation VAFs D1 300 F34') +
     #xlab('Mutation VAFs E1 301 F41') + ylab('Muation VAFs F1 301 F41') +
@@ -73,3 +75,13 @@ jpeg('output2.jpg')
 print(p)
 dev.off()
 
+library(ggrepel)
+vafs$col <- grepl(paste0(oncosites,collapse = "|"), vafs$Identity)
+p <- ggplot(vafs, aes(x=Sample1, y=Sample2, alpha=1, color = col)) +
+    geom_point() +
+    geom_text_repel(aes(label=ifelse(Sample2>0.002 |Sample1>0.002 ,as.character(Identity),''))) +
+    xlab('Mutation VAFs 19r1') + ylab('Mutation VAFs Average') +
+    labs(title = 'Variant Allele Frequencies of Putative Mutations') 
+jpeg('output3.jpg')
+print(p)
+dev.off()
