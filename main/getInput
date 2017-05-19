@@ -52,7 +52,7 @@ parser.add_argument('--badBaseSubstitute', '-x', action='store_true', help='This
 parser.add_argument('--reference', '-y', type=str, help='Set the location of the human reference genome hg19.fa and supporting files.')
 parser.add_argument('--duplexcollapse', '-w', action='store_true', help='This will run duplex collapsing instead of the original collapsing that treats two complementary strands as different captures.')
 parser.add_argument('--minimaloutput', '-z', action='store_true', help='This will suppress the output of most files, and only include the final vcf files and some of the info files.')
-parser.add_argument('--getsamplesautomatically', '-g', action='store_true', help='This will try and automatically grab and sort all files in a specified input directory so they dont need to be manually specified. Samples should fit the pattern xr1.fastq and xr2.fastq where x can be any string.')
+parser.add_argument('--getsamplesautomatically', '-g', action='store_true', help='This will try and automatically grab and sort all files in a specified input directory so they dont need to be manually specified. Samples should fit the pattern x1.fastq (r1) and x2.fastq (r2) where x can be any string.')
 
 args = parser.parse_args()
 
@@ -106,7 +106,7 @@ if args.getsamplesautomatically:
     from os.path import split as s
     inputDir = args.indir
     readList={}
-    r1List = g('%s/*r1.fastq' % (inputDir)) # get all r1.fastq
+    r1List = g('%s/*1.fastq' % (inputDir)) # get all r1.fastq
     
     for r1 in r1List:
         r1 = s(r1)[1] # trim off dir 
