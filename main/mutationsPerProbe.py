@@ -63,6 +63,7 @@ def normalizeCounts(raw, totalCoverage):
     return raw
 
 def mutationsPerProbe(inFile, outputDir):
+    from parseLine import seqRead
     target = open(inFile, 'r')
 
     # Number of unique variants found within a particular capture region
@@ -87,7 +88,7 @@ def mutationsPerProbe(inFile, outputDir):
 
     totalCoverage = getMeanCoverage(totalCoverage)
     pdf = plotTally(outputDir, totalCoverage, pdf, 'Probe Bias', 'Avg Num of Captures')
-    
+
     uniqVars = normalizeCounts(uniqVars, totalCoverage)
     #displayTally(uniqVars)
     pdf = plotTally(outputDir, uniqVars, pdf, 'Normalized Unique Variants Per Probe', 'Number of Variants')
@@ -97,7 +98,7 @@ def mutationsPerProbe(inFile, outputDir):
     pdf = plotTally(outputDir, totalVars, pdf, 'Normalized Total Variants Per Probe', 'Number of Variants')
 
     pdf.close()
-    
+
 if __name__ == '__main__':
     from parseLine import seqRead
     inFile, outputDir = runArgParse()
