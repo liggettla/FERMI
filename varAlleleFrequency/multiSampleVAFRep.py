@@ -17,9 +17,27 @@ parser.add_argument('--principle', '-p', type=str, required=True, help='This is 
 parser.add_argument('--samples', '-s', type=str, nargs='*', required=True, help='List of samples to be averaged and compared to the principle sample. Ex: A1-R1')
 parser.add_argument('--rarevars', '-r', type=float, help='This can be set to cutoff the data at a certain allele frequency and only include variants below a particular frequency like 0.03 or 0.003.')
 parser.add_argument('--commonVars', '-c', action='store_true', help='This will only plot variants that are found in both samples and ignore those variants that are only found in one of the samples.')
+parser.add_argument('--germline', '-g', type=str, nargs='*', help='Only output those variants that changed from these bases.')
+parser.add_argument('--variant', '-v', type=str, nargs='*', help='Only output those variants that change to these bases.')
 
 args = parser.parse_args()
 
+#####################
+# Specify Mutations #
+#####################
+if args.germline:
+    germline = args.germline
+else:
+    germline = ['A','T','G','C']
+
+if args.variant:
+    variant = args.variant
+else:
+    variant = ['A','T','G','C']
+
+#################
+# Specify Files #
+#################
 inputDir = args.indir
 outputDir = args.outdir
 #principle = inputDir + '/' + args.principle + '/' +'total_filtered.vcf'
@@ -61,8 +79,8 @@ def parseLine(i):
     DPNum = float(DP.split(',')[0][3:])
     AFNum = AONum / DPNum
 
-    location = '%s-%s-%s' % (chrom, str(loc), str(var))
-    return location, AFNum
+    location = '%s-%s-%s-%s' % (chrom, str(loc), str(WT), str(var))
+    return location, AFNum, WT, var
 
 ###################
 # Find Avg AFNums #
@@ -81,20 +99,23 @@ def takeAverage(tempData):
 # Build Avg Data Structure #
 ############################
 def buildAverageStructure(samples):
+    from Bio.Seq import Seq
     tempData = {}
     for i in samples:
         target = open(inputDir + '/' + i + '/' +'onlyProbedRegions.vcf', 'r')
         for line in target:
             if '#' not in line and 'chr' in line: # skip the info
-                # Ex: loc = chr1:1234:A
-                loc, AFNum = parseLine(line)
+                # Ex: loc = chr1-1234-C-A
+                loc, AFNum, WT, var = parseLine(line)
 
-                # decide if variant is unique or not
-                if rareEnough(AFNum):
-                    if loc in tempData:
-                        tempData[loc]['vaf'].append(AFNum)
-                    else:
-                        tempData[loc] = {'vaf':[AFNum]}
+                # should germline/variant types be included?
+                if WT in germline and var in variant or str(Seq(WT).complement()) in germline and str(Seq(var).complement()) in variant:
+                    # decide if variant is unique or not
+                    if rareEnough(AFNum):
+                        if loc in tempData:
+                            tempData[loc]['vaf'].append(AFNum)
+                        else:
+                            tempData[loc] = {'vaf':[AFNum]}
 
     # average all of the AFNum values
     avgData = takeAverage(tempData)
@@ -106,14 +127,18 @@ def buildAverageStructure(samples):
 # Builds dictionary of the principle data
 # to be compared to the average data
 def buildPrincipleStructure(principle):
+    from Bio.Seq import Seq
     principleData = {}
     target = open(principle, 'r')
     for i in target:
         if '#' not in i and 'chr' in i: # skip the info
-            loc, AFNum = parseLine(i)
-            # decide if variant is unique or not
-            if rareEnough(AFNum):
-                principleData[loc] = AFNum
+            loc, AFNum, WT, var = parseLine(i)
+
+            # should germline/variant types be included?
+            if WT in germline and var in variant or str(Seq(WT).complement()) in germline and str(Seq(var).complement()) in variant:
+                # decide if variant is unique or not
+                if rareEnough(AFNum):
+                    principleData[loc] = AFNum
 
     return principleData
 
