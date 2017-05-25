@@ -1,0 +1,119 @@
+#!/usr/bin/env python
+
+############
+# Argparse #
+############
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--indir', '-i', type=str, required=True, help='Input directory containing the vcf files to be analyzed: /dir')
+parser.add_argument('--outdir', '-o', type=str, required=True, help='Output directory for plots: /dir')
+parser.add_argument('--samplelist', '-s', type=str, nargs='*', required=True, help='Individual sample directories to be considered')
+parser.add_argument('--samplekey', '-k', type=str, required=True, help='Sample key should be in same dir as samples, have headers on first line then each following line should be in this format: 1,A1,300,40 (num, pos, ID, age)')
+
+args = parser.parse_args()
+
+indir = args.indir
+outdir = args.outdir
+samplelist = args.samplelist
+samplekey = args.samplekey
+
+#######################
+# Create Region Lists #
+#######################
+def regions():
+    oncoSites = ['5073770', '7577539','7577119','115256529','115258747','115258744','534287','534288','534289','25398284','25380275','106197266','106197267','106197268','106197269','106155172','106155173','106155174','25457242','25457243','209113112','209113113','90631934','90631838','48649700']
+    oncoGenes = []
+    '''
+    for i in oncoSites: # provides total oncogene region (may underestimate total size)
+        i = i / 1000
+        oncoGenes.append(i)
+    '''
+    TIIIRegions = ['115227', '229041', '110541', '112997', '121167', '123547', '124428', '1397', '2126', '2390', '2593', '11486', '92527', '73379', '82455', '85949']
+
+    return oncoSites, oncoGenes, TIIIRegions
+
+###################
+# Read Sample Key #
+###################
+def getSampleKey(indir, samplekey):
+    keyfile = indir + '/' + samplekey
+    target = open(keyfile, 'r')
+    key = {}
+    count = 0
+    for line in target:
+        # skip headers
+        if count == 0:
+            count += 1
+        else:
+            x=line.split(',')
+            key[x[0]] = x[3]
+            
+    return key 
+
+####################
+# Read Sample Data #
+####################
+def getSampleData(indir, samplelist, key, oncoSites):
+    from parseLine import seqRead
+
+    compiledData = {}
+
+    for sample in samplelist:
+        # sample in form 1r1.fastq so strip off 8 suffix chars
+        age = key[sample[:-8]]
+        target = open('%s/%s/onlyProbedRegions.vcf' % (indir, sample))
+        
+        for line in target:
+            if '#' not in line and 'chr' in line: # skip the info
+                lineObj = seqRead(line)
+                if lineObj.loc() in oncoSites and lineObj.loc() in compiledData:
+                    compiledData[lineObj.loc()]['age'].append(age)
+                    compiledData[lineObj.loc()]['af'].append(lineObj.af())
+                elif lineObj.loc() in oncoSites and lineObj.loc() not in compiledData:
+                    compiledData[lineObj.loc()] = {}
+                    compiledData[lineObj.loc()] = {}
+
+                    compiledData[lineObj.loc()]['age']=[age]
+                    compiledData[lineObj.loc()]['af']=[lineObj.af()]
+
+    return compiledData
+
+if __name__ == '__main__':
+    oncoSites, oncoGenes, TIII = regions()
+    key = getSampleKey(indir, samplekey)
+
+    # format is {'5073770':{'age':[10,20], 'af':[0.5,0.005]}}
+    compiledData = getSampleData(indir, samplelist, key, oncoSites)
+
+    outputfile = outdir + 'oncogeneSelection.txt'
+
+    '''
+            Sample #    Plate Pos   Sample ID   Sample  Index Pair
+    1   A1  305 Cord    ATCACGAC-AAGGTTCA
+    2   B1  503 Cord    ACAGTGGT-ACTTAGCA
+    *3   C1  502 Cord    CAGATCCA-AGAGAACA
+    4   D1  308 34  ACAAACGG-GTGTCTTA
+    5   E1  310 34  ACCCAGCA-TCGATTAG
+    6   F1  312 30  AACCCCTC-TGTTCTAG
+    7   G1  300 34  CCCAACCT-GGAACTTA
+    8   H1  314 46  CACCACAC-TAGGTCTA
+    9   A2  202 47  GAAACCCA-AAGGTTCA
+    10  B2  306 40  TGTGACCA-ACTTAGCA
+    *11  C2  204 59  AGGGTCAA-AGAGAACA
+    12  D2  200 59  AGGAGTGG-GTGTCTTA
+                    
+    *13  E2  304 58  ATCACGAC-TCGATTAG
+    14  F2  201 62  ACAGTGGT-TGTTCTAG
+    15  G2  209 65  CAGATCCA-GGAACTTA
+    16  H2  207 64  ACAAACGG-TAGGTCTA
+    17  A3  211 64  ACCCAGCA-AAGGTTCA
+    18  B3  316 73  AACCCCTC-ACTTAGCA
+    19  C3  317 73  CCCAACCT-AGAGAACA
+    20  D3  318 72  CACCACAC-GTGTCTTA
+    21  E3  319 79  GAAACCCA-TCGATTAG
+    *22  F3  323 89  TGTGACCA-TGTTCTAG
+    23  G3  500 HCT MMR +   AGGGTCAA-GGAACTTA
+    24  H3  501 HCT MMR -   AGGAGTGG-TAGGTCTA
+    '''
+
