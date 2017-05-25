@@ -79,14 +79,32 @@ def getSampleData(indir, samplelist, key, oncoSites):
 
     return compiledData
 
+#############
+# Plot Data #
+#############
+def plotData(compiledData, oncoSites):
+    import matplotlib.pyplot as plt
+
+    for locus in oncoSites:
+        age = compiledData[locus]['age']
+        af = compiledData[locus]['af']
+
+        plt.plot(age, af, 'bo')
+        plt.axis([0,100,0,0.002])
+        plt.title('Oncogenic Locus: %s' % (locus))
+        plt.show()
+
 if __name__ == '__main__':
     oncoSites, oncoGenes, TIII = regions()
     key = getSampleKey(indir, samplekey)
 
     # format is {'5073770':{'age':[10,20], 'af':[0.5,0.005]}}
     compiledData = getSampleData(indir, samplelist, key, oncoSites)
+    plotData(compiledData, oncoSites)
 
-    outputfile = outdir + 'oncogeneSelection.txt'
+        
+
+
 
     '''
             Sample #    Plate Pos   Sample ID   Sample  Index Pair
