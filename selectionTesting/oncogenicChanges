@@ -92,6 +92,10 @@ def plotData(compiledData, oncoSites):
         plt.plot(age, af, 'bo')
         plt.axis([0,100,0,0.002])
         plt.title('Oncogenic Locus: %s' % (locus))
+        plt.xlabel('Age (years)')
+        plt.ylabel('Allele Frequency')
+        plt.tight_layout() # adjust window size to accomodate labels
+        plt.savefig(locus + '.png')
         plt.show()
 
 if __name__ == '__main__':
@@ -101,37 +105,3 @@ if __name__ == '__main__':
     # format is {'5073770':{'age':[10,20], 'af':[0.5,0.005]}}
     compiledData = getSampleData(indir, samplelist, key, oncoSites)
     plotData(compiledData, oncoSites)
-
-        
-
-
-
-    '''
-            Sample #    Plate Pos   Sample ID   Sample  Index Pair
-    1   A1  305 Cord    ATCACGAC-AAGGTTCA
-    2   B1  503 Cord    ACAGTGGT-ACTTAGCA
-    *3   C1  502 Cord    CAGATCCA-AGAGAACA
-    4   D1  308 34  ACAAACGG-GTGTCTTA
-    5   E1  310 34  ACCCAGCA-TCGATTAG
-    6   F1  312 30  AACCCCTC-TGTTCTAG
-    7   G1  300 34  CCCAACCT-GGAACTTA
-    8   H1  314 46  CACCACAC-TAGGTCTA
-    9   A2  202 47  GAAACCCA-AAGGTTCA
-    10  B2  306 40  TGTGACCA-ACTTAGCA
-    *11  C2  204 59  AGGGTCAA-AGAGAACA
-    12  D2  200 59  AGGAGTGG-GTGTCTTA
-                    
-    *13  E2  304 58  ATCACGAC-TCGATTAG
-    14  F2  201 62  ACAGTGGT-TGTTCTAG
-    15  G2  209 65  CAGATCCA-GGAACTTA
-    16  H2  207 64  ACAAACGG-TAGGTCTA
-    17  A3  211 64  ACCCAGCA-AAGGTTCA
-    18  B3  316 73  AACCCCTC-ACTTAGCA
-    19  C3  317 73  CCCAACCT-AGAGAACA
-    20  D3  318 72  CACCACAC-GTGTCTTA
-    21  E3  319 79  GAAACCCA-TCGATTAG
-    *22  F3  323 89  TGTGACCA-TGTTCTAG
-    23  G3  500 HCT MMR +   AGGGTCAA-GGAACTTA
-    24  H3  501 HCT MMR -   AGGAGTGG-TAGGTCTA
-    '''
-
