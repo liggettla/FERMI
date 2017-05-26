@@ -208,7 +208,7 @@ principleData = buildPrincipleStructure(principle)
 outputData(commonVars, avgData, principleData)
 plotAndDisplay(outputFile, plotFile1, plotFile2)
 
-from computeRSquared import getRSquared
+from revisedComputeRSquared import getRSquared
 r2 = getRSquared()
 print('R-Squared = %f' % (r2))
 
