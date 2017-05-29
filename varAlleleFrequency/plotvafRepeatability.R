@@ -53,16 +53,16 @@ x = data.frame(vafs, predict(lm_fit, interval = 'prediction'))
 # plot with y=x line
 p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity)) +
   geom_point() +
-  #xlim(0,1) +
-  #ylim(0,1) +
+  xlim(0,0.05) +
+  ylim(0,0.05) +
   #geom_text(aes(label=identity), hjust='inward', vjust='inward', angle=0) + # this labels all points
   #geom_text(aes(label=ifelse(sample2>0.002|sample1>0.002,as.character(identity),'')),hjust=0,vjust=0) + # this labels points above particular frequency
   
     #geom_text_repel(aes(label=ifelse(sample2>0.4|sample1>0.4,as.character(identity),''))) + # this labels points above freq and does not allow overlap
-    #geom_text_repel(aes(label=ifelse(sample2>0.002|sample1>0.002,as.character(identity),''))) + # this labels points above freq and does not allow overlap
-    geom_text_repel(aes(label=ifelse(sample2>0.007 |sample1>0.007 ,as.character(identity),''))) + # this labels points above freq and does not allow overlap
+    #geom_text_repel(aes(label=ifelse(sample2>0.0025|sample1>0.0025,as.character(identity),''))) + # this labels points above freq and does not allow overlap
+    #geom_text_repel(aes(label=ifelse(sample2>0.0005 |sample1>0.0005 ,as.character(identity),''))) + # this labels points above freq and does not allow overlap
   geom_abline(intercept = 0, slope = 1) +
-    xlab('Mutation VAFs 23r1') + ylab('Mutation VAFs 2r1') +
+    xlab('Mutation VAFs Sample 305') + ylab('Mutation VAFs Average') +
     #xlab('Mutation VAFs A1 305 Cord') + ylab('Muation VAFs B1 305 Cord') +
     #xlab('Mutation VAFs C1 300 F34') + ylab('Muation VAFs D1 300 F34') +
     #xlab('Mutation VAFs E1 301 F41') + ylab('Muation VAFs F1 301 F41') +
