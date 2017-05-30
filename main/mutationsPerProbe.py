@@ -37,6 +37,7 @@ def plotTally(outputDir, tally, pdf, title='Variants Per Probe', xlabel='Number 
     plt.xlabel('Probes', fontsize=1)
     plt.ylabel(xlabel)
     plt.xticks(range(len(tally)), tally.keys(), rotation='90')
+    plt.tight_layout()
 
 
     #fig = plt.figure()
