@@ -177,14 +177,14 @@ def outputData(commonVars, avgData, principleData):
 ####################
 # Plot and Display #
 ####################
-def plotAndDisplay(outputFile, plotFile1, plotFile2):
-    print outputFile, plotFile1, plotFile2
+def plotAndDisplay(outputFile, plotFile1, plotFile2, displayPlot):
     from os import system
     #import pdb; pdb.set_trace()
 
     # plot the results
     command = 'Rscript plotvafRepeatability.R'
-    system(command)
+    if displayPlot:
+        system(command)
 
     # move the results
     command = 'mv outputFile %s' % (outputFile)
@@ -192,13 +192,15 @@ def plotAndDisplay(outputFile, plotFile1, plotFile2):
     #command = 'mv output1.jpg %s' % (plotFile1)
     #system(command)
     command = 'mv output2.jpg %s' % (plotFile2)
-    system(command)
+    if displayPlot:
+        system(command)
 
     # display the plots
     #command = 'eog vafRepeatabilityRegression.jpg'
     #system(command)
     command = 'eog vafRepeatabilityNoRegression.jpg'
-    system(command)
+    if displayPlot:
+        system(command)
 
 ##################
 # Run the Script #
@@ -210,7 +212,10 @@ outputData(commonVars, avgData, principleData)
 
 # output plot if requested
 if args.displayplot:
-    plotAndDisplay(outputFile, plotFile1, plotFile2)
+    plotAndDisplay(outputFile, plotFile1, plotFile2, True)
+else:
+    plotAndDisplay(outputFile, plotFile1, plotFile2, False)
+
 
 from revisedComputeRSquared import getRSquared
 r2 = getRSquared()
