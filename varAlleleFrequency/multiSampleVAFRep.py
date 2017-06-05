@@ -19,6 +19,7 @@ parser.add_argument('--rarevars', '-r', type=float, help='This can be set to cut
 parser.add_argument('--commonVars', '-c', action='store_true', help='This will only plot variants that are found in both samples and ignore those variants that are only found in one of the samples.')
 parser.add_argument('--germline', '-g', type=str, nargs='*', help='Only output those variants that changed from these bases.')
 parser.add_argument('--variant', '-v', type=str, nargs='*', help='Only output those variants that change to these bases.')
+parser.add_argument('--displayplot', '-d', action='store_true', help='This will trigger the displaying of VAF plot.')
 
 args = parser.parse_args()
 
@@ -206,7 +207,10 @@ avgData = buildAverageStructure(samples)
 
 principleData = buildPrincipleStructure(principle)
 outputData(commonVars, avgData, principleData)
-plotAndDisplay(outputFile, plotFile1, plotFile2)
+
+# output plot if requested
+if args.displayplot:
+    plotAndDisplay(outputFile, plotFile1, plotFile2)
 
 from revisedComputeRSquared import getRSquared
 r2 = getRSquared()
