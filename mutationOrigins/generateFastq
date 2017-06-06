@@ -84,7 +84,7 @@ def checkIfTarget(substrings, sequences):
 
     for i in substrings:
         for j in sequences:
-            if distance (i,j) < 2:
+            if distance (i,j) < 1:
                 status = True
             else:
                 pass
@@ -124,7 +124,40 @@ if __name__ == '__main__':
     'ACTGGGCGTCCTACGCC',
     'ACATCAGAGCAATGTTA',
     'GATGGCAGCTTCTAGAT']
+    
+    mutSeq = [
+    'AGGCCACTCGTCTATCA',
+    'AAGACCGTACCACCCAG',
+    'AGTAGGAGCGACATAGA',
+    'GAGTGACACAGAAGATA',
+    'TATATCCACAGAAGATA',
+    'CTACAAAGTTCCAGAAT',
+    'GCATCAGCTGGATATCC',
+    'TCTCTCACTTCCTCCAT',
+    'ACACAACACACATACAA',
+    'GCTCCTCAAGGGCCTGC',
+    'CACTGCCCACTGCTCTT',
+    'GCTGCTCTCGGTCAAGA',
+    'GGCGTAGGGCGCCCAGT',
+    'TAACATTGTTCTGATGT',
+    'ATCTAGAACCTGCCATC',
+    'TGATAGACGAGTGGCCT',
+    'CTGGGTGGTACGGTCTT',
+    'TCTATGTCGCTCCTACT',
+    'TATCTTCTGTGTCACTC',
+    'TATCTTCTGTGGATATA',
+    'ATTCTGGAACTTTGTAG',
+    'GGATATCCAGCTGATGC',
+    'ATGGAGGAAGTGAGAGA',
+    'TTGTATGTGTGTTGTGT',
+    'GCAGGCCCTTGAGGAGC',
+    'AAGAGCAGTGGGCAGTG',
+    'TCTTGACCGAGAGCAGC',
+    'ACTGGGCGCCCTACGCC',
+    'ACATCAGAACAATGTTA',
+    'GATGGCAGGTTCTAGAT']
 
+if __name__ == '__main__':
     indir, outdir, autoget = runArgparse()
 
     if autoget:
