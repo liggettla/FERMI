@@ -21,4 +21,7 @@ varAlleleFrequency/vafRepeatability.txt
 varAlleleFrequency/vafRepeatabilityNoRegression.jpg
 varAlleleFrequency/vafRepeatabilityRegression.jpg
 varAlleleFrequency/plotvafRepeatability.R
+varAlleleFrequency/run.sh
+varAlleleFrequency/.RData
+varAlleleFrequency/.Rhistory
 fastqHanding/entireProbedRegion.txt
