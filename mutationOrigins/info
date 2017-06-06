@@ -1,0 +1,7 @@
+The purpose of the scripts in this folder are to understand what the
+origins of rare mutations are. The initial idea is to look at heterozygous
+SNPs and then understand the mutation load that is associated with those SNPs.
+The theory is that if associated mutations are uniformly associated with
+the SNPs then mutations are coming both early and late in differentiation
+lineages. If the mutations are more heavily associated with one of the SNPs
+then it would seem to be occurring in early less differentiated cells.
