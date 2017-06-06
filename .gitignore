@@ -25,3 +25,4 @@ varAlleleFrequency/run.sh
 varAlleleFrequency/.RData
 varAlleleFrequency/.Rhistory
 fastqHanding/entireProbedRegion.txt
+mutationOrigins/run.sh
