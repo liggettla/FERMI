@@ -72,16 +72,18 @@ def searchFastq(indir, outdir, r1, r2, wtSeq, mutSeq):
                     quality2 = line2.rstrip('\n')
                     position = 1 
                     
-                    if seqPresence = 'wt':
+                    if seqPresence == 'wt':
                         targetr1wt.write(header1 + '\n' + seq1 + '\n' + plus + '\n' + quality1 + '\n')
                         targetr2wt.write(header2 + '\n' + seq2 + '\n' + plus + '\n' + quality2 + '\n')
-                    if seqPresence = 'mut':
+                    if seqPresence == 'mut':
                         targetr1mut.write(header1 + '\n' + seq1 + '\n' + plus + '\n' + quality1 + '\n')
                         targetr2mut.write(header2 + '\n' + seq2 + '\n' + plus + '\n' + quality2 + '\n')
                     else:
                         pass
-    targetr1.close()
-    targetr2.close()
+    targetr1wt.close()
+    targetr2wt.close()
+    targetr1mut.close()
+    targetr2mut.close()
                     
 def generateSubstrings(seq, sequences):
     n = len(sequences[0])
@@ -102,12 +104,14 @@ def checkIfTarget(substrings, sequences):
 def checkSeqPresence(seq1, wtSeq, mutSeq):
     status = False
     trimmed = seq1[3:-4] # trying a 10bp seq
-    if wtSeq in seq1:
-        status = 'wt'
-    elif mutSeq in seq1:
-        status = 'mut'
-
-    return status
+    for i in wtSeq:
+        if i in seq1:
+            status = 'wt'
+            return status
+    for i in mutSeq:
+        if i in seq1:
+            status = 'mut'
+            return status
 
 if __name__ == '__main__':
     # this includes rev complements
@@ -175,7 +179,6 @@ if __name__ == '__main__':
     'ACATCAGAACAATGTTA',
     'GATGGCAGGTTCTAGAT']
 
-if __name__ == '__main__':
     indir, outdir, autoget = runArgparse()
 
     if autoget:
@@ -183,6 +186,6 @@ if __name__ == '__main__':
         print sampleList
 
     for sample in sampleList:
-        searchFastq(indir, outdir, sample, sampleList[sample], sequences)
+        searchFastq(indir, outdir, sample, sampleList[sample], wtSeq, mutSeq)
 
 
