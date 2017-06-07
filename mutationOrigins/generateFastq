@@ -29,18 +29,22 @@ def autogetSamples(inputDir):
 
     return readList
 
-def searchFastq(indir, outdir, r1, r2, sequences):
+def searchFastq(indir, outdir, r1, r2, wtSeq, mutSeq):
     import itertools
     from Bio.Seq import Seq
     position = 1 
     plus = '+' 
 
-    r1out = '%s/%s' %  (outdir, r1)
-    r2out = '%s/%s' %  (outdir, r2)
+    r1wt = '%s/wt%s' %  (outdir, r1)
+    r2wt = '%s/wt%s' %  (outdir, r2)
+    r1mut = '%s/mut%s' %  (outdir, r1)
+    r2mut = '%s/mut%s' %  (outdir, r2)
 
     #write results to a new fastq file
-    targetr1 = open(r1out, 'w')
-    targetr2 = open(r2out, 'w')
+    targetr1wt = open(r1wt, 'w')
+    targetr2wt = open(r2wt, 'w')
+    targetr1mut = open(r1mut, 'w')
+    targetr2mut = open(r2mut, 'w')
 
     with open(indir+'/'+r1, 'r') as R1: 
         with open(indir+'/'+r2, 'r') as R2: 
@@ -56,8 +60,10 @@ def searchFastq(indir, outdir, r1, r2, sequences):
                 elif position == 2:
                     seq1 = line1.rstrip('\n') #It is necessary to first strip, or \n will count as a char
                     seq2 = line2.rstrip('\n')
-                    substrings = generateSubstrings(seq1, sequences)
-                    shouldInclude = checkIfTarget(substrings, sequences)
+                    #substrings = generateSubstrings(seq1, sequences)
+                    #shouldInclude = checkIfTarget(substrings, sequences)
+                    seqPresence = checkSeqPresence(seq1, wtSeq, mutSeq)
+
                     position += 1
                 elif position == 3:
                     position += 1
@@ -66,9 +72,12 @@ def searchFastq(indir, outdir, r1, r2, sequences):
                     quality2 = line2.rstrip('\n')
                     position = 1 
                     
-                    if shouldInclude:
-                        targetr1.write(header1 + '\n' + seq1 + '\n' + plus + '\n' + quality1 + '\n')
-                        targetr2.write(header2 + '\n' + seq2 + '\n' + plus + '\n' + quality2 + '\n')
+                    if seqPresence = 'wt':
+                        targetr1wt.write(header1 + '\n' + seq1 + '\n' + plus + '\n' + quality1 + '\n')
+                        targetr2wt.write(header2 + '\n' + seq2 + '\n' + plus + '\n' + quality2 + '\n')
+                    if seqPresence = 'mut':
+                        targetr1mut.write(header1 + '\n' + seq1 + '\n' + plus + '\n' + quality1 + '\n')
+                        targetr2mut.write(header2 + '\n' + seq2 + '\n' + plus + '\n' + quality2 + '\n')
                     else:
                         pass
     targetr1.close()
@@ -90,10 +99,19 @@ def checkIfTarget(substrings, sequences):
                 pass
 
     return status
+def checkSeqPresence(seq1, wtSeq, mutSeq):
+    status = False
+    trimmed = seq1[3:-4] # trying a 10bp seq
+    if wtSeq in seq1:
+        status = 'wt'
+    elif mutSeq in seq1:
+        status = 'mut'
+
+    return status
 
 if __name__ == '__main__':
     # this includes rev complements
-    sequences = [
+    wtSeq = [
     'AGGCCACTAGTCTATCA',
     'AAGACCGTGCCACCCAG',
     'AGTAGGAGTGACATAGA',
