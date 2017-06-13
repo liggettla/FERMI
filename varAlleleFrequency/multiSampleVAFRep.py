@@ -20,6 +20,7 @@ parser.add_argument('--commonVars', '-c', action='store_true', help='This will o
 parser.add_argument('--germline', '-g', type=str, nargs='*', help='Only output those variants that changed from these bases.')
 parser.add_argument('--variant', '-v', type=str, nargs='*', help='Only output those variants that change to these bases.')
 parser.add_argument('--displayplot', '-d', action='store_true', help='This will trigger the displaying of VAF plot.')
+parser.add_argument('--multiplier', '-m', type=float, help='This specifies a multiplier to artificially increase all the VAFs in the priniciple sample by a set multiplier allowing for comparison of shifting populations.')
 
 args = parser.parse_args()
 
@@ -108,6 +109,8 @@ def buildAverageStructure(samples):
             if '#' not in line and 'chr' in line: # skip the info
                 # Ex: loc = chr1-1234-C-A
                 loc, AFNum, WT, var = parseLine(line)
+                if args.multiplier:
+                    AFNum = AFNum * args.multiplier
 
                 # should germline/variant types be included?
                 if WT in germline and var in variant or str(Seq(WT).complement()) in germline and str(Seq(var).complement()) in variant:
