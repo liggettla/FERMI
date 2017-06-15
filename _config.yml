@@ -1,0 +1,8 @@
+title: FERMI
+description: Fast Extremely Rare Mutation Identification
+google_analytics: UA-70934716-1
+show_downloads: true
+theme: jekyll-theme-merlot
+
+gems:
+  - jekyll-mentions
