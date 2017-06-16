@@ -42,7 +42,7 @@ def plot(chrom, loc):
             muts.append(x[4].strip('\n'))
             wts.append(colors[x[3]])
 
-
+    print loci, muts, wts
     ind = np.arange(len(loci))
     p1 =plt.bar(loci, vafs, color=wts)
     #plt.colorbar(muts)
@@ -57,4 +57,7 @@ def plot(chrom, loc):
 
 if __name__ == '__main__':
     createInput()
-    plot('2', 27000000)
+    #plot('2', 27000000)
+    plot('16', 74379750)
+    #plot('4', 134428737)
+    #plot('11', 2226328)
