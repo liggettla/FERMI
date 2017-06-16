@@ -23,7 +23,7 @@ def createInput():
     inFile.close()
     outFile.close()
 
-def plot(chrom, loc):
+def plot():
     import numpy as np
     import matplotlib.pyplot as plt
     from Bio.Seq import Seq
@@ -33,7 +33,11 @@ def plot(chrom, loc):
     vafs=[]
     loci=[]
     changes=[]
-# change to the colors in the base bias plot
+
+    # form: {(chrom,loc):{vaf:[],mut[],wt[]}}
+    totalDict = {}
+
+    # same colors as base bias plotting
     colors = {'CA':'c', 'CG':'k', 'CT':'r', 'TA':'0.5', 'TC':'g', 'TG':'m'}
 
     for line in inFile:
@@ -57,6 +61,8 @@ def plot(chrom, loc):
     #plt.colorbar(muts)
     plt.ylim(ymin=0)
     plt.ylim(ymax=0.003)
+    plt.xlabel('Chromosome Location')
+    plt.ylabel('Variant Allele Frequencies')
 
     # create the legend
     cyan = mpatches.Patch(color='cyan', label='C-A')
@@ -69,9 +75,35 @@ def plot(chrom, loc):
 
     plt.show()
 
+# this will check if region is in a currently probed region or
+# in a differently probed region
+def checkLoc(chrom, loc, wt, mut, vaf, totalDict):
+    # total Dict form:
+    # {(chrom,loc):{locus:[1234],vaf:[0.5],mut[CT]}}
+
+    key = (chrom, loc)
+    isunique=True
+
+    for i in totalDict:
+        # is location prob in same probe
+        if chrom == i[0] and loc < i[1] + 200 and loc > i[1] - 200:
+            key = i
+            isunique=False
+
+    if isunique:
+        totalDict[key]['locus']=[locus]
+        totalDict[key]['vaf']=[vaf]
+        totalDict[key]['mut']=[('%s%s' % (wt, mut))]
+    else:
+        totalDict[key]['locus'].append(locus)
+        totalDict[key]['vaf'].append(vaf)
+        totalDict[key]['mut'].append(('%s%s' % (wt, mut)))
+
+    return totalDict
+
 if __name__ == '__main__':
     createInput()
-    #plot('2', 27000000)
-    plot('16', 74379750)
+    plot('2', 27000000)
+    #plot('16', 74379750)
     #plot('4', 134428737)
     #plot('11', 2226328)
