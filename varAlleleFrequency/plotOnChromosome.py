@@ -26,12 +26,15 @@ def createInput():
 def plot(chrom, loc):
     import numpy as np
     import matplotlib.pyplot as plt
+    from Bio.Seq import Seq
+    import matplotlib.patches as mpatches
+
     inFile = open('vafPlotting.txt', 'r')
     vafs=[]
     loci=[]
-    muts=[]
-    wts=[]
-    colors = {'C':'b', 'T':'r', 'G':'g', 'A':'y'}
+    changes=[]
+# change to the colors in the base bias plot
+    colors = {'CA':'c', 'CG':'k', 'CT':'r', 'TA':'0.5', 'TC':'g', 'TG':'m'}
 
     for line in inFile:
 
@@ -39,21 +42,32 @@ def plot(chrom, loc):
         if x[1] == chrom and float(x[2]) < loc:
             vafs.append(float(x[0]))
             loci.append(float(x[2]))
-            muts.append(x[4].strip('\n'))
-            wts.append(colors[x[3]])
+            mut = x[4].strip('\n')
+            wt = x[3]
 
-    print loci, muts, wts
+            if ('%s%s' % (wt, mut)) in colors:
+                change = ('%s%s' % (wt, mut))
+            else:
+                change = str(Seq(('%s%s' % (wt, mut))).complement())
+
+            changes.append(colors[change])
+
     ind = np.arange(len(loci))
-    p1 =plt.bar(loci, vafs, color=wts)
+    p1 = plt.bar(loci, vafs, color=changes)
     #plt.colorbar(muts)
     plt.ylim(ymin=0)
     plt.ylim(ymax=0.003)
-    #plt.axis([0])
+
+    # create the legend
+    cyan = mpatches.Patch(color='cyan', label='C-A')
+    black = mpatches.Patch(color='black', label='C-G')
+    red = mpatches.Patch(color='red', label='C-T')
+    gray = mpatches.Patch(color='gray', label='T-A')
+    green = mpatches.Patch(color='green', label='T-G')
+    magenta = mpatches.Patch(color='magenta', label='T-G')
+    plt.legend(handles=[cyan, black, red, gray, green, magenta])
+
     plt.show()
-
-
-
-
 
 if __name__ == '__main__':
     createInput()
