@@ -24,5 +24,7 @@ varAlleleFrequency/plotvafRepeatability.R
 varAlleleFrequency/run.sh
 varAlleleFrequency/.RData
 varAlleleFrequency/.Rhistory
+varAlleleFrequency/vafPlotting.txt
+varAlleleFrequency/output*
 fastqHanding/entireProbedRegion.txt
 mutationOrigins/run.sh

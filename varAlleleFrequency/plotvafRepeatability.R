@@ -8,8 +8,8 @@ library(ggrepel) # this avoids overlapping labels
 # Note that this script cannot begin with a comment for some reason
 
 #setwd('/media/alex/Extra/Dropbox/Code/FERMI/varAlleleFrequency')
-#setwd('/media/alex/Extra/Dropbox/Code/FERMI/varAlleleFrequency')
-setwd('/home/alex/Dropbox/Code/FERMI/varAlleleFrequency')
+setwd('/media/alex/Extra/Dropbox/Code/FERMI/varAlleleFrequency')
+#setwd('/home/alex/Dropbox/Code/FERMI/varAlleleFrequency')
 
 # This script plots the VAFs of each mutation found between two samples along with a regression
 # line and 95% confidence interval in order to understand how repeatable the AFs are for the 
@@ -53,8 +53,8 @@ x = data.frame(vafs, predict(lm_fit, interval = 'prediction'))
 # plot with y=x line
 p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity)) +
   geom_point() +
-  xlim(0,0.01) +
-  ylim(0,0.01) +
+  xlim(0,0.003) +
+  ylim(0,0.003) +
   #geom_text(aes(label=identity), hjust='inward', vjust='inward', angle=0) + # this labels all points
   #geom_text(aes(label=ifelse(sample2>0.002|sample1>0.002,as.character(identity),'')),hjust=0,vjust=0) + # this labels points above particular frequency
   
