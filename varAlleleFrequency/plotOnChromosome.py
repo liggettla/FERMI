@@ -56,9 +56,9 @@ def plot():
 
             changes.append(colors[change])
 
+    # create plot
     ind = np.arange(len(loci))
     p1 = plt.bar(loci, vafs, color=changes)
-    #plt.colorbar(muts)
     plt.ylim(ymin=0)
     plt.ylim(ymax=0.003)
     plt.xlabel('Chromosome Location')
