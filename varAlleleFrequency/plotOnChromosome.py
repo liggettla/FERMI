@@ -40,15 +40,15 @@ def plot():
         else:
             x = line.split('\t')
             chrom = x[1]
-            loc = x[2]
+            loc = float(x[2])
             wt = x[3]
             mut = x[4].strip('\n')
-            vaf = x[0]
+            vaf = float(x[0])
 
             totalDict = checkLoc(chrom, loc, wt, mut, vaf, totalDict)
 
-        for probe in totalDict:
-            generatePlot(totalDict[probe])
+    for probe in totalDict:
+        generatePlot(totalDict[probe])
 
 # this will check if region is in a currently probed region or
 # in a differently probed region
@@ -104,9 +104,8 @@ def generatePlot(probe):
     # {locus:[1234],vaf:[0.5],mut:[CT]}
     muts = probe['mut']
     changes = generateColors(muts)
-    loci = [float(i) for i in probe['locus']]
-    vafs = [float(i) for i in probe['vaf']]
-    print probe
+    loci = probe['locus']
+    vafs = probe['vaf']
 
     # create plot
     ind = np.arange(len(loci))

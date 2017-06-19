@@ -21,6 +21,7 @@ parser.add_argument('--germline', '-g', type=str, nargs='*', help='Only output t
 parser.add_argument('--variant', '-v', type=str, nargs='*', help='Only output those variants that change to these bases.')
 parser.add_argument('--displayplot', '-d', action='store_true', help='This will trigger the displaying of VAF plot.')
 parser.add_argument('--multiplier', '-m', type=float, help='This specifies a multiplier to artificially increase all the VAFs in the priniciple sample by a set multiplier allowing for comparison of shifting populations.')
+parser.add_argument('--plotonchrom', '-z', action='store_true', help='This will output vafs of the data shown on the y-axis of the vaf comparison plot (typically the average samples) along chromosomal distances to understand hot and cold regions of the chromosome.')
 
 args = parser.parse_args()
 
@@ -223,4 +224,8 @@ else:
 from revisedComputeRSquared import getRSquared
 r2 = getRSquared()
 print('R-Squared = %f' % (r2))
+
+if args.plotonchrom:
+    from os import system
+    system('python plotOnChromosome.py')
 
