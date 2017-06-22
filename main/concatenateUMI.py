@@ -73,11 +73,18 @@ def duplexConcatenate(read1, read2, output, realvsmock, overlap=80):
                     seq1 = line1.rstrip('\n')
                     seq2 = str(Seq(line2.rstrip('\n')).reverse_complement())
                     r1UMI = seq1[:6]
-                    r2UMI = seq2[-6:]
+                    r2UMI = seq2.rstrip('\n')[-6:]
+
                     r1 = seq1[6:]
                     r2 = seq2[:-6]
+                    r1,r2 = trimReads(r1,r2)
+
+                    '''
+                    r1 = seq1.rstrip('\n')[24:]
+                    r2 = seq2.rstrip('\n')[:-25]
                     r1 = r1[-overlap:]
                     r2 = r2[:overlap]
+                    '''
 
                     finalRead = duplexCollapse(r1, r2, r1UMI, r2UMI, realvsmock)
 
@@ -106,6 +113,42 @@ def duplexCollapse(r1, r2, r1UMI, r2UMI, realvsmock):
 
     finalRead += r2UMI
     return finalRead
+
+def trimReads(r1,r2):
+    from Levenshtein import distance
+
+    # some of the captures are less than 150bp causing r2 to extend 5' of r1
+    # so cleave off the most that could ever overhang from my captures and now
+    # r1 should always align more 5' than r2
+    r2 = r2[14:]
+
+    r1_5prime = r1[:10] # first 10bp
+    r1_3prime = r1[-10:]# last 10bp
+    # reversed for r2
+    r2_5prime = r2[-10:]
+    r2_3prime = r2[:10]
+
+    while distance(r1_5prime, r2_3prime) > 0: # allow one errors
+        r1 = r1[1:] # cut off first base
+        r1_5prime = r1[:10] # first 10bp
+        print r1,'\n',r2
+
+    while distance(r2_5prime, r1_3prime) > 0: # allow one errors
+        r2 = r2[:-1] # cut off last base
+        r2_5prime = r2[-10:] # first 10bp
+        print r1,'\n',r2
+
+    return r1, r2
+
+
+
+
+
+
+
+
+
+
 
 
 
