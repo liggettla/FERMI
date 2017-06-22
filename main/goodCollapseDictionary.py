@@ -96,7 +96,6 @@ def collapseReadsListDict(sequences, varThresh, final_output_file, supportingRea
         if readLength > len(sequences[umi][0][0]):
             readLength = len(sequences[umi][0][0])
 
-        print readLength
         for base in range(readLength):
             covCounter = 0 # used for quality coverage calc
 
