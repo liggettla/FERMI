@@ -78,14 +78,12 @@ def duplexConcatenate(read1, read2, output, overlap=80):
                     r2 = seq2[:-6]
                     r1 = r1[-overlap:]
                     r2 = r2[:overlap]
-                    print r1, r2, r1UMI, r2UMI
 
                     finalRead = duplexCollapse(r1, r2, r1UMI, r2UMI)
 
                     position += 1
                 elif position == 3:
                     position += 1
-                #retain quality scores for R2 UMI
                 elif position == 4:
                     quality = line1.rstrip('\n')[:len(finalRead)]
                     position = 1

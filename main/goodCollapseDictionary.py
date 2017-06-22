@@ -43,7 +43,7 @@ def buildListDict(input_file, distance_stringency, pickleOut):
             #umi_seq = line[0:11]+line[-7:] #Abs dist from start/end compatible with miSeq/hiSeq
             umi_seq = line[0:11]+line.rstrip('\n')[-11:] #Abs dist from start/end compatible with miSeq/hiSeq
             umi_seq = umi_seq.rstrip('\n')
-            read_seq = line[6:-6]
+            read_seq = line.rstrip('\n')[6:-6]
             position += 1
         elif position == 3:
             position += 1
@@ -91,6 +91,12 @@ def collapseReadsListDict(sequences, varThresh, final_output_file, supportingRea
         quality = sequences[umi][2]
         quality = ''.join(quality)
 
+        # to handle duplex collapse make sure overlap is larger than specified readlength
+        # otherise just use max overlap region
+        if readLength > len(sequences[umi][0][0]):
+            readLength = len(sequences[umi][0][0])
+
+        print readLength
         for base in range(readLength):
             covCounter = 0 # used for quality coverage calc
 
