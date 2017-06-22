@@ -53,7 +53,7 @@ def concatenateUMI(read1, read2, output):
                     position = 1
                     target.write(header + '\n' + seq1 + r2UMI + '\n' + plus + '\n' + quality + r2UMIqual + '\n')
 
-def duplexConcatenate(read1, read2, output, overlap=80):
+def duplexConcatenate(read1, read2, output, realvsmock, overlap=80):
     position = 1
     plus = '+'
 
@@ -79,7 +79,7 @@ def duplexConcatenate(read1, read2, output, overlap=80):
                     r1 = r1[-overlap:]
                     r2 = r2[:overlap]
 
-                    finalRead = duplexCollapse(r1, r2, r1UMI, r2UMI)
+                    finalRead = duplexCollapse(r1, r2, r1UMI, r2UMI, realvsmock)
 
                     position += 1
                 elif position == 3:
@@ -89,7 +89,7 @@ def duplexConcatenate(read1, read2, output, overlap=80):
                     position = 1
                     target.write(header + '\n' + finalRead + '\n' + plus + '\n' + quality + '\n')
 
-def duplexCollapse(r1, r2, r1UMI, r2UMI):
+def duplexCollapse(r1, r2, r1UMI, r2UMI, realvsmock):
     import numpy as np
     finalRead = ''
     finalRead += r1UMI
@@ -97,7 +97,12 @@ def duplexCollapse(r1, r2, r1UMI, r2UMI):
         if r1[i] == r2[i]:
             finalRead += r1[i]
         elif r1[i] != r2[i]:
-            finalRead += 'N'
+            # this will either fix the error or use the base from r1 in order to understand the
+            # effect duplex collapsing is having
+            if realvsmock:
+                finalRead += 'N'
+            else:
+                finalRead += r1[i]
 
     finalRead += r2UMI
     return finalRead

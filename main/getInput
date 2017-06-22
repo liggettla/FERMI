@@ -53,6 +53,7 @@ parser.add_argument('--reference', '-y', type=str, help='Set the location of the
 parser.add_argument('--duplexcollapse', '-w', action='store_true', help='This will run duplex collapsing instead of the original collapsing that treats two complementary strands as different captures.')
 parser.add_argument('--minimaloutput', '-z', action='store_true', help='This will suppress the output of most files, and only include the final vcf files and some of the info files.')
 parser.add_argument('--getsamplesautomatically', '-g', action='store_true', help='This will try and automatically grab and sort all files in a specified input directory so they dont need to be manually specified. Samples should fit the pattern x1.fastq (r1) and x2.fastq (r2) where x can be any string.')
+parser.add_argument('--realvsmock', '-j', action='store_true', help='This flag will trigger elimination of potential errors found by duplex sequencing, if duplex collapsing is flagged without this flag, mock duplex sequencing will be performed in order to compare with the effects of eliminating potential errors')
 
 args = parser.parse_args()
 
@@ -221,6 +222,11 @@ if args.duplexcollapse:
 else:
     duplex = False
 
+if args.realvsmock:
+    realvsmock = True
+else:
+    realvsmock = False
+
 #useDefaults = raw_input('Use Default Parameters? (Y/n): ')
 #useDefaults = 'Y'
 '''
@@ -352,6 +358,7 @@ def writePickle(one, two, specificOut):
     vardb['REF'] = REF
     vardb['duplex'] = duplex
     vardb['minimalOutput'] = minimalOutput
+    vardb['realvsmock'] = realvsmock
 
     pickleVars = './variables.pkl'
 

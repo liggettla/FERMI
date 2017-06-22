@@ -50,6 +50,7 @@ badBaseSubstitute = vardb['badBaseSubstitute']
 REF = vardb['REF']
 duplex = vardb['duplex']
 minimalOutput = vardb['minimalOutput']
+realvsmock = vardb['realvsmock']
 
 read1 = inputDir + '/' + read1
 read2 = inputDir + '/' + read2
@@ -62,7 +63,7 @@ if not duplex:
     concatenateUMI(read1, read2, twoUmiOut)
 elif duplex:
     print('Duplex Concatenating...')
-    duplexConcatenate(read1, read2, twoUmiOut)
+    duplexConcatenate(read1, read2, twoUmiOut, realvsmock)
 
 ##############################
 #Build/Get Seq Data Structure#
