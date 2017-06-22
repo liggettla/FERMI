@@ -2,6 +2,7 @@ import pickle
 from os import system
 from os import makedirs
 from concatenateUMI import concatenateUMI
+from concatenateUMI import duplexConcatenate
 from goodCollapseDictionary import buildListDict
 from goodCollapseDictionary import collapseReadsListDict
 from goodCollapseDictionary import duplexCollapse
@@ -56,8 +57,12 @@ read2 = inputDir + '/' + read2
 #####################
 #Concatate R1 and R2#
 #####################
-print('Concatenating UMIs...')
-concatenateUMI(read1, read2, twoUmiOut)
+if not duplex:
+    print('Concatenating UMIs...')
+    concatenateUMI(read1, read2, twoUmiOut)
+elif duplex:
+    print('Duplex Concatenating...')
+    duplexConcatenate(read1, read2, twoUmiOut)
 
 ##############################
 #Build/Get Seq Data Structure#
@@ -91,20 +96,22 @@ with open(twoUmiOut, 'r') as target:
 ################
 #collapse reads on binned UMI data structure
 print('Collapsing Reads...')
-if not duplex:
-    averageErrorRate, averageCoverage = collapseReadsListDict(seqDict, varThresh, final_output_file, supportingReads, readLength, errorRate, badBaseSubstitute)
+averageErrorRate, averageCoverage = collapseReadsListDict(seqDict, varThresh, final_output_file, supportingReads, readLength, errorRate, badBaseSubstitute)
 
 ###################
 # Duplex Collapse #
 ###################
 # Duplex collapse using the two initial two strands of every capture
 # to eliminate any dissimilar variants
+'''
+print('Duplex Collapsing Reads...')
 if duplex:
     #averageErrorRate, averageCoverage = duplexCollapse(seqDict, varThresh, final_output_file, supportingReads, readLength, errorRate, badBaseSubstitute)
     coverageList, errorRateList, duplexDict = duplexCollapse(seqDict, varThresh, final_output_file, supportingReads, readLength, errorRate, badBaseSubstitute)
     deDuplexList = find_complementary_umis(duplexDict)
     collapse_paired_reads(deDuplexList, readLength, final_output_file)
     averageErrorRate, averageCoverage = calcCoverageError(coverageList, errorRateList, errorRate)
+'''
 
 #####################
 #Output Seq Coverage#

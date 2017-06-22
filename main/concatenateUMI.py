@@ -52,3 +52,60 @@ def concatenateUMI(read1, read2, output):
                     r2UMIqual = line2[0:6]
                     position = 1
                     target.write(header + '\n' + seq1 + r2UMI + '\n' + plus + '\n' + quality + r2UMIqual + '\n')
+
+def duplexConcatenate(read1, read2, output, overlap=80):
+    position = 1
+    plus = '+'
+
+    #write results to a new fastq file
+    target = open(output, 'w')
+
+    with open(read1, 'r') as R1:
+        with open(read2, 'r') as R2:
+
+            #in python2 zip reads everything into memory
+            #itertools.izip is iterative, and reads line by line
+            for line1, line2 in itertools.izip(R1, R2):
+                if position == 1:
+                    header = line1.rstrip('\n')
+                    position += 1
+                elif position == 2:
+                    seq1 = line1.rstrip('\n')
+                    seq2 = str(Seq(line2.rstrip('\n')).reverse_complement())
+                    r1UMI = seq1[:6]
+                    r2UMI = seq2[-6:]
+                    r1 = seq1[6:]
+                    r2 = seq2[:-6]
+                    r1 = r1[-overlap:]
+                    r2 = r2[:overlap]
+                    print r1, r2, r1UMI, r2UMI
+
+                    finalRead = duplexCollapse(r1, r2, r1UMI, r2UMI)
+
+                    position += 1
+                elif position == 3:
+                    position += 1
+                #retain quality scores for R2 UMI
+                elif position == 4:
+                    quality = line1.rstrip('\n')[:len(finalRead)]
+                    position = 1
+                    target.write(header + '\n' + finalRead + '\n' + plus + '\n' + quality + '\n')
+
+def duplexCollapse(r1, r2, r1UMI, r2UMI):
+    import numpy as np
+    finalRead = ''
+    finalRead += r1UMI
+    for i in np.arange(len(r1)):
+        if r1[i] == r2[i]:
+            finalRead += r1[i]
+        elif r1[i] != r2[i]:
+            finalRead += 'N'
+
+    finalRead += r2UMI
+    return finalRead
+
+
+
+
+
+
