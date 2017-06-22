@@ -110,18 +110,22 @@ def generatePlot(probe):
     # create plot
     ind = np.arange(len(loci))
     p1 = plt.bar(loci, vafs, color=changes)
+    # when youre bored
+    plt.xkcd()
+
     plt.ylim(ymin=0)
     plt.ylim(ymax=0.003)
     plt.xlabel('Chromosome Location')
     plt.ylabel('Variant Allele Frequencies')
     plt.title('Probe Within Chromosome %s' % (probe['chrom']))
+    plt.xticks(rotation=90)
 
     # create the legend
     cyan = mpatches.Patch(color='cyan', label='C-A')
     black = mpatches.Patch(color='black', label='C-G')
     red = mpatches.Patch(color='red', label='C-T')
     gray = mpatches.Patch(color='gray', label='T-A')
-    green = mpatches.Patch(color='green', label='T-G')
+    green = mpatches.Patch(color='green', label='T-C')
     magenta = mpatches.Patch(color='magenta', label='T-G')
     plt.legend(handles=[cyan, black, red, gray, green, magenta])
 
