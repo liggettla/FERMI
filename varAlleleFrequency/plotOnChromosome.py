@@ -111,14 +111,18 @@ def generatePlot(probe):
     ind = np.arange(len(loci))
     p1 = plt.bar(loci, vafs, color=changes)
     # when youre bored
-    plt.xkcd()
+    #plt.xkcd()
 
     plt.ylim(ymin=0)
     plt.ylim(ymax=0.003)
     plt.xlabel('Chromosome Location')
     plt.ylabel('Variant Allele Frequencies')
     plt.title('Probe Within Chromosome %s' % (probe['chrom']))
-    plt.xticks(rotation=90)
+
+    # this formats the xticks so they aren't abbreviated
+    from matplotlib.ticker import FormatStrFormatter
+    plt.gca().xaxis.set_major_formatter(FormatStrFormatter('%d'))
+    plt.xticks(rotation=45)
 
     # create the legend
     cyan = mpatches.Patch(color='cyan', label='C-A')
