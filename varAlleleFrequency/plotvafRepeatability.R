@@ -7,7 +7,6 @@ library(ggrepel) # this avoids overlapping labels
 
 # Note that this script cannot begin with a comment for some reason
 
-#setwd('/media/alex/Extra/Dropbox/Code/FERMI/varAlleleFrequency')
 setwd('/media/alex/Extra/Dropbox/Code/FERMI/varAlleleFrequency')
 #setwd('/home/alex/Dropbox/Code/FERMI/varAlleleFrequency')
 
@@ -28,47 +27,21 @@ identity <- vafs$Identity
 lm_fit  = lm(sample1 ~ sample2)
 x = data.frame(vafs, predict(lm_fit, interval = 'prediction'))
 
-# this appears to do the same as the above
-# coef(lm(sample1 ~ sample2, data = vafs))
-# geom_smooth(method = "lm", se = TRUE) +
-
-# plot with regression line
-#p <- ggplot(x, aes(x=sample1, y=sample2, alpha=0.5, label=identity)) +
-    #geom_text(aes(label=identity),hjust='inward', vjust='inward', angle=0) + # this labels all points
-    #geom_text(aes(label=ifelse(sample2>0.002|sample1>0.002,as.character(identity),'')),hjust=0,vjust=0) + # this labels points above particular frequency
-    #geom_text_repel(aes(label=ifelse(sample2>0.002|sample1>0.002,as.character(identity),''))) + # this labels points above freq and does not allow overlap
-#  xlab('Mutation VAFs C1 F34') +
-#  ylab('Muation VAFs E1 F41') +
-#  labs(title = 'Variant Allele Frequencies of Putative Mutations (W/ Regression)') +
-#  geom_point() +
-#  geom_smooth(method = 'lm', aes(fill = 'confidence'), alpha = 0.15) +
-#  scale_fill_manual('Interval', values = c('green', 'blue'))
-# print(p)
-#jpeg('output1.jpg')
-#print(p)
-#dev.off()
-
-# the following line finds the maximum vafs for use as plotting cutoffs
-# awk -v max1=0.0 -v max2=0.0 '{if($1!="Sample1" && $1>max1 && 2>max2){max1=$1; max2=$2}}END{print max1; print max2}' vafRepeatability.txt
 # plot with y=x line
 p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity)) +
   geom_point() +
   xlim(0,0.003) +
   ylim(0,0.003) +
-  #geom_text(aes(label=identity), hjust='inward', vjust='inward', angle=0) + # this labels all points
-  #geom_text(aes(label=ifelse(sample2>0.002|sample1>0.002,as.character(identity),'')),hjust=0,vjust=0) + # this labels points above particular frequency
-  
-    #geom_text_repel(aes(label=ifelse(sample2>0.4|sample1>0.4,as.character(identity),''))) + # this labels points above freq and does not allow overlap
-    #geom_text_repel(aes(label=ifelse(sample2>0.0025|sample1>0.0025,as.character(identity),''))) + # this labels points above freq and does not allow overlap
-    #geom_text_repel(aes(label=ifelse(sample2>0.0005 |sample1>0.0005 ,as.character(identity),''))) + # this labels points above freq and does not allow overlap
   geom_abline(intercept = 0, slope = 1) +
-    xlab('Mutation VAFs Sample 301') + ylab('Mutation VAFs Sample 300') +
+  xlab('Mutation VAFs Sample 317 Deviator 73yr Reseq') + ylab('Mutation VAFs Sample 305 Reg Cord Reseq') +
   labs(title = 'Variant Allele Frequencies of Putative Mutations')
 # print(p)
 jpeg('output2.jpg')
 print(p)
 dev.off()
 
+# The following produces plot with the oncogegenic mutations identified
+'''
 library(ggrepel)
 vafs$col <- grepl(paste0(oncosites,collapse = "|"), vafs$Identity)
 p <- ggplot(vafs, aes(x=Sample1, y=Sample2, alpha=1, color = col)) +
@@ -79,3 +52,4 @@ p <- ggplot(vafs, aes(x=Sample1, y=Sample2, alpha=1, color = col)) +
 jpeg('output3.jpg')
 print(p)
 dev.off()
+'''
