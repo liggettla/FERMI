@@ -61,7 +61,12 @@ def buildListDict(input_file, distance_stringency, pickleOut):
                             is_unique = False
                             umi_seq = umi
 
-            sequences[umi_seq][0].append(read_seq)
+            # it is important for duplex collapsing to make sure reads are of the same length
+            # when not duplex collapsing this should always be true
+            if not is_unique and len(sequences[umi_seq][0][0]) == len(read_seq):
+                sequences[umi_seq][0].append(read_seq)
+            elif is_unique:
+                sequences[umi_seq][0].append(read_seq)
 
             #check if header slot is empty prevents multiple entries error
             if is_unique and not bool(sequences[umi_seq][1]):

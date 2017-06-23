@@ -79,13 +79,6 @@ def duplexConcatenate(read1, read2, output, realvsmock, overlap=80):
                     r2 = seq2[:-6]
                     r1,r2 = trimReads(r1,r2)
 
-                    '''
-                    r1 = seq1.rstrip('\n')[24:]
-                    r2 = seq2.rstrip('\n')[:-25]
-                    r1 = r1[-overlap:]
-                    r2 = r2[:overlap]
-                    '''
-
                     finalRead = duplexCollapse(r1, r2, r1UMI, r2UMI, realvsmock)
 
                     position += 1
@@ -94,7 +87,11 @@ def duplexConcatenate(read1, read2, output, realvsmock, overlap=80):
                 elif position == 4:
                     quality = line1.rstrip('\n')[:len(finalRead)]
                     position = 1
-                    target.write(header + '\n' + finalRead + '\n' + plus + '\n' + quality + '\n')
+
+                    # only write reads that are of significant length
+                    # this should only be necessary when duplex collapsing
+                    if len(r1) > 5 and len(r2) > 5:
+                        target.write(header + '\n' + finalRead + '\n' + plus + '\n' + quality + '\n')
 
 def duplexCollapse(r1, r2, r1UMI, r2UMI, realvsmock):
     import numpy as np
@@ -120,7 +117,8 @@ def trimReads(r1,r2):
     # some of the captures are less than 150bp causing r2 to extend 5' of r1
     # so cleave off the most that could ever overhang from my captures and now
     # r1 should always align more 5' than r2
-    r2 = r2[14:]
+    r1 = r1[:-20]
+    r2 = r2[20:]
 
     r1_5prime = r1[:10] # first 10bp
     r1_3prime = r1[-10:]# last 10bp
@@ -128,15 +126,13 @@ def trimReads(r1,r2):
     r2_5prime = r2[-10:]
     r2_3prime = r2[:10]
 
-    while distance(r1_5prime, r2_3prime) > 0: # allow one errors
+    while distance(r1_5prime, r2_3prime) > 0 and len(r1)>5: # allow one error and trim until read almost gone
         r1 = r1[1:] # cut off first base
         r1_5prime = r1[:10] # first 10bp
-        print r1,'\n',r2
 
-    while distance(r2_5prime, r1_3prime) > 0: # allow one errors
+    while distance(r2_5prime, r1_3prime) > 0 and len(r2)>5: # allow one error
         r2 = r2[:-1] # cut off last base
         r2_5prime = r2[-10:] # first 10bp
-        print r1,'\n',r2
 
     return r1, r2
 
