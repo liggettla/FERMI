@@ -97,19 +97,25 @@ def duplexCollapse(r1, r2, r1UMI, r2UMI, realvsmock):
     import numpy as np
     finalRead = ''
     finalRead += r1UMI
-    for i in np.arange(len(r1)):
-        if r1[i] == r2[i]:
-            finalRead += r1[i]
-        elif r1[i] != r2[i]:
-            # this will either fix the error or use the base from r1 in order to understand the
-            # effect duplex collapsing is having
-            if realvsmock:
-                finalRead += 'N'
-            else:
+    # this is crude, but if r1 and r2 are not of the same length just use r1
+    # it would probably be better to throw it out but for now this way is easier
+    if len(r1) == len(r2):
+        for i in np.arange(len(r1)):
+            if r1[i] == r2[i]:
                 finalRead += r1[i]
+            elif r1[i] != r2[i]:
+                # this will either fix the error or use the base from r1 in order to understand the
+                # effect duplex collapsing is having
+                if realvsmock:
+                    finalRead += 'N'
+                else:
+                    finalRead += r1[i]
 
-    finalRead += r2UMI
-    return finalRead
+        finalRead += r2UMI
+        return finalRead
+
+    else:
+        return r1
 
 def trimReads(r1,r2):
     from Levenshtein import distance
