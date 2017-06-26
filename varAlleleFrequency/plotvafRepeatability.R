@@ -33,7 +33,7 @@ p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity)) +
   xlim(0,0.003) +
   ylim(0,0.003) +
   geom_abline(intercept = 0, slope = 1) +
-  xlab('Mutation VAFs Sample 317 Deviator 73yr Reseq') + ylab('Mutation VAFs Sample 305 Reg Cord Reseq') +
+  xlab('Mutation VAFs Sample 503 Deviator Cord Reseq') + ylab('Mutation VAFs Sample 305 Reg Cord Reseq') +
   labs(title = 'Variant Allele Frequencies of Putative Mutations')
 # print(p)
 jpeg('output2.jpg')
