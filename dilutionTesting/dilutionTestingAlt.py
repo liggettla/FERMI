@@ -12,7 +12,7 @@ parser.add_argument('--indir', '-i', required=True, type=str, help='Specifies th
 parser.add_argument('--donor', '-d', required=True, type=str, help='Name of the directory containing fermi analysis of donor dilution sample')
 parser.add_argument('--controlRecipient', '-c', required=True, type=str, help='Name of the directory containing the blank recipient sample into which no donor DNA has been input')
 parser.add_argument('--recipients', '-r', required=True, nargs='*', type=str, help='Name of the directories containing fermi analysis of recipient dilution samples')
-parser.add_argument('--nonunique', '-n', action='store_true', help='Instead of looking for variants that are unique to the donor sample, use variants that are homo/het in donor sample and more rare than 1/1,000 in the recipient samples.')
+parser.add_argument('--nonunique', '-n', action='store_true', help='Instead of looking for variants that are unique to the donor sample, use variants that are homo/het in donor sample and more rare than 1/100 in the recipient samples.')
 
 args = parser.parse_args()
 
@@ -27,8 +27,11 @@ recSamples = args.recipients # this is a list
 # if nonunique rare vars from recipient files should still be included
 if args.nonunique:
     nonUnique = 'Y'
-else:
+elif not args.nonunique:
     nonUnique = 'n'
+# default to using nonUniques
+else:
+    nonUnique = 'Y'
 
 
 donorFile = inputDir + '/' + donorSample + '/AF1_filtered.vcf'
@@ -57,7 +60,7 @@ if nonUnique == 'Y':
 ########################
 if nonUnique == 'Y':
     recipientDict = {}
-    control = inputDir + '/' + controlRec + '/total_filtered.vcf'
+    control = inputDir + '/' + controlRec + '/onlyProbedRegions.vcf'
     target = open(control, 'r')
 
     for line in target:
@@ -68,8 +71,8 @@ if nonUnique == 'Y':
             AO = float(line.split(';')[5].strip('AO='))
             DP = float(line.split(';')[7].strip('DP='))
 
-            # only include vars that are more rare than 1:1000 in final analysis
-            if AO/DP > 0.001:
+            # only include vars that are more rare than 1:100 in final analysis
+            if AO/DP > 0.01:
                 recipientDict[loc] = {'ref':ref, 'alt':alt}
 
 #########################
@@ -113,7 +116,7 @@ if nonUnique == 'Y':
                             + 'DP: ' + str(sampleDict[loc]['DP']) + '\n' \
                             + 'AF: ' + str(AF) + '\n')
                     print sample
-                    print sampleDict[loc]
+                    print loc,sampleDict[loc]
 
 
 
@@ -208,62 +211,11 @@ for i in recSamples:
 target.close()
 target0.close()
 
+################
+# Output Plots #
+################
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 
-
-'''
-recipientCons = 'AF0_filtered.vcf'
-
-
-
-consName = '_finalOutput.vcf'
-
-spikeList = []
-List24 = []
-List25 = []
-List28 = []
-List29 = []
-listOfLists = [List24, List25, List28, List29]
-
-target = open(inputDir + donorSample + consName, 'r')
-
-for line in target:
-    if '#' not in line and 'chr' in line: #skip the damn info
-        AO = line.split(';')[5]
-        DP = line.split(';')[7]
-        AF = line.split(';')[3]
-
-        AONum = int(AO.split(',')[0][3:])
-        AFNum = float(AF.split(',')[0][3:])
-        DPNum = int(DP.split(',')[0][3:])
-
-#get spike-in vars
-        if AONum > 5 and (AFNum == 1 or AFNum == 0.5) and DPNum > 50:
-            loc = line.split('\t')[1]
-            spikeList.append(loc)
-
-#get all variants
-for i in listOfLists:
-    index = listOfLists.index(i)
-    target = open(inputDir + samples[index] + consName, 'r')
-    for line in target:
-        if '#' not in line and 'chr' in line: #skip the damn info
-            loc = line.split('\t')[1]
-            i.append(loc)
-
-outFile = open(inputDir + 'DilutionEfficiency.txt', 'w')
-numVars = len(spikeList)
-
-for sample in listOfLists:
-    counter = 0
-    index = listOfLists.index(sample)
-    for loc in sample:
-        if loc in spikeList:
-            counter += 1
-    fraction = float(counter) / numVars * 100
-    outFile.write('In sample %s %f percent of donor in variants were observed.\n' % (samples[index], fraction))
-
-print len(spikeList)
-
-'''
