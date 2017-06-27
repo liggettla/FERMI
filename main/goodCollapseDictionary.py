@@ -108,58 +108,62 @@ def collapseReadsListDict(sequences, varThresh, final_output_file, supportingRea
         from pprint import pprint
         pprint(sequences[umi][0])
 
-        for base in range(readLength):
-            covCounter = 0 # used for quality coverage calc
+        # check that all sequences are of same length
+        goodSet = checkLengths(sequences[umi][0])
 
-            if isReadGood:
-                A = 0
-                T = 0
-                G = 0
-                C = 0
+        if goodSet:
+            for base in range(readLength):
+                covCounter = 0 # used for quality coverage calc
 
-                for seq in sequences[umi][0]:
-                    covCounter += 1 # count number of supporting reads
+                if isReadGood:
+                    A = 0
+                    T = 0
+                    G = 0
+                    C = 0
 
-                    if seq[base] == 'A':
-                        A += 1
-                    elif seq[base] == 'T':
-                        T += 1
-                    elif seq[base] == 'G':
-                        G += 1
-                    elif seq[base] == 'C':
-                        C += 1
+                    for seq in sequences[umi][0]:
+                        covCounter += 1 # count number of supporting reads
 
-                calcError = True # used to include a base in error rate calc
+                        if seq[base] == 'A':
+                            A += 1
+                        elif seq[base] == 'T':
+                            T += 1
+                        elif seq[base] == 'G':
+                            G += 1
+                        elif seq[base] == 'C':
+                            C += 1
 
-                if float(A)/numReads >= varThresh:
-                    finalRead += 'A'
-                elif float(T)/numReads >= varThresh:
-                    finalRead += 'T'
-                elif float(G)/numReads >= varThresh:
-                    finalRead += 'G'
-                elif float(C)/numReads >= varThresh:
-                    finalRead += 'C'
-                else:
-                    # if there are too many errors either substitute or invalidate
-                    if badBaseSubstitute: # ignore base but keep read
-                        isReadGood = True
-                        finalRead += 'N'
-                    else: # ignore entire read
-                        isReadGood = False
+                    calcError = True # used to include a base in error rate calc
 
-                    calcError = False
+                    if float(A)/numReads >= varThresh:
+                        finalRead += 'A'
+                    elif float(T)/numReads >= varThresh:
+                        finalRead += 'T'
+                    elif float(G)/numReads >= varThresh:
+                        finalRead += 'G'
+                    elif float(C)/numReads >= varThresh:
+                        finalRead += 'C'
+                    else:
+                        # if there are too many errors either substitute or invalidate
+                        if badBaseSubstitute: # ignore base but keep read
+                            isReadGood = True
+                            finalRead += 'N'
+                        else: # ignore entire read
+                            isReadGood = False
 
-                if errorRate == 'Y' and calcError:
-                    rate = calcErrorRate(A,T,G,C)
-                    errorRateList.append(rate)
+                        calcError = False
 
-        if isReadGood and numReads >= supportingReads:
-            coverageList.append(covCounter) # if read checks out, record its coverage
+                    if errorRate == 'Y' and calcError:
+                        rate = calcErrorRate(A,T,G,C)
+                        errorRateList.append(rate)
 
-            target = open(final_output_file, 'a')
-            trimmed_quality = quality[6:-6]
-            trimmed_quality = trimmed_quality[0:readLength] # make quality string match read length
-            target.write(header + '\n' + finalRead + '\n' + plus + '\n' + trimmed_quality + '\n')
+            if isReadGood and numReads >= supportingReads:
+                coverageList.append(covCounter) # if read checks out, record its coverage
+
+                target = open(final_output_file, 'a')
+                trimmed_quality = quality[6:-6]
+                trimmed_quality = trimmed_quality[0:readLength] # make quality string match read length
+                target.write(header + '\n' + finalRead + '\n' + plus + '\n' + trimmed_quality + '\n')
 
     averageCoverage = mean(coverageList)
 
@@ -168,6 +172,20 @@ def collapseReadsListDict(sequences, varThresh, final_output_file, supportingRea
         return averageErrorRate, averageCoverage
     else:
         return 0, averageCoverage
+
+######################################
+# Check all captures are same length #
+######################################
+# maybe it would be better to take the most common length
+# for ease just using first read at the moment
+def checkLengths(umis):
+    length = len(umis[0])
+    goodSet = True
+    for i in umis:
+        if len(i) != length:
+            goodSet = False
+
+    return goodSet
 
 ###################
 # Duplex Collapse #
