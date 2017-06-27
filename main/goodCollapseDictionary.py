@@ -104,10 +104,6 @@ def collapseReadsListDict(sequences, varThresh, final_output_file, supportingRea
         if readLength > desiredReadLength:
             readLength = desiredReadLength
 
-        # This is for troubleshooting, delete when done
-        from pprint import pprint
-        pprint(sequences[umi][0])
-
         # check that all sequences are of same length
         goodSet = checkLengths(sequences[umi][0])
 
