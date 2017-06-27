@@ -91,7 +91,6 @@ def duplexConcatenate(read1, read2, output, realvsmock, overlap=80):
                     # only write reads that are of significant length
                     # this should only be necessary when duplex collapsing
                     if len(r1) > 5 and len(r2) > 5:
-                        print finalRead
                         target.write(header + '\n' + finalRead + '\n' + plus + '\n' + quality + '\n')
 
 def duplexCollapse(r1, r2, r1UMI, r2UMI, realvsmock):
