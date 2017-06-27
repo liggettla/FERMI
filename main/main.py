@@ -194,12 +194,14 @@ if alignAndVar == 'Y':
 if minimalOutput:
     print('Cleaning up Outputs...')
     system('rm %s' % (outputDir + '/finalOutput.fastq'))
-    system('rm %s' % (outputDir + '/finalOutput.vcf'))
-    system('rm %s' % (outputDir + '/finalOutputDecomposed.vcf'))
+    system('rm %s' % (outputDir + '/finalOutput.bam'))
     system('rm %s' % (outputDir + '/finalOutputBlockDecomposed.vcf'))
+    system('rm %s' % (outputDir + '/finalOutputDecomposed.vcf'))
+    system('rm %s' % (outputDir + '/finalOutput.vcf'))
+    system('rm %s' % (outputDir + '/total_filtered.vcf'))
     system('rm %s' % (outputDir + '/AF0_filtered.vcf'))
     system('rm %s' % (outputDir + '/AF1_filtered.vcf'))
-    system('rm %s' % (outputDir + '/total_filtered.vcf'))
+    system('rm %s' % (outputDir + '/finalOutput.bam'))
 
 ################
 #Output Runtime#

@@ -86,6 +86,7 @@ def collapseReadsListDict(sequences, varThresh, final_output_file, supportingRea
     plus = '+'
     target = open(final_output_file, 'w')
     coverageList = [] # used to tally coverage for each UMI pair
+    desiredReadLength = readLength # length specified by the user ie 120bp
 
     for umi in sequences:
         isReadGood = True
@@ -98,8 +99,14 @@ def collapseReadsListDict(sequences, varThresh, final_output_file, supportingRea
 
         # to handle duplex collapse make sure overlap is larger than specified readlength
         # otherise just use max overlap region
-        if readLength > len(sequences[umi][0][0]):
-            readLength = len(sequences[umi][0][0])
+        # if larger than desired length, then used desired length
+        readLength = len(sequences[umi][0][0])
+        if readLength > desiredReadLength:
+            readLength = desiredReadLength
+
+        # This is for troubleshooting, delete when done
+        from pprint import pprint
+        pprint(sequences[umi][0])
 
         for base in range(readLength):
             covCounter = 0 # used for quality coverage calc
