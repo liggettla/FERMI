@@ -308,7 +308,11 @@ def recordParams(parametersUsed, inputDir, read1, read2, varThresh, supportingRe
     else:
         target.write('Bad Base Substitution Not Used\n')
     if duplex:
-        target.write('Duplex Collapsing Used\n')
+        if realvsmock:
+            target.write('Duplex Collapsing Used\n')
+        else:
+            target.write('Mock Duplex Collapsing Used\n')
+
     else:
         target.write('Duplex Collapsing Not Used\n')
 
