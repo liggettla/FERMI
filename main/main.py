@@ -118,21 +118,22 @@ if duplex:
 #Output Seq Coverage#
 #####################
 print('Computing Coverages...')
+print('Herding Llamas...')
 outputCov(twoUmiOut, final_output_file, distance_stringency, coverage_file, averageErrorRate, averageCoverage)
 
 ####################
 #Align to Reference#
 ####################
-print('Aligning to Reference...')
 if alignAndVar == 'Y':
+    print('Aligning to Reference...')
     from align import align
     bamOut = align(final_output_file, REF) # align and index
 
 ###############
 #Call Variants#
 ###############
-print('Calling Variants...')
 if alignAndVar == 'Y':
+    print('Calling Variants...')
     from callVar import callVar
     vcfOut = bamOut.strip('bam') + 'vcf'
     callVar(freebayes, REF, bamOut, vcfOut)
@@ -140,8 +141,8 @@ if alignAndVar == 'Y':
 ###################
 #VCF Decomposition#
 ###################
-print('Decomposing VCFs...')
 if alignAndVar == 'Y':
+    print('Decomposing VCFs...')
     from decomposeVCF import decompose
     blockDecomposedOut = decompose(vcfOut)
 
@@ -150,8 +151,8 @@ if alignAndVar == 'Y':
 #################
 # filters final vcf file to output either only AF=0 reads
 # or AF=0.5 and AF=1 reads
-print('Filtering Allele Frequencies...')
 if alignAndVar == 'Y':
+    print('Filtering Allele Frequencies...')
     from varDPFilter import vcfFilter
     vcfFilter(inputDir, outputDir, blockDecomposedOut, AONum, DPNum)
 
