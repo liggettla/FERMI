@@ -45,6 +45,7 @@ def plot():
             mut = x[4].strip('\n')
             vaf = float(x[0])
 
+            #if chrom == '4':
             totalDict = checkLoc(chrom, loc, wt, mut, vaf, totalDict)
 
     for probe in totalDict:
@@ -95,6 +96,17 @@ def generateColors(muts):
 
     return changes
 
+def identifyLocus(probe):
+    ID = ''
+    probes = {'TIIIa':['1152278','1152279'],'NRAS-1':['1152564','1152565','1152566'],'NRAS-2':['1152587','1152588'],'DNMT3a':['254572','254573'],'IDH1':['2091130','2091131','2091132'],'SF3B1':['1982668','1982669'],'TIIIb':['2231906','2231907','2231908'],'TIIIc':['2290411','2290412'],'TET2-1':['1061972','1061973','1061974'],'TET2-2':['1061551','1061552'],'TIIId':['1105411','1105412','1105413'],'TIIIe':['1129972','1129973'],'TIIIf':['1211677','1211678'],'TIIIg':['1235477','1235478','1235479'],'TIIIh':['1244286','1244287'],'JAK2':['50737','50738'],'TIIIj':['21262','21263','21264'],'TIIIk':['2389','2390'],'TIIIl':['2593','2594'],'TIIIm':['114865','114866','114867'],'HRAS':['5342','5343'],'KRAS-1':['253982','253983','253984'],'KRAS-2':['253802','253803'],'TIIIn':['925270','925271'],'IDH2':['906318','906319'],'TIIIo':['733796','733797','733798'],'TIIIp':['824550','824551'],'TIIIq':['859491','859492'],'p53-1':['75775','75776'],'p53-2':['75783','75784','75785'],'p53-3':['75770','75771','75772'],'GATA1':['486496','486497','486498']}
+
+    for i in probes:
+        for j in probes[i]:
+            if j in probe:
+                ID = i
+
+    return ID
+
 def generatePlot(probe):
     import numpy as np
     import matplotlib.pyplot as plt
@@ -113,11 +125,14 @@ def generatePlot(probe):
     # when youre bored
     #plt.xkcd()
 
+    # ID gene target
+    gene = identifyLocus(str(probe['locus'][0]))
+
     plt.ylim(ymin=0)
     plt.ylim(ymax=0.003)
     plt.xlabel('Chromosome Location')
     plt.ylabel('Variant Allele Frequencies')
-    plt.title('Probe Within Chromosome %s' % (probe['chrom']))
+    plt.title('Probe Within Chromosome %s:%s' % (probe['chrom'],gene))
 
     # this formats the xticks so they aren't abbreviated
     from matplotlib.ticker import FormatStrFormatter
