@@ -30,8 +30,8 @@ x = data.frame(vafs, predict(lm_fit, interval = 'prediction'))
 # plot with y=x line
 p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity)) +
   geom_point() +
-  xlim(0,0.005) +
-  ylim(0,0.005) +
+  xlim(0,0.001) +
+  ylim(0,0.001) +
   geom_abline(intercept = 0, slope = 1) +
   xlab('Mutation VAFs Sample 513') + ylab('Mutation VAFs Sample Average') +
   labs(title = 'Variant Allele Frequencies of Putative Mutations')
