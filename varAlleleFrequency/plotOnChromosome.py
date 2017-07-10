@@ -82,7 +82,10 @@ def checkLoc(chrom, loc, wt, mut, vaf, totalDict):
 def generateColors(muts):
     from Bio.Seq import Seq
     # same colors as base bias plotting
+    # if combining
     colors = {'CA':'c', 'CG':'k', 'CT':'r', 'TA':'0.5', 'TC':'g', 'TG':'m'}
+    # if not combining
+    colors = {'CA':'c', 'CG':'k', 'CT':'r', 'TA':'0.5', 'TC':'g', 'TG':'m', 'GT':'#000099', 'GC':'#660066', 'GA':'#00ff00', 'AT':'#ffff00', 'AG':'#ff6600', 'AC':'#663300'}
     changes = []
 
     # change to cononical changes
@@ -146,7 +149,14 @@ def generatePlot(probe):
     gray = mpatches.Patch(color='gray', label='T-A')
     green = mpatches.Patch(color='green', label='T-C')
     magenta = mpatches.Patch(color='magenta', label='T-G')
-    plt.legend(handles=[cyan, black, red, gray, green, magenta])
+    a = mpatches.Patch(color='#000099', label='G-T')
+    b = mpatches.Patch(color='#660066', label='G-C')
+    c = mpatches.Patch(color='#00ff00', label='G-A')
+    d = mpatches.Patch(color='#ffff00', label='A-T')
+    e = mpatches.Patch(color='#ff6600', label='A-G')
+    f = mpatches.Patch(color='#663300', label='A-C')
+    #plt.legend(handles=[cyan, black, red, gray, green, magenta])
+    plt.legend(handles=[cyan, black, red, gray, green, magenta, a,b,c,d,e,f])
 
     plt.show()
 

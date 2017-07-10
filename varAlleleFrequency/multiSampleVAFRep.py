@@ -22,6 +22,8 @@ parser.add_argument('--variant', '-v', type=str, nargs='*', help='Only output th
 parser.add_argument('--displayplot', '-d', action='store_true', help='This will trigger the displaying of VAF plot.')
 parser.add_argument('--multiplier', '-m', type=float, help='This specifies a multiplier to artificially increase all the VAFs in the priniciple sample by a set multiplier allowing for comparison of shifting populations.')
 parser.add_argument('--plotonchrom', '-z', action='store_true', help='This will output vafs of the data shown on the y-axis of the vaf comparison plot (typically the average samples) along chromosomal distances to understand hot and cold regions of the chromosome.')
+parser.add_argument('--combinecomplements', '-a', action='store_true', help='This will combine the complement of base pairs into a single plot, ie if C-T variants are asked for, both C-T and G-A variants will be output.')
+
 
 args = parser.parse_args()
 
@@ -114,7 +116,13 @@ def buildAverageStructure(samples):
                     AFNum = AFNum * args.multiplier
 
                 # should germline/variant types be included?
-                if WT in germline and var in variant or str(Seq(WT).complement()) in germline and str(Seq(var).complement()) in variant:
+                # and either combine complementary bases or not
+                if args.combinecomplements:
+                    matchingVariants = WT in germline and var in variant or str(Seq(WT).complement()) in germline and str(Seq(var).complement()) in variant
+                else:
+                    matchingVariants = WT in germline and var in variant
+
+                if matchingVariants:
                     # decide if variant is unique or not
                     if rareEnough(AFNum):
                         if loc in tempData:
