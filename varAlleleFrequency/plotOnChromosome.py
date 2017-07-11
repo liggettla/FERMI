@@ -160,10 +160,151 @@ def generatePlot(probe):
 
     plt.show()
 
+def plot():
+    inFile = open('vafPlotting.txt', 'r')
+    vafs=[]
+    loci=[]
+    changes=[]
+
+    # {(chrom,):{chrom:4,locus:[1234],vaf:[0.5],mut:[CT]}}
+    totalDict = {}
+
+    count = 0
+    for line in inFile:
+        # skip headers
+        if count == 0:
+            count += 1
+        else:
+            x = line.split('\t')
+            chrom = x[1]
+            loc = float(x[2])
+            wt = x[3]
+            mut = x[4].strip('\n')
+            vaf = float(x[0])
+
+            #if chrom == '4':
+            totalDict = checkLoc(chrom, loc, wt, mut, vaf, totalDict)
+
+    for probe in totalDict:
+        generatePlot(totalDict[probe])
+
+def idExactLocus(chrom, loc, wt, mut, vaf, totalDict):
+    exactProbes = {'TIIIa':['115227814','115227978'],'NRAS-1':['115256496','115256680'],'NRAS-2':['115258713','115258897'],'DNMT3a':['25457211','25457364'],'IDH1':['209113077','209113239'],'SF3B1':['198266803','198266967'],'TIIIb':['223190674','223190820'],'TIIIc':['229041101','229041289'],'TET2-1':['106197237','106197405'],'TET2-2':['106155137','106155275'],'TIIId':['110541172','110541302'],'TIIIe':['112997214','112997386'],'TIIIf':['121167756','121167884'],'TIIIg':['123547743','123547901'],'TIIIh':['124428637','124428767'],'JAK2':['5073733','5073887'],'TIIIj':['2126256','2126420'],'TIIIk':['2389983','2390171'],'TIIIl':['2593889','2594074'],'TIIIm':['11486596','11486728'],'HRAS':['534258','534385'],'KRAS-1':['25398247','25398415'],'KRAS-2':['25380242','25380368'],'TIIIn':['92527052','92527176'],'IDH2':['90631809','90631969'],'TIIIo':['73379656','73379832'],'TIIIp':['82455026','82455164'],'TIIIq':['85949137','85949299'],'p53-1':['7577504','7577635'],'p53-2':['7578369','7578544'],'p53-3':['7577084','7577214'],'GATA1':['48649667','48649849']}
+
+    # total Dict form:
+    # {(probe):{chrom:4,locus:[1234],vaf:[0.5],mut:[CT]}}
+
+    key = ''
+    isunique = True
+
+    for probe in exactProbes:
+        match = int(loc)-20 > int(exactProbes[probe][0]) and int(loc) < int(exactProbes[probe][1])
+        if match:
+            key = probe
+
+    if key in totalDict:
+        isunique = False
+
+    if isunique:
+        totalDict[key]={'chrom':0,'locus':[],'vaf':[],'mut':[]}
+        totalDict[key]['chrom']=chrom
+        totalDict[key]['locus']=[loc]
+        totalDict[key]['vaf']=[vaf]
+        totalDict[key]['mut']=[('%s%s' % (wt, mut))]
+    else:
+        totalDict[key]['locus'].append(loc)
+        totalDict[key]['vaf'].append(vaf)
+        totalDict[key]['mut'].append(('%s%s' % (wt, mut)))
+
+    return totalDict
+
+def plotExact():
+    inFile = open('vafPlotting.txt', 'r')
+    vafs=[]
+    loci=[]
+    changes=[]
+
+    # {(probe):{chrom:4,locus:[1234],vaf:[0.5],mut:[CT]}}
+    totalDict = {}
+
+    count = 0
+    for line in inFile:
+        # skip headers
+        if count == 0:
+            count += 1
+        else:
+            x = line.split('\t')
+            chrom = x[1]
+            loc = float(x[2])
+            wt = x[3]
+            mut = x[4].strip('\n')
+            vaf = float(x[0])
+
+            #if chrom == '4':
+            totalDict = idExactLocus(chrom, loc, wt, mut, vaf, totalDict)
+
+    for probe in totalDict:
+        exactPlotting(probe, totalDict[probe])
+
+def exactPlotting(gene, probe):
+    exactProbes = {'TIIIa':['115227814','115227978'],'NRAS-1':['115256496','115256680'],'NRAS-2':['115258713','115258897'],'DNMT3a':['25457211','25457364'],'IDH1':['209113077','209113239'],'SF3B1':['198266803','198266967'],'TIIIb':['223190674','223190820'],'TIIIc':['229041101','229041289'],'TET2-1':['106197237','106197405'],'TET2-2':['106155137','106155275'],'TIIId':['110541172','110541302'],'TIIIe':['112997214','112997386'],'TIIIf':['121167756','121167884'],'TIIIg':['123547743','123547901'],'TIIIh':['124428637','124428767'],'JAK2':['5073733','5073887'],'TIIIj':['2126256','2126420'],'TIIIk':['2389983','2390171'],'TIIIl':['2593889','2594074'],'TIIIm':['11486596','11486728'],'HRAS':['534258','534385'],'KRAS-1':['25398247','25398415'],'KRAS-2':['25380242','25380368'],'TIIIn':['92527052','92527176'],'IDH2':['90631809','90631969'],'TIIIo':['73379656','73379832'],'TIIIp':['82455026','82455164'],'TIIIq':['85949137','85949299'],'p53-1':['7577504','7577635'],'p53-2':['7578369','7578544'],'p53-3':['7577084','7577214'],'GATA1':['48649667','48649849']}
+    # gene = NRAS-1
+    # probe = {chrom:4,locus:[1234],vaf:[0.5],mut:[CT]}
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import matplotlib.patches as mpatches
+
+    # probe in form:
+    # {locus:[1234],vaf:[0.5],mut:[CT]}
+    muts = probe['mut']
+    changes = generateColors(muts)
+    loci = probe['locus']
+    vafs = probe['vaf']
+
+    # create plot
+    ind = np.arange(len(loci))
+    p1 = plt.bar(loci, vafs, color=changes)
+    # when youre bored
+    #plt.xkcd()
+
+    plt.ylim(ymin=0)
+    plt.ylim(ymax=0.003)
+
+    # there is some weird error were the second element in exactProbes
+    # is not a gene name, this bypasses that problem, but better to fix it
+    if len(gene) > 3:
+        plt.xlim(xmin=int(exactProbes[gene][0]))
+        plt.xlim(xmax=int(exactProbes[gene][1]))
+
+    plt.xlabel('Chromosome Location')
+    plt.ylabel('Variant Allele Frequencies')
+    plt.title('Probe Within Chromosome %s:%s' % (probe['chrom'],gene))
+    plt.savefig('plotOnProbe.png')
+
+    # this formats the xticks so they aren't abbreviated
+    from matplotlib.ticker import FormatStrFormatter
+    plt.gca().xaxis.set_major_formatter(FormatStrFormatter('%d'))
+    plt.xticks(rotation=45)
+
+    # create the legend
+    cyan = mpatches.Patch(color='cyan', label='C-A')
+    black = mpatches.Patch(color='black', label='C-G')
+    red = mpatches.Patch(color='red', label='C-T')
+    gray = mpatches.Patch(color='gray', label='T-A')
+    green = mpatches.Patch(color='green', label='T-C')
+    magenta = mpatches.Patch(color='magenta', label='T-G')
+    a = mpatches.Patch(color='#000099', label='G-T')
+    b = mpatches.Patch(color='#660066', label='G-C')
+    c = mpatches.Patch(color='#00ff00', label='G-A')
+    d = mpatches.Patch(color='#ffff00', label='A-T')
+    e = mpatches.Patch(color='#ff6600', label='A-G')
+    f = mpatches.Patch(color='#663300', label='A-C')
+    #plt.legend(handles=[cyan, black, red, gray, green, magenta])
+    plt.legend(handles=[cyan, black, red, gray, green, magenta, a,b,c,d,e,f])
+
+    plt.show()
+
 if __name__ == '__main__':
     createInput()
-    plot()
-    #plot('2', 27000000)
-    #plot('16', 74379750)
-    #plot('4', 134428737)
-    #plot('11', 2226328)
+    #plot()
+    plotExact()
