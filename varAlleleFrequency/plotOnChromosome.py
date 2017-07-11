@@ -83,9 +83,9 @@ def generateColors(muts):
     from Bio.Seq import Seq
     # same colors as base bias plotting
     # if combining
-    colors = {'CA':'c', 'CG':'k', 'CT':'r', 'TA':'0.5', 'TC':'g', 'TG':'m'}
+    colors = {'CA':'c', 'CG':'k', 'CT':'#ed0000', 'TA':'0.5', 'TC':'g', 'TG':'m'}
     # if not combining
-    colors = {'CA':'c', 'CG':'k', 'CT':'r', 'TA':'0.5', 'TC':'g', 'TG':'m', 'GT':'#000099', 'GC':'#660066', 'GA':'#00ff00', 'AT':'#ffff00', 'AG':'#ff6600', 'AC':'#663300'}
+    colors = {'CA':'c', 'CG':'k', 'CT':'#ed0000', 'TA':'0.5', 'TC':'g', 'TG':'m', 'GT':'#000099', 'GC':'#660066', 'GA':'#00ff00', 'AT':'#ffff00', 'AG':'#ff6600', 'AC':'#663300'}
     changes = []
 
     # change to cononical changes
@@ -145,7 +145,7 @@ def generatePlot(probe):
     # create the legend
     cyan = mpatches.Patch(color='cyan', label='C-A')
     black = mpatches.Patch(color='black', label='C-G')
-    red = mpatches.Patch(color='red', label='C-T')
+    red = mpatches.Patch(color='#ed0000', label='C-T')
     gray = mpatches.Patch(color='gray', label='T-A')
     green = mpatches.Patch(color='green', label='T-C')
     magenta = mpatches.Patch(color='magenta', label='T-G')
@@ -289,7 +289,7 @@ def exactPlotting(gene, probe):
     # create the legend
     cyan = mpatches.Patch(color='cyan', label='C-A')
     black = mpatches.Patch(color='black', label='C-G')
-    red = mpatches.Patch(color='red', label='C-T')
+    red = mpatches.Patch(color='#ed0000', label='C-T')
     gray = mpatches.Patch(color='gray', label='T-A')
     green = mpatches.Patch(color='green', label='T-C')
     magenta = mpatches.Patch(color='magenta', label='T-G')
