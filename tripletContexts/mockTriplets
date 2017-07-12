@@ -7,15 +7,15 @@ def argparse():
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--input', '-i', type=str, help='Input file containing all triplet contexts from sequencing data.')
+    parser.add_argument('--indir', '-i', type=str, help='Input directory containing changes.txt and contexts.txt')
     parser.add_argument('--output', '-o', type=str, help='Output directory.')
 
     args = parser.parse_args()
     
-    inFile = args.input
+    inDir = args.indir
     outFile = args.output
 
-    return inFile, outFile
+    return inDir, outFile
 
 def buildDict():
     probedRegions={'JAK2':'TTCTCACAAGCATTTGGTTTTAAATTATGGAGTATGTGTCTGTGGAGACGAGAGTAAGTAAAACTACAGGCTTTCTAATGCCTTTCTCAGAGCATCTGTTTTTGTTTATATAGAAAATTCAGTTTCAGGATCACAGCTAGGTGTCAGTGTAAACT',
@@ -51,15 +51,13 @@ def buildDict():
             'TIIIP':'ATTAAGGATGGGGTAGTGGGCACTTACCTAGTGGCTGCAATTGAGCATCCAGGAGTAGAGTCAGGACCCAGTGCCCAGCAGGCTATTAGAGTGAAGGTCAAGCAGAGGGCAGTAGCGTAGGGTAGAAGTGAGATGTTAG',
             'TIIIQ':'GTTGTTTTCACTCCGGCTTCACAGATGAGGAGACTGAGGCTGGGAGGTTCAGGATCTCATCCAGGTCGCGCAGGCCTCTGGCTGGAGCCTGTTCTTGAGGCCTCCTTGTGCCCGGCAGCCGCCATGCTCACAGGGTCTCAGTTCTGGGAGGCCTGGGTCATGA'}
 
-    # {kras:{1:['A'],2:['T']}}
-    counter = 1
+    # probesAndLocs = {kras:[(1, 'A'), (2, 'T')]}
     probesAndLocs = {}
 
     for gene in probedRegions:
-        for base in gene:
-            probesAndLocs[gene] = {counter:base}
-            counter += 1
-    
+        seq = list(enumerate(list(probedRegions[gene])))
+        probesAndLocs[gene] = seq
+        
     return probesAndLocs
 '''
 create a dictionary for each probe where the string is represented by char elements and keys are locations
@@ -70,33 +68,62 @@ then scan along probes until matching seq is found
 
 # output a dict with all base triplet possibilities
 def generateTriplets():
-    import itertools
+    from itertools import product
     bases = ['T','C','G','A']
-    combos = [p for p in itertools.product(bases, repeat=3)]
+    combos = [p for p in product(bases, repeat=3)]
     triplets = {}
     
     for i in combos:
         triple = i[0] + i[1] + i[2]
-        triplets[triple] = 0
+        triplets[triple] = {'T':0,'C':0,'G':0,'A':0}
 
+    # triplets = {'TCT':{'T':0,'C':0,'G':0,'A':0}}
     return  triplets
 
 # counts number of instances of each triplet
-def parseInput(inFile, triplets):
+def parseInput(inDir, triplets):
+    from itertools import izip
     total = 0
-    target = open(inFile, 'r')
-    for line in target:
-        line = line.rstrip('\n')
-        triplets[line] += 1
+    contexts = open(inDir + '/contexts.txt', 'r')
+    changes = open(inDir + '/changes.txt', 'r')
+
+    for i, j in izip(contexts, changes):
+        i = i.rstrip('\n')
+        j = j.rstrip('\n')
+        triplets[i][j] += 1
         total += 1
 
     return triplets, total
 
+def getStart(probesAndLocs):
+    from random import randint
+    from random import seed
+    #seed(10)
+    length = len(probesAndLocs) - 1
+    index = randint(0,length)
+    gene = ''
+
+    # get random gene
+    count = 0
+    for i in probesAndLocs:
+        if count == index:
+            gene = i
+        count += 1
+
+    # get random locus
+    readLength = len(probesAndLocs[gene]) - 1
+    locus = randint(0,readLength)
+
+    return gene, locus
+
 if __name__ == '__main__':
-    inFile, outFile = argparse()
+    inDir, outFile = argparse()
     triplets = generateTriplets()
-    triplets, total = parseInput(inFile, triplets)
+    # triplets = {'TCT':{'T':0,'C':0,'G':0,'A':0}}
+    triplets, total = parseInput(inDir, triplets)
+    # probesAndLocs = {kras:[(1, 'A'), (2, 'T')]}
     probesAndLocs = buildDict()
-    print probesAndLocs
+    gene, locus = getStart(probesAndLocs)
+    print gene, locus
 
 
