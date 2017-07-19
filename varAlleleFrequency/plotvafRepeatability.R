@@ -34,11 +34,15 @@ p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity)) +
   ylim(0,0.003) +
   geom_abline(intercept = 0, slope = 1) +
   xlab('Mutation VAFs Sample 202 47yr') + ylab('Mutation VAFs Sample 300 34yr') +
-  labs(title = 'Variant Allele Frequencies of Putative Mutations A-T')
+  labs(title = 'Variant Allele Frequencies of Putative Mutations A-T')+
+  geom_smooth(method=lm, se=FALSE)
 # print(p)
 jpeg('output2.jpg')
 print(p)
 dev.off()
+
+m <- lm(sample1 ~ sample2);
+print(m)
 
 # The following produces plot with the oncogegenic mutations identified
 '''
@@ -46,10 +50,10 @@ library(ggrepel)
 vafs$col <- grepl(paste0(oncosites,collapse = "|"), vafs$Identity)
 p <- ggplot(vafs, aes(x=Sample1, y=Sample2, alpha=1, color = col)) +
     geom_point() +
-    geom_text_repel(aes(label=ifelse(Sample2>0.002 |Sample1>0.002 ,as.character(Identity),''))) +
-    xlab('Mutation VAFs 19r1') + ylab('Mutation VAFs Average') +
-    labs(title = 'Variant Allele Frequencies of Putative Mutations') 
-jpeg('output3.jpg')
+    geom_text_repel(aes(label=ifelse(Sample2>0.002 |Sample1>0.002 ,as.character(Identity),""))) +
+    xlab("Mutation VAFs 19r1") + ylab("Mutation VAFs Average") +
+    labs(title = "Variant Allele Frequencies of Putative Mutations") 
+jpeg("output3.jpg")
 print(p)
 dev.off()
 '''
