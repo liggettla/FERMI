@@ -28,20 +28,30 @@ lm_fit  = lm(sample1 ~ sample2)
 x = data.frame(vafs, predict(lm_fit, interval = 'prediction'))
 
 # plot with y=x line
-p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity)) +
+p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity, size=15)) +
   geom_point() +
   xlim(0,0.003) +
   ylim(0,0.003) +
-  geom_abline(intercept = 0, slope = 1) +
-  xlab('Mutation VAFs Sample 202 47yr') + ylab('Mutation VAFs Sample 300 34yr') +
-  labs(title = 'Variant Allele Frequencies of Putative Mutations A-T')+
-  geom_smooth(method=lm, se=FALSE)
+  geom_abline(intercept = 0, slope = 1, size=2)+ # y=x line
+  xlab('Variant Allele Frequency') + ylab('Variant Allele Frequency') +
+  labs(title = 'Putative Mutations A-T')+
+  geom_smooth(method=lm, se=FALSE, size=2)+ # regression line
+  theme_bw()+ # no gray background
+  theme(panel.border = element_blank())+ # no border
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+ # no gridlines
+  theme(axis.title = element_text(size = 40))+ # change label size
+  theme(plot.title = element_text(size = 40))+ # change title size
+  theme(plot.title = element_text(hjust = 0.5))+ # center title
+  theme(axis.text = element_text(size = 40, colour="black", family="Arial"))+ # change tick size
+  theme(legend.position="none")+ # no legend
+  theme(axis.line = element_line(colour = "black", size=2)) # add axis
 # print(p)
-jpeg('output2.jpg')
+#jpeg('output2.jpg')
+jpeg('output2.jpg', units="in", width=17, height=17, res=500)
 print(p)
 dev.off()
 
-m <- lm(sample1 ~ sample2);
+m <- lm(sample2 ~ sample1);
 print(m)
 
 # The following produces plot with the oncogegenic mutations identified

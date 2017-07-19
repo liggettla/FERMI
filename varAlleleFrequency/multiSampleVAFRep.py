@@ -204,15 +204,15 @@ def plotAndDisplay(outputFile, plotFile1, plotFile2, displayPlot):
     #command = 'mv output1.jpg %s' % (plotFile1)
     #system(command)
     command = 'mv output2.jpg %s' % (plotFile2)
-    #if displayPlot:
-    #    system(command)
+    if displayPlot:
+        system(command)
 
     # display the plots
     #command = 'eog vafRepeatabilityRegression.jpg'
     #system(command)
     command = 'eog vafRepeatabilityNoRegression.jpg'
-    #if displayPlot:
-    #    system(command)
+    if displayPlot:
+        system(command)
 
 ##################
 # Run the Script #
