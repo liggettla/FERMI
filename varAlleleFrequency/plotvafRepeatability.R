@@ -32,19 +32,21 @@ p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity, size=15))
   geom_point() +
   xlim(0,0.003) +
   ylim(0,0.003) +
-  geom_abline(intercept = 0, slope = 1, size=2)+ # y=x line
-  xlab('Variant Allele Frequency') + ylab('Variant Allele Frequency') +
+  geom_abline(intercept = 0, slope = 1, size=3)+ # y=x line
+  xlab('VAF') + ylab('VAF') +
   labs(title = 'Putative Mutations A-T')+
-  geom_smooth(method=lm, se=FALSE, size=2)+ # regression line
+  geom_smooth(method=lm, se=FALSE, size=3)+ # regression line
   theme_bw()+ # no gray background
   theme(panel.border = element_blank())+ # no border
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+ # no gridlines
-  theme(axis.title = element_text(size = 40))+ # change label size
-  theme(plot.title = element_text(size = 40))+ # change title size
+  theme(axis.title = element_text(size = 50))+ # change label size
+  theme(plot.title = element_text(size = 50))+ # change title size
   theme(plot.title = element_text(hjust = 0.5))+ # center title
-  theme(axis.text = element_text(size = 40, colour="black", family="Arial"))+ # change tick size
+  theme(axis.text.x = element_text(size = 50, colour="black", angle=90))+ # change tick size
+  theme(axis.text.y = element_text(size = 50, colour="black"))+ # change tick size
   theme(legend.position="none")+ # no legend
-  theme(axis.line = element_line(colour = "black", size=2)) # add axis
+  theme(axis.ticks = element_line(colour = "black", size = 2))+ # hide ticks
+  theme(axis.line = element_line(colour = "black", size=3)) # add axis
 # print(p)
 #jpeg('output2.jpg')
 jpeg('output2.jpg', units="in", width=17, height=17, res=500)
