@@ -23,6 +23,8 @@ parser.add_argument('--displayplot', '-d', action='store_true', help='This will 
 parser.add_argument('--multiplier', '-m', type=float, help='This specifies a multiplier to artificially increase all the VAFs in the priniciple sample by a set multiplier allowing for comparison of shifting populations.')
 parser.add_argument('--plotonchrom', '-z', action='store_true', help='This will output vafs of the data shown on the y-axis of the vaf comparison plot (typically the average samples) along chromosomal distances to understand hot and cold regions of the chromosome.')
 parser.add_argument('--combinecomplements', '-a', action='store_true', help='This will combine the complement of base pairs into a single plot, ie if C-T variants are asked for, both C-T and G-A variants will be output.')
+parser.add_argument('--onlyCoding', '-x', action='store_true', help='This will only use variants coming from coding strand probes.')
+parser.add_argument('--onlyTemplate', '-z', action='store_true', help='This will only use variants coming from template strand probes.')
 
 
 args = parser.parse_args()
@@ -85,7 +87,8 @@ def parseLine(i):
     AFNum = AONum / DPNum
 
     location = '%s-%s-%s-%s' % (chrom, str(loc), str(WT), str(var))
-    return location, AFNum, WT, var
+    loc = int(loc)
+    return location, AFNum, WT, var, loc
 
 ###################
 # Find Avg AFNums #
@@ -103,7 +106,7 @@ def takeAverage(tempData):
 ############################
 # Build Avg Data Structure #
 ############################
-def buildAverageStructure(samples):
+def buildAverageStructure(samples, regions):
     from Bio.Seq import Seq
     tempData = {}
     for i in samples:
@@ -111,24 +114,33 @@ def buildAverageStructure(samples):
         for line in target:
             if '#' not in line and 'chr' in line: # skip the info
                 # Ex: loc = chr1-1234-C-A
-                loc, AFNum, WT, var = parseLine(line)
+                loc, AFNum, WT, var, location = parseLine(line)
                 if args.multiplier:
                     AFNum = AFNum * args.multiplier
 
-                # should germline/variant types be included?
-                # and either combine complementary bases or not
-                if args.combinecomplements:
-                    matchingVariants = WT in germline and var in variant or str(Seq(WT).complement()) in germline and str(Seq(var).complement()) in variant
-                else:
-                    matchingVariants = WT in germline and var in variant
+                # decide if in acceptable probe regions; coding vs template
+                withinProbes = False
+                for i in regions:
+                    start=int(regions[i][0])
+                    end=int(regions[i][1])
+                    if location > start and location < end:
+                        withinProbes = True
 
-                if matchingVariants:
-                    # decide if variant is unique or not
-                    if rareEnough(AFNum):
-                        if loc in tempData:
-                            tempData[loc]['vaf'].append(AFNum)
-                        else:
-                            tempData[loc] = {'vaf':[AFNum]}
+                if withinProbes:
+                    # should germline/variant types be included?
+                    # and either combine complementary bases or not
+                    if args.combinecomplements:
+                        matchingVariants = WT in germline and var in variant or str(Seq(WT).complement()) in germline and str(Seq(var).complement()) in variant
+                    else:
+                        matchingVariants = WT in germline and var in variant
+
+                    if matchingVariants:
+                        # decide if variant is unique or not
+                        if rareEnough(AFNum):
+                            if loc in tempData:
+                                tempData[loc]['vaf'].append(AFNum)
+                            else:
+                                tempData[loc] = {'vaf':[AFNum]}
 
     # average all of the AFNum values
     avgData = takeAverage(tempData)
@@ -139,19 +151,28 @@ def buildAverageStructure(samples):
 #############################
 # Builds dictionary of the principle data
 # to be compared to the average data
-def buildPrincipleStructure(principle):
+def buildPrincipleStructure(principle, regions):
     from Bio.Seq import Seq
     principleData = {}
     target = open(principle, 'r')
     for i in target:
         if '#' not in i and 'chr' in i: # skip the info
-            loc, AFNum, WT, var = parseLine(i)
+            loc, AFNum, WT, var, location = parseLine(i)
 
             # should germline/variant types be included?
             if WT in germline and var in variant or str(Seq(WT).complement()) in germline and str(Seq(var).complement()) in variant:
-                # decide if variant is unique or not
-                if rareEnough(AFNum):
-                    principleData[loc] = AFNum
+
+                # decide if in acceptable probe regions; coding vs template
+                withinProbes = False
+                for i in regions:
+                    start=int(regions[i][0])
+                    end=int(regions[i][1])
+                    if location > start and location < end:
+                        withinProbes = True
+                if withinProbes:
+                    # decide if variant is unique or not
+                    if rareEnough(AFNum):
+                        principleData[loc] = AFNum
 
     return principleData
 
@@ -217,23 +238,34 @@ def plotAndDisplay(outputFile, plotFile1, plotFile2, displayPlot):
 ##################
 # Run the Script #
 ##################
-avgData = buildAverageStructure(samples)
+if __name__ == '__main__':
+    if args.onlyCoding:
+        strand = 'Coding'
+        regions = {'TIIIb':['223190673','223190820'],'TET2-1':['106197237','106197405'],'TET2-2':['106155137','106155275'],'TIIId':['110541172','110541302'],'JAK2':['5073733','5073887'],'TIIIl':['2593889','2594074'],'TIIIn':['92527052','92527176'],'TIIIq':['85949137','85949299'],'GATA1':['48649667','48649849']}
 
-principleData = buildPrincipleStructure(principle)
-outputData(commonVars, avgData, principleData)
+    elif args.onlyTemplate:
+        strand = 'Template'
+        regions = {'TIIIa':['115227813','115227978'],'NRAS-1':['115256496','115256680'],'NRAS-2':['115258713','115258897'],'DNMT3a':['25457211','25457364'],'IDH1':['209113077','209113239'],'SF3B1':['198266803','198266967'],'TIIIc':['229041101','229041289'],'TIIIk':['2389983','2390171'],'TIIIl':['2593889','2594074'],'TIIIm':['11486596','11486728'],'HRAS':['534258','534385'],'KRAS-1':['25398247','25398415'],'KRAS-2':['25380242','25380368'],'IDH2':['90631809','90631969'],'p53-1':['7577504','7577635'],'p53-2':['7578369','7578544'],'p53-3':['7577084','7577214']}
+
+    else:
+        regions = {'TIIIa':['115227814','115227978'],'NRAS-1':['115256496','115256680'],'NRAS-2':['115258713','115258897'],'DNMT3a':['25457211','25457364'],'IDH1':['209113077','209113239'],'SF3B1':['198266803','198266967'],'TIIIb':['223190674','223190820'],'TIIIc':['229041101','229041289'],'TET2-1':['106197237','106197405'],'TET2-2':['106155137','106155275'],'TIIId':['110541172','110541302'],'TIIIe':['112997214','112997386'],'TIIIf':['121167756','121167884'],'TIIIg':['123547743','123547901'],'TIIIh':['124428637','124428767'],'JAK2':['5073733','5073887'],'TIIIj':['2126256','2126420'],'TIIIk':['2389983','2390171'],'TIIIl':['2593889','2594074'],'TIIIm':['11486596','11486728'],'HRAS':['534258','534385'],'KRAS-1':['25398247','25398415'],'KRAS-2':['25380242','25380368'],'TIIIn':['92527052','92527176'],'IDH2':['90631809','90631969'],'TIIIo':['73379656','73379832'],'TIIIp':['82455026','82455164'],'TIIIq':['85949137','85949299'],'p53-1':['7577504','7577635'],'p53-2':['7578369','7578544'],'p53-3':['7577084','7577214'],'GATA1':['48649667','48649849']}
+
+    avgData = buildAverageStructure(samples, regions)
+
+    principleData = buildPrincipleStructure(principle, regions)
+    outputData(commonVars, avgData, principleData)
 
 # output plot if requested
-if args.displayplot:
-    plotAndDisplay(outputFile, plotFile1, plotFile2, True)
-else:
-    plotAndDisplay(outputFile, plotFile1, plotFile2, False)
+    if args.displayplot:
+        plotAndDisplay(outputFile, plotFile0, plotFile2, True)
+    else:
+        plotAndDisplay(outputFile, plotFile0, plotFile2, False)
 
+    from revisedComputeRSquared import getRSquared
+    r2 = getRSquared()
+    print('R-Squared = %f' % (r2))
 
-from revisedComputeRSquared import getRSquared
-r2 = getRSquared()
-print('R-Squared = %f' % (r2))
-
-if args.plotonchrom:
-    from os import system
-    system('python plotOnChromosome.py')
+    if args.plotonchrom:
+        from os import system
+        system('python plotOnChromosome.py')
 
