@@ -44,7 +44,7 @@ p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity, size=15))
 # 3b
   #xlab('VAF HCT116 MMR-') + ylab('VAF Mean') +
 # 3c
-  xlab('VAF Individual 19') + ylab('VAF Mean') +
+  #xlab('VAF Individual 19') + ylab('VAF Mean') +
 # 3d
   #xlab('VAF Individual 2') + ylab('VAF Mean') +
 # 3e
@@ -87,8 +87,8 @@ p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity, size=15))
   #labs(title = 'T-G/A-C Variants')+
   #labs(title = 'T-A/A-T Variants')+
 # 3s5
-  #xlab('VAF Individual 19') + ylab('VAF Mean') +
-  #labs(title = 'Total Variants')+
+  xlab('VAF Individual 19') + ylab('VAF Mean') +
+  labs(title = 'Total Variants')+
   #labs(title = 'C-T/G-A Variants')+
   #labs(title = 'C-G/G-C Variants')+
   #labs(title = 'C-A/G-T Variants')+
@@ -96,7 +96,7 @@ p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity, size=15))
   #labs(title = 'T-G/A-C Variants')+
   #labs(title = 'T-A/A-T Variants')+
 
-  #geom_smooth(method=lm, se=FALSE, size=3)+ # regression line
+  geom_smooth(method=lm, se=FALSE, size=3)+ # regression line
   theme_bw()+ # no gray background
   theme(panel.border = element_blank())+ # no border
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+ # no gridlines
