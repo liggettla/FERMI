@@ -30,11 +30,13 @@ x = data.frame(vafs, predict(lm_fit, interval = 'prediction'))
 # plot with y=x line
 p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity, size=15)) +
   geom_point() +
-  xlim(0,0.006) +
-  ylim(0,0.006) +
+  xlim(0,0.003) +
+  ylim(0,0.003) +
   #xlim(0,1) +
   #ylim(0,1) +
   geom_abline(intercept = 0, slope = 1, size=3)+ # y=x line
+  xlab('\nVAF Individual 15') + ylab('VAF Mean\n') +
+  labs(title = 'C-T Variants Coding Regions\n')+
 # 2a
   #xlab('VAF Individual 15') + ylab('VAF Individual 7') +
 # 2b
@@ -87,8 +89,8 @@ p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity, size=15))
   #labs(title = 'T-G/A-C Variants')+
   #labs(title = 'T-A/A-T Variants')+
 # 3s5
-  xlab('VAF Individual 19') + ylab('VAF Mean') +
-  labs(title = 'Total Variants')+
+  #xlab('VAF Individual 19') + ylab('VAF Mean') +
+  #labs(title = 'Total Variants')+
   #labs(title = 'C-T/G-A Variants')+
   #labs(title = 'C-G/G-C Variants')+
   #labs(title = 'C-A/G-T Variants')+
@@ -96,7 +98,7 @@ p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity, size=15))
   #labs(title = 'T-G/A-C Variants')+
   #labs(title = 'T-A/A-T Variants')+
 
-  geom_smooth(method=lm, se=FALSE, size=3)+ # regression line
+  #geom_smooth(method=lm, se=FALSE, size=3)+ # regression line
   theme_bw()+ # no gray background
   theme(panel.border = element_blank())+ # no border
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+ # no gridlines

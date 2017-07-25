@@ -24,7 +24,7 @@ parser.add_argument('--multiplier', '-m', type=float, help='This specifies a mul
 parser.add_argument('--plotonchrom', '-z', action='store_true', help='This will output vafs of the data shown on the y-axis of the vaf comparison plot (typically the average samples) along chromosomal distances to understand hot and cold regions of the chromosome.')
 parser.add_argument('--combinecomplements', '-a', action='store_true', help='This will combine the complement of base pairs into a single plot, ie if C-T variants are asked for, both C-T and G-A variants will be output.')
 parser.add_argument('--onlyCoding', '-x', action='store_true', help='This will only use variants coming from coding strand probes.')
-parser.add_argument('--onlyTemplate', '-z', action='store_true', help='This will only use variants coming from template strand probes.')
+parser.add_argument('--onlyTemplate', '-y', action='store_true', help='This will only use variants coming from template strand probes.')
 
 
 args = parser.parse_args()
@@ -257,9 +257,9 @@ if __name__ == '__main__':
 
 # output plot if requested
     if args.displayplot:
-        plotAndDisplay(outputFile, plotFile0, plotFile2, True)
+        plotAndDisplay(outputFile, plotFile1, plotFile2, True)
     else:
-        plotAndDisplay(outputFile, plotFile0, plotFile2, False)
+        plotAndDisplay(outputFile, plotFile1, plotFile2, False)
 
     from revisedComputeRSquared import getRSquared
     r2 = getRSquared()
