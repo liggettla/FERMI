@@ -1,0 +1,36 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE DASDNA SYSTEM "http://www.biodas.org/dtd/dasdna.dtd">
+<DASDNA>
+<SEQUENCE id="chr4" start="121167863" stop="121167883" version="1.00">
+<DNA length="21">
+ctaacatctccacatagtgcc
+</DNA>
+</SEQUENCE>
+</DASDNA>
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE DASDNA SYSTEM "http://www.biodas.org/dtd/dasdna.dtd">
+<DASDNA>
+<SEQUENCE id="chr17" start="7577598" stop="7577618" version="1.00">
+<DNA length="21">
+tcagagccaacctaggagata
+</DNA>
+</SEQUENCE>
+</DASDNA>
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE DASDNA SYSTEM "http://www.biodas.org/dtd/dasdna.dtd">
+<DASDNA>
+<SEQUENCE id="chr17" start="7577594" stop="7577614" version="1.00">
+<DNA length="21">
+acagtcagagccaacctagga
+</DNA>
+</SEQUENCE>
+</DASDNA>
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE DASDNA SYSTEM "http://www.biodas.org/dtd/dasdna.dtd">
+<DASDNA>
+<SEQUENCE id="chr2" start="209113105" stop="209113125" version="1.00">
+<DNA length="21">
+agcatgacgacctatgatgat
+</DNA>
+</SEQUENCE>
+</DASDNA>
