@@ -12,36 +12,17 @@ def runArgparse():
     from numpy import mean
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--inFile', '-i', type=str, help='Specifies the input vcf file.')
-    parser.add_argument('--wt', '-w', type=str, help='Specify the WT base that is getting mutated.')
-    parser.add_argument('--mut', '-m', type=str, help='Specify the mutant base.')
+    parser.add_argument('--inDir', '-i', type=str, help='Specifies the input directory containing analsis directories.')
+    #parser.add_argument('--wt', '-w', type=str, help='Specify the WT base that is getting mutated.')
+    #parser.add_argument('--mut', '-m', type=str, help='Specify the mutant base.')
 
     args = parser.parse_args()
-    inFile = args.inFile
-    wt = args.wt
-    mut = args.mut
+    inDir = args.inDir
+    #wt = args.wt
+    #mut = args.mut
 
-    return inFile, wt, mut
+    return inDir
 
-def buildDict(inFile):
-    from parseline import parseLine
-    target = open(inFile, 'r')
-    variants = {}
-    badLocs = []
-
-    for line in target:
-        location, AFNum, WT, var, loc, chrom = parseLine(line)
-        if loc:
-            if loc in variants and loc not in badLocs:
-                badLocs.append(loc)
-            variants[loc]={'wt':WT, 'var':var, 'chrom':chrom}
-
-    # delete any variants that aren't the only variants found
-    # at a given locus
-    for i in badLocs:
-        del variants[i]
-
-    return variants
 
 # this builds a file of commands to download UCSC DNA segments
 # surrounding base change of interest
@@ -94,7 +75,6 @@ def quantifyFlanks():
                 bases[count][base]+=1
             count += 1
 
-    #print bases
     return bases
 
 
@@ -111,6 +91,52 @@ def plotSeq(bases):
     ax.set_ylabel('Percent')
 
     plt.show()
+    
+
+
+def buildDF(inFile, badLocs):
+    from parseline import parseLine
+    import pandas as pd
+    print inFile
+    target = open(inFile, 'r')
+    #variants = {loc:'CT'}
+    variants = {}
+
+    for line in target:
+        location, AFNum, WT, var, loc, chrom = parseLine(line)
+        if loc: # parseLine returns false if within info lines
+            if loc in variants and loc not in badLocs:
+                badLocs.append(loc)
+            variants[loc] = '%s-%s' % (WT, var)
+
+    # delete any variants that aren't the only variants found
+    # at a given locus
+    for i in badLocs:
+        if i in variants:
+            del variants[i]
+
+
+    # create pandas dataframe from the dictionary
+    # the index orient will use the locs as indices
+    df = pd.DataFrame.from_dict(variants, orient='index')
+    # transform so locations are column headers
+    df = df.T
+
+    return df, badLocs
+
+def combineDFs(allData,df):
+    # this comines the data from newly parsed vcf files
+    # together with total d
+    # ignore index will give each sample a new number
+    allData=allData.append(df, ignore_index=True)
+    return allData
+
+def getFiles(inDir):
+    # builds a list of all files to investigate from
+    # the input directory
+    from glob import glob as g
+    fileList = g('%s/*fastq/onlyProbedRegions.vcf' % (inDir))
+    return fileList
 
 
 
@@ -120,10 +146,14 @@ def plotSeq(bases):
 
 
 if __name__ == '__main__':
-    inFile, wt, mut = runArgparse()
-    variants = buildDict(inFile)
-    outputLocs(variants, wt, mut)
-    cleanLocs()
-    bases = quantifyFlanks()
-    plotSeq(bases)
-    print len(variants)
+    import pandas as pd
+    inDir = runArgparse()
+    fileList = getFiles(inDir)
+    allData = pd.DataFrame()
+    badLocs = [] # keep track of locs with multiple vars
+    for inputFile in fileList:
+        df, badLocs = buildDF(inputFile, badLocs)
+        allData = combineDFs(allData, df)
+    print allData
+
+
