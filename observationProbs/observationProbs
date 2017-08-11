@@ -110,7 +110,8 @@ def buildDF(inFile, badLocs):
             variants[loc] = '%s-%s' % (WT, var)
 
     # delete any variants that aren't the only variants found
-    # at a given locus
+    # at a given locus but will miss those that haven't been found to be bad
+    # these must be removed later
     for i in badLocs:
         if i in variants:
             del variants[i]
@@ -138,6 +139,16 @@ def getFiles(inDir):
     fileList = g('%s/*fastq/onlyProbedRegions.vcf' % (inDir))
     return fileList
 
+def removeBadLocs(allData, badLocs):
+    # because badLocs are sometimes found only after the first
+    # few files are parsed, locs with multiple variants must be
+    # removed after building dataframe
+    for loc in badLocs:
+        if loc in allData:
+            # 0 drops rows, 1 drops columns
+            allData = allData.drop(loc,1)
+
+    return allData
 
 
     
@@ -151,9 +162,15 @@ if __name__ == '__main__':
     fileList = getFiles(inDir)
     allData = pd.DataFrame()
     badLocs = [] # keep track of locs with multiple vars
+    # parse all input files
     for inputFile in fileList:
         df, badLocs = buildDF(inputFile, badLocs)
         allData = combineDFs(allData, df)
+    # remove any missed badlocs
+    allData = removeBadLocs(allData, badLocs)
+
     print allData
+
+
 
 
