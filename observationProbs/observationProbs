@@ -94,7 +94,7 @@ def plotSeq(bases):
     
 
 
-def buildDF(inFile, badLocs):
+def buildDF(inFile, badLocs, goodLocs):
     from parseline import parseLine
     import pandas as pd
     print inFile
@@ -105,9 +105,22 @@ def buildDF(inFile, badLocs):
     for line in target:
         location, AFNum, WT, var, loc, chrom = parseLine(line)
         if loc: # parseLine returns false if within info lines
+
+            # flag anything that is mutated differently within this vcf
             if loc in variants and loc not in badLocs:
                 badLocs.append(loc)
-            variants[loc] = '%s-%s' % (WT, var)
+
+            # if location prev ID'd as good check that change was the same
+            if loc in goodLocs:
+                if goodLocs[loc] == '%s-%s' % (WT, var):
+                    variants[loc] = '%s-%s' % (WT, var)
+                else:
+                    badLocs.append(loc)
+
+            # if never seen, assume good and add
+            else:
+                goodLocs[loc] = '%s-%s' % (WT, var)
+                variants[loc] = '%s-%s' % (WT, var)
 
     # delete any variants that aren't the only variants found
     # at a given locus but will miss those that haven't been found to be bad
@@ -162,9 +175,10 @@ if __name__ == '__main__':
     fileList = getFiles(inDir)
     allData = pd.DataFrame()
     badLocs = [] # keep track of locs with multiple vars
+    goodLocs = {} # keep track of variant type at each loc
     # parse all input files
     for inputFile in fileList:
-        df, badLocs = buildDF(inputFile, badLocs)
+        df, badLocs = buildDF(inputFile, badLocs, goodLocs)
         allData = combineDFs(allData, df)
     # remove any missed badlocs
     allData = removeBadLocs(allData, badLocs)
