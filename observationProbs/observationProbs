@@ -94,7 +94,7 @@ def plotSeq(bases):
     
 
 
-def buildDF(inFile, badLocs, goodLocs):
+def buildDF(inFile, badLocs, goodLocs, totalVarCounts):
     from parseline import parseLine
     import pandas as pd
     print inFile
@@ -105,6 +105,9 @@ def buildDF(inFile, badLocs, goodLocs):
     for line in target:
         location, AFNum, WT, var, loc, chrom = parseLine(line)
         if loc: # parseLine returns false if within info lines
+            # only look at substitutions
+            if len('%s-%s' % (WT, var)) == 3:
+                totalVarCounts['%s-%s' % (WT, var)] += 1
 
             # flag anything that is mutated differently within this vcf
             if loc in variants and loc not in badLocs:
@@ -136,7 +139,7 @@ def buildDF(inFile, badLocs, goodLocs):
     # transform so locations are column headers
     df = df.T
 
-    return df, badLocs
+    return df, badLocs, totalVarCounts
 
 def combineDFs(allData,df):
     # this comines the data from newly parsed vcf files
@@ -163,6 +166,64 @@ def removeBadLocs(allData, badLocs):
 
     return allData
 
+def countVariants(allData):
+    # this counts each type of variant
+    from collections import defaultdict
+    counts = defaultdict(int)
+
+def mutationRatios(totalVarCounts):
+    # this computes the ratios of each substitution changes
+    total = 0
+    for i in totalVarCounts:
+        total += totalVarCounts[i]
+
+
+    for i in totalVarCounts:
+        print('%s:%s' % (i,str(float(totalVarCounts[i])/float(total))))
+
+def defineProbabilities():
+    x = {'T-A':0.2886282509,'T-G':0.008669046405,'T-C':0.7027027027,'C-A':0.1144487215,'C-G':0.005361561727,'C-T':0.8801897168,'G-C':0.1411374931,'G-A':0.3717283269,'G-T':0.48713418,'A-G':0.6341116599,'A-C':0.006061966771,'A-T':0.3598263733}
+    return x
+
+def calculateProbs(allData, ratios):
+    from collections import defaultdict
+    allProbs = defaultdict(list)
+
+    for loc in allData:
+        count = 0
+        varType = ''
+        for variant in allData[loc]:
+            # count variant instances
+            if pd.notnull(variant) and len(variant) == 3:
+                varType = variant
+                count += 1
+        if count > 0:
+            probability = pow(ratios[varType],count*2)
+            allProbs[varType].append(probability)
+
+
+    # now sort all of the lists in descending order
+    for i in allProbs:
+        list.sort(allProbs[i],reverse=True)
+    print allProbs['C-A']
+
+    return allProbs
+
+def plotProbabilities(allProbs):
+    import matplotlib.pyplot as plt
+    # plot as p values
+    for i in allProbs:
+        plt.bar(range(len(allProbs[i])),allProbs[i],color='gray')
+        plt.title('%s' % (i))
+        plt.ylabel('p-value')
+
+        plt.show()
+
+
+            
+
+
+
 
     
 
@@ -171,19 +232,26 @@ def removeBadLocs(allData, badLocs):
 
 if __name__ == '__main__':
     import pandas as pd
+    from collections import defaultdict
     inDir = runArgparse()
     fileList = getFiles(inDir)
     allData = pd.DataFrame()
-    badLocs = [] # keep track of locs with multiple vars
+    badLocs = [] # keep track of locs with multiple vars in single vcf
     goodLocs = {} # keep track of variant type at each loc
+    totalVarCounts = defaultdict(int)
     # parse all input files
     for inputFile in fileList:
-        df, badLocs = buildDF(inputFile, badLocs, goodLocs)
+        df, badLocs, totalVarCounts = buildDF(inputFile, badLocs, goodLocs, totalVarCounts)
         allData = combineDFs(allData, df)
     # remove any missed badlocs
     allData = removeBadLocs(allData, badLocs)
+    countVariants(allData)
+    # mutationRatios(totalVarCounts)
+    ratios = defineProbabilities()
+    # calculate all the probabilites for every locus
+    allProbs = calculateProbs(allData, ratios)
+    plotProbabilities(allProbs)
 
-    print allData
 
 
 
