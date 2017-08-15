@@ -182,11 +182,14 @@ def mutationRatios(totalVarCounts):
         print('%s:%s' % (i,str(float(totalVarCounts[i])/float(total))))
 
 def defineProbabilities():
-    x = {'T-A':0.2886282509,'T-G':0.008669046405,'T-C':0.7027027027,'C-A':0.1144487215,'C-G':0.005361561727,'C-T':0.8801897168,'G-C':0.1411374931,'G-A':0.3717283269,'G-T':0.48713418,'A-G':0.6341116599,'A-C':0.006061966771,'A-T':0.3598263733}
+    #x = {'T-A':0.2886282509,'T-G':0.008669046405,'T-C':0.7027027027,'C-A':0.1144487215,'C-G':0.005361561727,'C-T':0.8801897168,'G-C':0.1411374931,'G-A':0.3717283269,'G-T':0.48713418,'A-G':0.6341116599,'A-C':0.006061966771,'A-T':0.3598263733}
+    x = {'T-A':0.1045736252,'T-G':0.004353965639,'T-C':0.2457048717,'T-T':0.6453675375,'C-A':0.07028799544,'C-G':0.003813800969,'C-T':0.506201882,'C-C':0.4196963216,'G-C':0.05708131395,'G-A':0.1481652435,'G-T':0.1937841372,'G-G':0.6009693053,'A-G':0.3658376711,'A-C':0.004704067862,'A-T':0.2100250627,'A-A':0.4194331984}
+
     return x
 
 def calculateProbs(allData, ratios):
     from collections import defaultdict
+    from scipy.misc import comb
     allProbs = defaultdict(list)
 
     for loc in allData:
@@ -198,16 +201,36 @@ def calculateProbs(allData, ratios):
                 varType = variant
                 count += 1
         if count > 0:
-            probability = pow(ratios[varType],count*2)
+            # simple probability
+            #probability = pow(ratios[varType],count*2)
+
+            # binomial probability
+            probability = comb(21,count)*pow(ratios[varType],count)*pow((1-ratios[varType]),(21-count))
             allProbs[varType].append(probability)
 
 
     # now sort all of the lists in descending order
     for i in allProbs:
         list.sort(allProbs[i],reverse=True)
-    print allProbs['C-A']
+
+    # calculate p values
+    fisherpvalues(allProbs)
 
     return allProbs
+
+def fisherpvalues(allProbs):
+    # calculate p value by fisher's test
+    # will return a dictionary with p values for each variant
+    from scipy.stats import combine_pvalues as fisher
+
+    for i in allProbs:
+        stats = fisher(allProbs[i])
+        chi = stats[0]
+        p_val = stats[1]
+        print i, p_val
+
+
+
 
 def plotProbabilities(allProbs):
     import matplotlib.pyplot as plt
@@ -246,7 +269,7 @@ if __name__ == '__main__':
     # remove any missed badlocs
     allData = removeBadLocs(allData, badLocs)
     countVariants(allData)
-    # mutationRatios(totalVarCounts)
+    #mutationRatios(totalVarCounts)
     ratios = defineProbabilities()
     # calculate all the probabilites for every locus
     allProbs = calculateProbs(allData, ratios)
