@@ -85,10 +85,12 @@ def plotSeq(bases):
     d = {1: {'a': 140, 'c': 173, 't': 128, 'g': 136}, 2: {'a': 145, 'c': 161, 't': 138, 'g': 133}}
 
     df = pd.DataFrame.from_dict(bases, orient='index').apply(lambda p: p/p.sum(), axis=1)
+    plt.tight_layout()
 
     ax = df.plot(kind='bar', rot=0, ylim=(0, 0.4))
     ax.set_xlabel('Position')
     ax.set_ylabel('Percent')
+    ax.set_yscale("log", nonposx='clip')
 
     plt.show()
     
@@ -208,13 +210,24 @@ def calculateProbs(allData, ratios):
             probability = comb(21,count)*pow(ratios[varType],count)*pow((1-ratios[varType]),(21-count))
             allProbs[varType].append(probability)
 
-
     # now sort all of the lists in descending order
     for i in allProbs:
         list.sort(allProbs[i],reverse=True)
+    
+    # correct for multicomparisons
+    allProbs = multicompcorrect(allProbs)
 
     # calculate p values
     fisherpvalues(allProbs)
+
+    return allProbs
+
+def multicompcorrect(allProbs):
+    # bonferroni correct for multiple comparisons
+    import statsmodels.sandbox.stats.multicomp as mc
+    for i in allProbs:
+        x = mc.multipletests(allProbs[i])
+        allProbs[i] = list(x[1])
 
     return allProbs
 
