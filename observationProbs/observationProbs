@@ -247,12 +247,22 @@ def fisherpvalues(allProbs):
 
 def plotProbabilities(allProbs):
     import matplotlib.pyplot as plt
+
+    title_font = {'fontname':'Arial', 'size':'30', 'color':'black', 'weight':'normal'}
+    axis_font = {'fontname':'Arial', 'size':'30'}
+
     # plot as p values
     for i in allProbs:
         plt.bar(range(len(allProbs[i])),allProbs[i],color='gray')
-        plt.title('%s' % (i))
-        plt.ylabel('p-value')
+        plt.title('%s' % (i), **title_font)
+        plt.ylabel('p-value', **axis_font)
+        plt.xlabel('Individual Variants', **axis_font)
+        plt.yscale('log')
+        plt.xticks(**axis_font)
+        plt.yticks(**axis_font)
+        plt.tight_layout()
 
+        plt.savefig('plot.png', figsize=(13,13), dpi=1750)
         plt.show()
 
 
