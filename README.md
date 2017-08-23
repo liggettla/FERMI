@@ -1,4 +1,5 @@
-*FERMI*
+**FERMI**
+
 **Fast Extremely Rare Mutation Identification**
 
 FERMI is used to identify mutations at an extremely rare frequency.
@@ -6,4 +7,4 @@ FERMI contains set of tools to analyze unique molecular identifier (UMI) tagged,
 
 For installation and usage instructions please see the wiki [link](https://github.com/liggettla/FERMI/wiki "here")
 
-**"Where is everybody?!"**
+*"Where is everybody?!"*
