@@ -265,6 +265,36 @@ def plotProbabilities(allProbs):
         plt.savefig('plot.png', figsize=(13,13), dpi=1750)
         plt.show()
 
+def qqplot(allProbs, plottype='both'):
+    # the purpose of this is to generate a qq plot from the data
+    import numpy as np
+    import pylab
+    import scipy.stats as stats
+
+    if plottype == 'probability' or plottype == 'both':
+        for variant in allProbs:
+            stats.probplot(allProbs[variant], dist="norm", plot=pylab)
+            pylab.title('Probability Plot %s' % (variant), fontsize=50)
+            pylab.ylabel('Ordered Values', fontsize=50)
+            pylab.xlabel('Theoretical Quantiles', fontsize=50)
+            pylab.yticks(fontsize=50)
+            pylab.xticks(fontsize=50)
+            pylab.tight_layout()
+            pylab.show()
+
+    if plottype == 'qq' or plottype == 'both':
+        for variant in allProbs:
+            import statsmodels.api as sm
+            from matplotlib import pyplot as plt
+            fig = sm.qqplot(np.asarray(allProbs[variant]), stats.t, fit=True, line='45')
+            plt.title('Q-Q Plot %s' % (variant), fontsize=50)
+            plt.ylabel('Ordered Values', fontsize=50)
+            plt.xlabel('Theoretical Quantiles', fontsize=50)
+            plt.yticks(fontsize=50)
+            plt.xticks(fontsize=50)
+            plt.tight_layout()
+            plt.show()
+
 
             
 
@@ -296,6 +326,7 @@ if __name__ == '__main__':
     ratios = defineProbabilities()
     # calculate all the probabilites for every locus
     allProbs = calculateProbs(allData, ratios)
+    qqplot(allProbs)
     plotProbabilities(allProbs)
 
 
