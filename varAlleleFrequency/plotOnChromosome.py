@@ -131,11 +131,14 @@ def generatePlot(probe):
     # ID gene target
     gene = identifyLocus(str(probe['locus'][0]))
 
+    title_font = {'fontname':'Arial', 'size':'16', 'color':'black', 'weight':'normal'}
+    axis_font = {'fontname':'Arial', 'size':'30'}
+
     plt.ylim(ymin=0)
     plt.ylim(ymax=0.003)
-    plt.xlabel('Chromosome Location')
-    plt.ylabel('Variant Allele Frequencies')
-    plt.title('Probe Within Chromosome %s:%s' % (probe['chrom'],gene))
+    plt.xlabel('Chromosome Location', **axis_font)
+    plt.ylabel('Variant Allele Frequencies', **axis_font)
+    plt.title('Probe Within Chromosome %s:%s' % (probe['chrom'],gene), **title_font)
 
     # this formats the xticks so they aren't abbreviated
     from matplotlib.ticker import FormatStrFormatter
@@ -256,6 +259,7 @@ def exactPlotting(gene, probe):
 
     # probe in form:
     # {locus:[1234],vaf:[0.5],mut:[CT]}
+    #print probe['vaf']
     muts = probe['mut']
     changes = generateColors(muts)
     loci = probe['locus']
@@ -270,21 +274,34 @@ def exactPlotting(gene, probe):
     plt.ylim(ymin=0)
     plt.ylim(ymax=0.003)
 
+    title_font = {'fontname':'Arial', 'size':'30', 'color':'black', 'weight':'normal'}
+    axis_font = {'fontname':'Arial', 'size':'30'}
+
     # there is some weird error were the second element in exactProbes
     # is not a gene name, this bypasses that problem, but better to fix it
     if len(gene) > 3:
         plt.xlim(xmin=int(exactProbes[gene][0]))
         plt.xlim(xmax=int(exactProbes[gene][1]))
 
-    plt.xlabel('Chromosome Location')
-    plt.ylabel('Variant Allele Frequencies')
-    plt.title('Probe Within Chromosome %s:%s' % (probe['chrom'],gene))
+    plt.xlabel('Chromosome Location', **axis_font)
+    plt.ylabel('Variant Allele Frequencies', **axis_font)
+    plt.title('Probe Within Chromosome %s:%s' % (probe['chrom'],gene), **title_font)
     plt.savefig('plotOnProbe.png')
 
     # this formats the xticks so they aren't abbreviated
     from matplotlib.ticker import FormatStrFormatter
     plt.gca().xaxis.set_major_formatter(FormatStrFormatter('%d'))
-    plt.xticks(rotation=45)
+    plt.xticks(rotation=45, **axis_font)
+    plt.yticks(**axis_font)
+
+
+    plt.tick_params(
+    axis='x',          # changes apply to the x-axis
+    which='both',      # both major and minor ticks are affected
+    bottom='off',      # ticks along the bottom edge are off
+    top='off',         # ticks along the top edge are off
+    labelbottom='off') # labels along the bottom edge are off
+
 
     # create the legend
     cyan = mpatches.Patch(color='cyan', label='C-A')
@@ -300,7 +317,8 @@ def exactPlotting(gene, probe):
     e = mpatches.Patch(color='#ff6600', label='A-G')
     f = mpatches.Patch(color='#663300', label='A-C')
     #plt.legend(handles=[cyan, black, red, gray, green, magenta])
-    plt.legend(handles=[cyan, black, red, gray, green, magenta, a,b,c,d,e,f])
+    plt.legend(handles=[cyan, black, red, gray, green, magenta, a,b,c,d,e,f], prop={'size': 15})
+    plt.tight_layout()
 
     plt.show()
 
