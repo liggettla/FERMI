@@ -270,15 +270,11 @@ def countAllVars(allData):
 
     return countsdf
 
-def statsnstuff():
-    from scipy.stats import chisquare as chi
-    c([.1,.2,.3,.4,.5], f_exp=[.2,.4,.6,.8,1.0])
-
 def calculateProbabilities(allData, variantProbs):
+    allProbs = defaultdict(list)
     # this will get lists of variants and their counts at each location
     for loc in allData:
         tempVarProbs = {}
-        print variantProbs
         # [18, 15, 1]
         counts = allData[loc].value_counts().tolist()
         numVars = sum(counts)
@@ -290,9 +286,22 @@ def calculateProbabilities(allData, variantProbs):
         # {'G-C': 0.25}
         for i in variantProbs:
             tempVarProbs[i] = variantProbs[i] * numVars 
-        print tempVarProbs
         
-        #getChiSquared(counts, variants, tempVarProbs)
+        stat, p, wtbase = getChiSquared(counts, variants, tempVarProbs)
+        
+        allProbs[wtbase].append(p)
+
+    # now sort all of the lists in descending order
+    for i in allProbs:
+        list.sort(allProbs[i],reverse=True)
+
+    # correct for multicomparisons
+    allProbs = multicompcorrect(allProbs)
+
+    # calculate total p values
+    fisherpvalues(allProbs)
+
+    return allProbs
 
 def getChiSquared(counts, variants, tempVarProbs):
     # this puts two lists together of observed and expected numbers of variants
@@ -300,6 +309,7 @@ def getChiSquared(counts, variants, tempVarProbs):
     possibleVars = {'T':['T-C','T-G','T-A'],'C':['C-T','C-G','C-A'],'G':['G-T','G-C','G-A'],'A':['A-T','A-C','A-G']}
     observed = []
     expected = []
+    varList = []
 
     wtbase = ''
     # start by adding all observed variants and expected frequencies
@@ -307,23 +317,23 @@ def getChiSquared(counts, variants, tempVarProbs):
         wtbase = x[0]
         observed.append(y)
         expected.append(tempVarProbs[x])
+        varList.append(x)
+    # add zeros for variants that are not observed
+    for i in possibleVars[wtbase]:
+        if i not in varList:
+            # [17, 16, 2]
+            observed.append(0)
+            # [15.13598369011213, 17.594903160040776, 2.2691131498470947]
+            expected.append(tempVarProbs[i])
+            # ['A-T', 'A-G', 'A-C']
+            varList.append(i)
 
-    # because not every change occurs at every locus, fill in missed
-    # changes with 0 observations
+    # calculate chi squared
+    x = chi(observed, f_exp=expected)
+    stat = x[0]
+    p = x[1]
 
-
-    
-    
-
-    
-
-        
-
-
-
-
-
-
+    return stat, p, wtbase
 
 def originalMethod():
     # this is the original method we were using to calculate significance
@@ -372,30 +382,17 @@ def newMethod():
     allCounts = countAllVars(allData)
     # variantProbs = {'C-T':0.58}
     variantProbs = varProbability(totalVarCounts, fileCount)
-    calculateProbabilities(allData, variantProbs)
-
-
-
-
-
-
-
-
-
-            
-
-
-
-
-    
-
-    
-
+    allProbs = calculateProbabilities(allData, variantProbs)
+    # qq and probability plots
+    qqplot(allProbs)
+    # barplot
+    plotProbabilities(allProbs)
 
 if __name__ == '__main__':
     import pandas as pd
     from collections import defaultdict
     from parseline import parseLine
+    from scipy.stats import chisquare as chi
 
     #originalMethod()
     newMethod()
