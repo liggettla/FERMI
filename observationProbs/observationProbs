@@ -13,93 +13,15 @@ def runArgparse():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--inDir', '-i', type=str, help='Specifies the input directory containing analsis directories.')
-    #parser.add_argument('--wt', '-w', type=str, help='Specify the WT base that is getting mutated.')
-    #parser.add_argument('--mut', '-m', type=str, help='Specify the mutant base.')
 
     args = parser.parse_args()
     inDir = args.inDir
-    #wt = args.wt
-    #mut = args.mut
 
     return inDir
-
-
-# this builds a file of commands to download UCSC DNA segments
-# surrounding base change of interest
-def outputLocs(variants, wt, mut):
-    target = open('commands.sh', 'w')
-    # erase previous work
-    locs = open('locs', 'w')
-    locs.close()
-    target.write('#!/usr/bin/env bash\n')
-
-    for loc in variants:
-        if variants[loc]['wt'] == wt and variants[loc]['var'] == mut: 
-            low = int(loc) - 10
-            high = int(loc) + 10
-            target.write('wget -O - http://genome.ucsc.edu/cgi-bin/das/hg19/dna?segment=%s:%s,%s >> locs\n' % (variants[loc]['chrom'], low, high))
-
-    target.close()
-    import sys, os
-    os.system('./commands.sh')
-
-# output all of the sequences surrounding
-# base of interest
-def cleanLocs():
-    target = open('locs', 'r')
-    output = open('sequences.txt', 'w')
-
-    for line in target:
-        if '<' not in line and 'n' not in line:
-            output.write(line)
-        else:
-            pass
-
-    target.close()
-    output.close()
-
-def quantifyFlanks():
-
-    #{1:{'a':5,'t':6,'g':1,'c':3}}
-    #{'locus':[1,1,1,1],'percent':[0.25,0.25,0.25,0.25],'letters':['t','c','g','a']
-    bases = {}
-    target = open('sequences.txt', 'r')
-    for line in target:
-        line = line.rstrip('\n')
-        count = 1
-        for base in line:
-            if count in bases:
-                bases[count][base]+=1
-            else:
-                bases[count]={'t':0,'c':0,'g':0,'a':0}
-                bases[count][base]+=1
-            count += 1
-
-    return bases
-
-
-def plotSeq(bases): 
-    import matplotlib.pyplot as plt
-    import pandas as pd
-
-    d = {1: {'a': 140, 'c': 173, 't': 128, 'g': 136}, 2: {'a': 145, 'c': 161, 't': 138, 'g': 133}}
-
-    df = pd.DataFrame.from_dict(bases, orient='index').apply(lambda p: p/p.sum(), axis=1)
-    plt.tight_layout()
-
-    ax = df.plot(kind='bar', rot=0, ylim=(0, 0.4))
-    ax.set_xlabel('Position')
-    ax.set_ylabel('Percent')
-    ax.set_yscale("log", nonposx='clip')
-
-    plt.show()
-    
-
 
 def buildDF(inFile, badLocs, goodLocs, totalVarCounts):
     from parseline import parseLine
     import pandas as pd
-    print inFile
     target = open(inFile, 'r')
     #variants = {loc:'CT'}
     variants = {}
@@ -274,11 +196,11 @@ def qqplot(allProbs, plottype='both'):
     if plottype == 'probability' or plottype == 'both':
         for variant in allProbs:
             stats.probplot(allProbs[variant], dist="norm", plot=pylab)
-            pylab.title('Probability Plot %s' % (variant), fontsize=50)
-            pylab.ylabel('Ordered Values', fontsize=50)
-            pylab.xlabel('Theoretical Quantiles', fontsize=50)
-            pylab.yticks(fontsize=50)
-            pylab.xticks(fontsize=50)
+            pylab.title('Probability Plot %s' % (variant), fontsize=40)
+            pylab.ylabel('Ordered Values', fontsize=40)
+            pylab.xlabel('Theoretical Quantiles', fontsize=40)
+            pylab.yticks(fontsize=40)
+            pylab.xticks(fontsize=40)
             pylab.tight_layout()
             pylab.show()
 
@@ -287,28 +209,125 @@ def qqplot(allProbs, plottype='both'):
             import statsmodels.api as sm
             from matplotlib import pyplot as plt
             fig = sm.qqplot(np.asarray(allProbs[variant]), stats.t, fit=True, line='45')
-            plt.title('Q-Q Plot %s' % (variant), fontsize=50)
-            plt.ylabel('Ordered Values', fontsize=50)
-            plt.xlabel('Theoretical Quantiles', fontsize=50)
-            plt.yticks(fontsize=50)
-            plt.xticks(fontsize=50)
+            plt.title('Q-Q Plot %s' % (variant), fontsize=40)
+            plt.ylabel('Ordered Values', fontsize=40)
+            plt.xlabel('Theoretical Quantiles', fontsize=40)
+            plt.yticks(fontsize=40)
+            plt.xticks(fontsize=40)
             plt.tight_layout()
             plt.show()
 
+def buildInclusiveDF(inputFile, totalVarCounts):
+    # this method parses the vcf file passed to it and builds a pd df 
+    # with variants sorted by locations. Unlike buildDF(), this method is
+    # independent of a variant's uniqueness, and all found variants will be
+    # included in the df.
+    target = open(inputFile, 'r')
 
-            
+    #variants = {loc:['C-T','C-A']}
+    variants = defaultdict(list)
+
+    for line in target:
+        location, AFNum, WT, var, loc, chrom = parseLine(line)
+        if loc: # parseLine returns false if within info lines
+            # only look at substitutions
+            if len('%s-%s' % (WT, var)) == 3:
+                totalVarCounts['%s-%s' % (WT, var)] += 1
+                variants[loc].append('%s-%s' % (WT, var))
+
+    # create pandas dataframe from the dictionary
+    # the index orient will use the locs as indices
+    # and transform so locations are column headers
+    df = pd.DataFrame.from_dict(variants, orient='index').T
+
+    return df, totalVarCounts
+
+# this will add expected counts of no mutation at particular sites
+# these are unique to probed region and must be changed to fit probes
+# being used
+def varProbability(totalVarCounts, fileCount):
+    #totalVarCounts = {'A-C': 1500, 'G-C': 1000}
+    baseCounts = {'T':fileCount*1214, 'C':fileCount*1336, 'G':fileCount*1238, 'A':fileCount*1235}
+    # observedCounts = {'T':5000, 'C':4000}
+    observedCounts = defaultdict(int)
+    # get total numbers of variants per wt base
+    for variant in totalVarCounts:
+        numVars = totalVarCounts[variant]
+        wtBase = variant[0]
+        observedCounts[wtBase] += numVars
+
+    variantProbs = {}
+    # get percentage representations multiplied by filecount
+    for variant in totalVarCounts:
+        variantProbs[variant] = float(totalVarCounts[variant]) / float(observedCounts[variant[0]])
+
+    return variantProbs 
+
+# this will return a df of column counts
+def countAllVars(allData):
+    for loc in allData:
+        countsdf = allData[loc].value_counts()
+
+    return countsdf
+
+def statsnstuff():
+    from scipy.stats import chisquare as chi
+    c([.1,.2,.3,.4,.5], f_exp=[.2,.4,.6,.8,1.0])
+
+def calculateProbabilities(allData, variantProbs):
+    # this will get lists of variants and their counts at each location
+    for loc in allData:
+        tempVarProbs = {}
+        print variantProbs
+        # [18, 15, 1]
+        counts = allData[loc].value_counts().tolist()
+        numVars = sum(counts)
+        # ['C-T', 'C-A', 'C-G']
+        variants = allData[loc].value_counts().index.tolist()
+
+        # calc expected numbers of each variant based on number of variants
+        # seen at this location
+        # {'G-C': 0.25}
+        for i in variantProbs:
+            tempVarProbs[i] = variantProbs[i] * numVars 
+        print tempVarProbs
+        
+        #getChiSquared(counts, variants, tempVarProbs)
+
+def getChiSquared(counts, variants, tempVarProbs):
+    # this puts two lists together of observed and expected numbers of variants
+    # at given location, compares them, and returns chi-squared and p values
+    possibleVars = {'T':['T-C','T-G','T-A'],'C':['C-T','C-G','C-A'],'G':['G-T','G-C','G-A'],'A':['A-T','A-C','A-G']}
+    observed = []
+    expected = []
+
+    wtbase = ''
+    # start by adding all observed variants and expected frequencies
+    for x, y in zip(variants, counts):
+        wtbase = x[0]
+        observed.append(y)
+        expected.append(tempVarProbs[x])
+
+    # because not every change occurs at every locus, fill in missed
+    # changes with 0 observations
 
 
-
-
+    
     
 
     
 
+        
 
-if __name__ == '__main__':
-    import pandas as pd
-    from collections import defaultdict
+
+
+
+
+
+
+def originalMethod():
+    # this is the original method we were using to calculate significance
+    # it appears that this was incorrect for a number of reasons, but for
     inDir = runArgparse()
     fileList = getFiles(inDir)
     allData = pd.DataFrame()
@@ -328,6 +347,58 @@ if __name__ == '__main__':
     allProbs = calculateProbs(allData, ratios)
     qqplot(allProbs)
     plotProbabilities(allProbs)
+    # reproducibility's sake this is being kept available
+
+def newMethod():
+    # this method now uses chi squared instead of binomial probability
+    # and does not rely on variants being uniquely observed at a particular site
+    inDir = runArgparse()
+    fileList = getFiles(inDir)
+    
+    '''
+       229041219 229041220 229041221 229041222 229041223 229041224 229041225  
+    0        A-G       NaN       NaN       NaN       G-T       C-T       A-G 
+    '''
+    allData = pd.DataFrame() # structure shown above
+    totalVarCounts = defaultdict(int) # keep track of variant numbers to get expected counts
+
+    # parse input files and put in pd df with loc as columns and index as rows
+    fileCount = 0
+    for inputFile in fileList:
+        fileCount += 1
+        print ('Parsing: %s' % (inputFile))
+        df, totalVarCounts = buildInclusiveDF(inputFile, totalVarCounts)
+        allData = combineDFs(allData, df)
+    allCounts = countAllVars(allData)
+    # variantProbs = {'C-T':0.58}
+    variantProbs = varProbability(totalVarCounts, fileCount)
+    calculateProbabilities(allData, variantProbs)
+
+
+
+
+
+
+
+
+
+            
+
+
+
+
+    
+
+    
+
+
+if __name__ == '__main__':
+    import pandas as pd
+    from collections import defaultdict
+    from parseline import parseLine
+
+    #originalMethod()
+    newMethod()
 
 
 
