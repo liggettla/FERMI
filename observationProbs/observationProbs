@@ -13,11 +13,16 @@ def runArgparse():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--inDir', '-i', type=str, help='Specifies the input directory containing analsis directories.')
+    parser.add_argument('--probCutoff', '-p', type=float, help='Eliminate any p values above a specified value from plotting.')
 
     args = parser.parse_args()
     inDir = args.inDir
+    if args.probCutoff:
+        probCutoff = args.probCutoff
+    else:
+        probCutoff = 1
 
-    return inDir
+    return inDir, probCutoff
 
 def buildDF(inFile, badLocs, goodLocs, totalVarCounts):
     from parseline import parseLine
@@ -354,6 +359,19 @@ def getChiSquared(counts, variants, tempVarProbs):
 
     return stat, p, wtbase
 
+def filterProbs(allProbs, probCutoff):
+    tempDict = defaultdict(list)
+    for base in allProbs:
+        for prob in allProbs[base]:
+            if prob <= probCutoff:
+                tempDict[base].append(prob)
+
+    print tempDict
+
+    return tempDict
+
+
+
 def originalMethod():
     # this is the original method we were using to calculate significance
     # it appears that this was incorrect for a number of reasons, but for
@@ -381,7 +399,7 @@ def originalMethod():
 def newMethod():
     # this method now uses chi squared instead of binomial probability
     # and does not rely on variants being uniquely observed at a particular site
-    inDir = runArgparse()
+    inDir, probCutoff = runArgparse()
     fileList = getFiles(inDir)
 
     # in order to get counts of the number of bases that don't mutate keep track here
@@ -408,6 +426,9 @@ def newMethod():
     # variantProbs = {'C-T':0.58}
     variantProbs = varProbability(totalVarCounts, fileCount, totalBaseMutationCounts)
     allProbs = calculateProbabilities(allData, variantProbs)
+    # filter out high probabilities if asked for
+    if probCutoff < 1:
+        allProbs = filterProbs(allProbs, probCutoff)
     # qq and probability plots
     qqplot(allProbs)
     # barplot
