@@ -217,12 +217,16 @@ def qqplot(allProbs, plottype='both'):
             plt.tight_layout()
             plt.show()
 
-def buildInclusiveDF(inputFile, totalVarCounts):
+def buildInclusiveDF(inputFile, totalVarCounts, totalBaseMutationCounts):
     # this method parses the vcf file passed to it and builds a pd df 
     # with variants sorted by locations. Unlike buildDF(), this method is
     # independent of a variant's uniqueness, and all found variants will be
     # included in the df.
     target = open(inputFile, 'r')
+
+    # this will hold all locations that have been mutated so counts of wt
+    # bases that get mutated can be calculated
+    mutatedLocs = []
 
     #variants = {loc:['C-T','C-A']}
     variants = defaultdict(list)
@@ -234,18 +238,23 @@ def buildInclusiveDF(inputFile, totalVarCounts):
             if len('%s-%s' % (WT, var)) == 3:
                 totalVarCounts['%s-%s' % (WT, var)] += 1
                 variants[loc].append('%s-%s' % (WT, var))
+                
+                # get counts of mutations
+                if loc not in mutatedLocs:
+                    mutatedLocs.append(loc)
+                    totalBaseMutationCounts[WT] += 1
 
     # create pandas dataframe from the dictionary
     # the index orient will use the locs as indices
     # and transform so locations are column headers
     df = pd.DataFrame.from_dict(variants, orient='index').T
 
-    return df, totalVarCounts
+    return df, totalVarCounts, totalBaseMutationCounts
 
 # this will add expected counts of no mutation at particular sites
 # these are unique to probed region and must be changed to fit probes
 # being used
-def varProbability(totalVarCounts, fileCount):
+def varProbability(totalVarCounts, fileCount, totalBaseMutationCounts):
     #totalVarCounts = {'A-C': 1500, 'G-C': 1000}
     baseCounts = {'T':fileCount*1214, 'C':fileCount*1336, 'G':fileCount*1238, 'A':fileCount*1235}
     # observedCounts = {'T':5000, 'C':4000}
@@ -257,10 +266,20 @@ def varProbability(totalVarCounts, fileCount):
         observedCounts[wtBase] += numVars
 
     variantProbs = {}
+
+    # add in the counts of bases not changing
+    for base in totalBaseMutationCounts:
+        nonMutCount = baseCounts[base] - totalBaseMutationCounts[base]
+        mutationType = ('%s-%s' % (base,base))
+        totalVarCounts[mutationType] = nonMutCount
+        observedCounts[base] += nonMutCount
+
     # get percentage representations multiplied by filecount
     for variant in totalVarCounts:
         variantProbs[variant] = float(totalVarCounts[variant]) / float(observedCounts[variant[0]])
 
+    print 'Overall Variant Probabilities: '
+    print variantProbs
     return variantProbs 
 
 # this will return a df of column counts
@@ -364,8 +383,14 @@ def newMethod():
     # and does not rely on variants being uniquely observed at a particular site
     inDir = runArgparse()
     fileList = getFiles(inDir)
+
+    # in order to get counts of the number of bases that don't mutate keep track here
+    # this can then be used to get the rate of bases that did not mutate
+    totalBaseMutationCounts = {'T':0, 'C':0, 'G':0, 'A':0}
     
     '''
+    the form of allData:
+
        229041219 229041220 229041221 229041222 229041223 229041224 229041225  
     0        A-G       NaN       NaN       NaN       G-T       C-T       A-G 
     '''
@@ -377,11 +402,11 @@ def newMethod():
     for inputFile in fileList:
         fileCount += 1
         print ('Parsing: %s' % (inputFile))
-        df, totalVarCounts = buildInclusiveDF(inputFile, totalVarCounts)
+        df, totalVarCounts, totalBaseMutationCounts = buildInclusiveDF(inputFile, totalVarCounts, totalBaseMutationCounts)
         allData = combineDFs(allData, df)
     allCounts = countAllVars(allData)
     # variantProbs = {'C-T':0.58}
-    variantProbs = varProbability(totalVarCounts, fileCount)
+    variantProbs = varProbability(totalVarCounts, fileCount, totalBaseMutationCounts)
     allProbs = calculateProbabilities(allData, variantProbs)
     # qq and probability plots
     qqplot(allProbs)
