@@ -208,7 +208,7 @@ else:
 if args.freebayes:
     freebayes = args.freebayes
 else:
-    freebayes = '/vol3/home/liggettl/programs/freebayes/bin/freebayes'
+    freebayes = 'freebayes'
 
 # read length
 if args.readLength:
