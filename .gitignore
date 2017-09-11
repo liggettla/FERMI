@@ -27,5 +27,10 @@ varAlleleFrequency/.Rhistory
 varAlleleFrequency/vafPlotting.txt
 varAlleleFrequency/output*
 varAlleleFrequency/plotOnProbe.png
+varAlleleFrequency/*png
+varAlleleFrequency/*jpg
 fastqHanding/entireProbedRegion.txt
 mutationOrigins/run.sh
+main/run
+main/probeBias.pdf
+jobCheck
