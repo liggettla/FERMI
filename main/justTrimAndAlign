@@ -10,7 +10,7 @@ def argParse():
     parser.add_argument('--indir', '-i', type=str, help='Location of input file.')
     parser.add_argument('--filename', '-f', type=str, help='The name of the file to be processed.')
     parser.add_argument('--readlength', '-r', default=120, type=int, help='The number of bases from the 5 prime end to analyse.')
-    parser.add_argument('--reference', '-y', default='/home/alex/Dropbox/Code/ReferenceGenomes/hg19.fa', type=str, help='Location of hg19.')
+    parser.add_argument('--reference', '-y', default='hg19.fa', type=str, help='Location of hg19.')
     parser.add_argument('--freebayes', '-b', default='freebayes', type=str, help='Location of freebayes.')
 
     args = parser.parse_args()
