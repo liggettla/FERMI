@@ -49,9 +49,6 @@ def computeRSquared(parsedFile):
 def getRSquared(target='vafRepeatability.txt'):
     from math import pow
 
-    #target='/media/alex/Extra/Dropbox/Degregori_Lab/Experiments/12.21.2016_0.75_120bp_Analysis/vafRepeatabilityCommon.txt'
-    #target='/media/alex/Extra/Dropbox/Degregori_Lab/Experiments/12.21.2016_0.75_120bp_Analysis/vafRepeatability.txt'
-    #target = '/home/alex/Dropbox/Code/FERMI/varAlleleFrequency/vafRepeatability.txt'
     inputFile = open(target, 'r')
     parsedFile = {}
 

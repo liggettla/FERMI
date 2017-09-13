@@ -1,14 +1,21 @@
 #!/usr/bin/env python
 
+# this computs r2 and pearson correlation coeff
 def computersquared(parsedFile):
     from scipy import stats
     import numpy as np
+    from scipy.stats.stats import pearsonr
     x = parsedFile['x']
     y = parsedFile['y']
 
+    # p value here is two-sided p-value for a hypothesis test
+    # whose null hypothesis is that the slope is zero.
     slope, intercept, r_value, p_value, std_err = stats.linregress(x,y)
 
-    return r_value**2
+    # calculate pearson correlation coefficient
+    p = pearsonr(x, y)
+
+    return r_value**2, p
 
 def getCoords(line):
     columns = line.split('\t')

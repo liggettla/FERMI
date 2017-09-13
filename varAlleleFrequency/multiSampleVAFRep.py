@@ -261,9 +261,12 @@ if __name__ == '__main__':
     else:
         plotAndDisplay(outputFile, plotFile1, plotFile2, False)
 
+    # this now also reports pearsons correlation coefficient
     from revisedComputeRSquared import getRSquared
-    r2 = getRSquared()
+    r2, p = getRSquared()
     print('R-Squared = %f' % (r2))
+    print('Pearson Coefficient = %f' % (p[0]))
+    print('p-value = %f' % (p[1]))
 
     if args.plotonchrom:
         from os import system
