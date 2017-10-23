@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+
+############
+# Argparse #
+############
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--indir', '-i', type=str, required=True, help='Input directory containing the vcf files to be analyzed: /dir')
+parser.add_argument('--infile', '-f', type=str, required=True, help='Input file.')
+
+args = parser.parse_args()
+indir = args.indir
+infile = indir + '/' + args.infile
+
+def countVars(infile):
+    totalVars = 0
+    from parseline import parseLine
+    target = open(infile, 'r')
+    for line in target:
+        location, AF, WT, var, loc, AO = parseLine(line)
+        totalVars += AO
+    
+    return totalVars
+
+if __name__ == '__main__':
+    totalVars = countVars(infile)
+    print totalVars
