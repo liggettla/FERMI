@@ -1,0 +1,75 @@
+#!/usr/bin/env python
+
+# the purpose of this script is to look at particular changes
+# with age to understand rates of changes with age.
+
+############
+# Argparse #
+############
+import argparse
+from numpy import mean
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--indir', '-i', type=str, required=True, help='Input directory containing the vcf files to be analyzed: /dir')
+parser.add_argument('--germline', '-g', type=str, nargs='*', help='Only output those variants that changed from these bases.')
+parser.add_argument('--variant', '-v', type=str, nargs='*', help='Only output those variants that change to these bases.')
+parser.add_argument('--combinecomplements', '-a', action='store_true', help='This will combine the complement of base pairs into a single plot, ie if C-T variants are asked for, both C-T and G-A variants will be output.')
+
+args = parser.parse_args()
+germline = args.germline
+variant = args.variant
+
+###############
+# Input Files # 
+###############
+from glob import glob as g
+from os.path import split as s
+
+inputDir = args.indir
+readList = g('%s/*fastq/onlyProbedRegions.vcf' % (inputDir))
+
+################
+# Check Rarity #
+################
+# check if rare variants are expected
+# and if so, if variant is rare enough
+def rareEnough(AFNum):
+    if not cutoff:
+        return True
+    if cutoff and AFNum <= cutoff:
+        return True
+    else:
+        return False
+
+def quantitateVars(readList, germline, variant):
+    for indiv in readList:
+        target = open(indiv, 'r')
+        raw_count = 0
+        unique_count = 0
+        total_count = 0
+        for line in target:
+            location, AFNum, WT, var, loc, AONum = parseLine(line)
+            if WT == germline[0] and var == variant[0]:
+                raw_count += 1
+                unique_count += AONum
+                total_count += AONum
+            elif WT:
+                total_count += AONum
+
+        print('Individual:')
+        print(indiv)
+        print('Raw Count: %s\nUnique Count: %s\nNormalized: %s' % 
+                (raw_count, unique_count, unique_count/total_count))
+
+
+
+            
+
+
+########
+# Main #
+########
+if __name__ == '__main__':
+    from parseline import parseLine
+    quantitateVars(readList, germline, variant)
+
