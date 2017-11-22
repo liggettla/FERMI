@@ -1,0 +1,125 @@
+#!/usr/bin/env python
+
+############
+# Argparse #
+############
+def runArgparse():
+    import argparse
+    from numpy import mean
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--inFile', '-i', type=str, help='Specifies the input vcf file.')
+    parser.add_argument('--wt', '-w', type=str, help='Specify the WT base that is getting mutated.')
+    parser.add_argument('--mut', '-m', type=str, help='Specify the mutant base.')
+
+    args = parser.parse_args()
+    inFile = args.inFile
+    wt = args.wt
+    mut = args.mut
+
+    return inFile, wt, mut
+
+def buildDict(inFile):
+    from parseline import parseLine
+    target = open(inFile, 'r')
+    variants = {}
+    badLocs = []
+
+    for line in target:
+        location, AFNum, WT, var, loc, chrom = parseLine(line)
+        if loc:
+            if loc in variants and loc not in badLocs:
+                badLocs.append(loc)
+            variants[loc]={'wt':WT, 'var':var, 'chrom':chrom}
+
+    # delete any variants that aren't the only variants found
+    # at a given locus
+    for i in badLocs:
+        del variants[i]
+
+    return variants
+
+# this builds a file of commands to download UCSC DNA segments
+# surrounding base change of interest
+def outputLocs(variants, wt, mut):
+    target = open('commands.sh', 'w')
+    # erase previous work
+    locs = open('locs', 'w')
+    locs.close()
+    target.write('#!/usr/bin/env bash\n')
+
+    for loc in variants:
+        if variants[loc]['wt'] == wt and variants[loc]['var'] == mut: 
+            low = int(loc) - 15
+            high = int(loc) + 15
+            target.write('wget -O - http://genome.ucsc.edu/cgi-bin/das/hg19/dna?segment=%s:%s,%s >> locs\n' % (variants[loc]['chrom'], low, high))
+
+    target.close()
+    import sys, os
+    os.system('./commands.sh')
+
+# output all of the sequences surrounding
+# base of interest
+def cleanLocs():
+    target = open('locs', 'r')
+    output = open('sequences.txt', 'w')
+
+    for line in target:
+        if '<' not in line and 'n' not in line:
+            output.write(line)
+        else:
+            pass
+
+    target.close()
+    output.close()
+
+def quantifyFlanks():
+
+    #{1:{'a':5,'t':6,'g':1,'c':3}}
+    #{'locus':[1,1,1,1],'percent':[0.25,0.25,0.25,0.25],'letters':['t','c','g','a']
+    bases = {}
+    target = open('sequences.txt', 'r')
+    for line in target:
+        line = line.rstrip('\n')
+        count = 1
+        for base in line:
+            if count in bases:
+                bases[count][base]+=1
+            else:
+                bases[count]={'t':0,'c':0,'g':0,'a':0}
+                bases[count][base]+=1
+            count += 1
+
+    #print bases
+    return bases
+
+
+def plotSeq(bases): 
+    import matplotlib.pyplot as plt
+    import pandas as pd
+
+    d = {1: {'a': 140, 'c': 173, 't': 128, 'g': 136}, 2: {'a': 145, 'c': 161, 't': 138, 'g': 133}}
+
+    df = pd.DataFrame.from_dict(bases, orient='index').apply(lambda p: p/p.sum(), axis=1)
+
+    ax = df.plot(kind='bar', rot=0, ylim=(0, 0.4))
+    ax.set_xlabel('Position')
+    ax.set_ylabel('Percent')
+
+    plt.show()
+
+
+
+    
+
+    
+
+
+if __name__ == '__main__':
+    inFile, wt, mut = runArgparse()
+    variants = buildDict(inFile)
+    outputLocs(variants, wt, mut)
+    cleanLocs()
+    bases = quantifyFlanks()
+    plotSeq(bases)
+    print len(variants)

@@ -1,0 +1,190 @@
+#!/usr/bin/env python
+# this script takes an input vcf file and outputs the average VAFs for CpG sites
+# and non CpG sites to test if the mutation rates of CpG sites are higher than
+# for non CpG sites
+
+############
+# Argparse #
+############
+def runArgparse():
+    print('Reading Argparse...')
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--inFile', '-i', type=str, help='Specifies the input vcf file.')
+    parser.add_argument('--flanklength', '-f', type=int, help='Specifies the number of bases of flanking sequence to include')
+    parser.add_argument('--previousdata', '-p', action='store_true', help='It can take a long time to read data from UCSC, so this will trigger use of previous output pickle data.')
+
+    args = parser.parse_args()
+    inFile = args.inFile
+    flankLength = args.flanklength
+    previousData = args.previousdata
+
+    return inFile, flankLength, previousData
+
+# checks if a given variant is just a single base substitution or not
+def checkSubst(var, wt):
+    if len(var)==1 and len(wt)==1:
+        single = True
+    else:
+        single = False
+
+    return single
+
+def readVCF(inFile, flankLength):
+    print('Reading data from genome browser, up to 20min...')
+    from parseline import VCFObj
+    from getSequence import getSequence
+    from collections import defaultdict
+
+    # vafs = {'cag':[0.01,0.02]}
+    vafs = defaultdict(list)
+    target = open(inFile, 'r')
+
+    for line in target:
+        if '#' not in line and 'chr' in line: # skip the info
+            vcfObj = VCFObj(line)
+
+            # check var is just a single base substitution
+            single = checkSubst(vcfObj.var, vcfObj.wt)
+
+            # if var is single base substitution get flanking seq
+            if single:
+                seq = getSequence(line, flankLength)
+                vafs[seq].append(vcfObj.af)
+
+    return vafs
+
+# this averages the associated allele frequencies for each triplet
+def averageVAFs(vafs):
+    print('Computing averages...')
+    from collections import defaultdict
+    from numpy import mean
+    avgVAFs = defaultdict(float)
+
+    for triplet in vafs:
+        average = mean(vafs[triplet])
+        avgVAFs[triplet] = average
+
+    return avgVAFs
+
+# this displays the average VAFs for each triplet
+def plotVAFs(avgVAFs):
+    print('Plotting all VAFs...')
+    import matplotlib.pyplot as plt
+    
+    plt.bar(range(len(avgVAFs)), avgVAFs.values(), align='center')
+    plt.xticks(range(len(avgVAFs)), avgVAFs.keys(), rotation=90)
+    plt.ylabel('Average Variant Allele Frequency')
+    plt.xlabel('Triplet Context')
+    plt.show()
+
+# this will write data into pickle files to eliminate need to constantly
+# read in from ucsc genome browser
+def writeoutData(vafs, avgVAFs):
+    print('Writing out data...')
+    import pickle
+    
+    vafPickle = open('vafs.pkl', 'wb')
+    pickle.dump(vafs, vafPickle)
+    vafPickle.close()
+    
+    avgVafPickle = open('avgvafs.pkl', 'wb')
+    pickle.dump(avgVAFs, avgVafPickle)
+    avgVafPickle.close()
+
+# this will read in previously pickled data
+def readPrevious():
+    print('Reading in saved data...')
+    import pickle
+
+    inputVafs = open('vafs.pkl', 'rb')
+    vafs = pickle.load(inputVafs)
+    inputVafs.close()
+
+    inputAvgVafs = open('avgvafs.pkl', 'rb')
+    avgVAFs = pickle.load(inputAvgVafs)
+    inputAvgVafs.close()
+
+    return vafs, avgVAFs
+
+# this should have been done earlier, but this will ignore SNPs
+def eliminateSNPs(vafs, avgVAFs):
+    print('Eliminating SNPs...')
+    from collections import defaultdict
+
+    newVAFs = defaultdict(list)
+    newAvgVAFs = defaultdict(float)
+
+    for triplet in vafs:
+        for i in vafs[triplet]:
+            if i < 0.1:
+                newVAFs[triplet].append(i)
+    
+    newAvgVAFs = averageVAFs(newVAFs)
+
+    return newVAFs, newAvgVAFs
+
+# this creates a sorted dictionary so that CpG and non CpG sites can be
+# compared
+def cpgVSnon(avgVAFs):
+    print('Sorting CpG Sites...')
+    from collections import defaultdict
+    from numpy import mean
+
+    sortedVAFs = defaultdict(list)
+
+    for i in avgVAFs:
+        if i[1:] == 'cg':
+            sortedVAFs['cpg'].append(avgVAFs[i])
+        else:
+            sortedVAFs['other'].append(avgVAFs[i])
+
+    return sortedVAFs
+
+def plotCPG(sortedVAFs):
+    print('Plotting CpG Comparison...')
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    nums = np.arange(len(sortedVAFs))
+    vafmean = []
+    vafstddev = []
+
+    for i in sortedVAFs:
+        vafmean.append(np.mean(sortedVAFs[i]))
+        vafstddev.append(np.std(sortedVAFs[i]))
+    
+
+    plt.clf()
+    plt.errorbar(nums, vafmean, yerr=vafstddev, linestyle="None", fmt='o')
+    plt.xticks(range(len(sortedVAFs)), sortedVAFs.keys(), rotation=0)
+    plt.ylabel('Average VAF ')
+    plt.show()
+
+if __name__ == '__main__':
+
+    inFile, flankLength, previousData = runArgparse()
+
+    if not previousData:
+        # get dict with all triplets and their associated VAFs 
+        # vafs = {'cag':[0.01,0.02]}
+        vafs = readVCF(inFile, flankLength)
+        avgVAFs = averageVAFs(vafs)
+        vafs, avgVAFs = eliminateSNPs(vafs, avgVAFs)
+        writeoutData(vafs, avgVAFs)
+
+    if previousData:
+        vafs, avgVAFs = readPrevious()
+        vafs, avgVAFs = eliminateSNPs(vafs, avgVAFs)
+    
+    # plot all variants
+    plotVAFs(avgVAFs)
+
+    # calculate averages for CpGs and non CpGs
+    sortedVAFs = cpgVSnon(avgVAFs)
+
+    # plot the CpG vs non CpG
+    plotCPG(sortedVAFs)
+
+
