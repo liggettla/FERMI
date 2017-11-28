@@ -13,16 +13,18 @@ def runArgparse():
     parser = argparse.ArgumentParser()
     parser.add_argument('--inFile', '-i', type=str, help='Specifies the input vcf file.')
     parser.add_argument('--flanklength', '-f', type=int, help='Specifies the number of bases of flanking sequence to include')
-    parser.add_argument('--previousdata', '-p', action='store_true', help='It can take a long time to read data from UCSC, so this will trigger use of previous output pickle data.')
+    parser.add_argument('--previousdata', '-p', action='store_true', help='It can take a long time to read data so this will trigger use of previous output pickle data.')
     parser.add_argument('--dirinput', '-d', type=str, help='Specifies the input directory for use with multiple files.')
     parser.add_argument('--multiplefiles', '-m', nargs='+', help='If dirinput is specified, pass in the file names to be used in analysis.')
-    parser.add_argument('--previousaodata', '-q', action='store_true', help='It can take hours to parse through multiple files and retrieve the necessary data from UCSC; this will retrieve previously stored data.')
+    parser.add_argument('--previousaodata', '-q', action='store_true', help='It can take hours to parse through multiple files and retrieve the necessary data; this will retrieve previously stored data.')
+    parser.add_argument('--reference', '-r', type=str, help='Point to the reference genome to be used for flanking sequence.')
 
     args = parser.parse_args()
     inFile = args.inFile
     flankLength = args.flanklength
     previousData = args.previousdata
     previousAOData = args.previousaodata
+    ref = args.reference
     
     if args.dirinput:
         dirinput = args.dirinput
@@ -31,7 +33,7 @@ def runArgparse():
         dirinput = False
         multiplefiles = False
 
-    return inFile, flankLength, previousData, dirinput, multiplefiles, previousAOData
+    return inFile, flankLength, previousData, dirinput, multiplefiles, previousAOData, ref
 
 # checks if a given variant is just a single base substitution or not
 def checkSubst(var, wt):
@@ -42,13 +44,13 @@ def checkSubst(var, wt):
 
     return single
 
-def readVCF(inFile, flankLength):
-    print('Reading data from genome browser, up to 20min...')
+def readVCF(inFile, flankLength, ref):
+    print('Reading flanking seqences...')
     from parseline import VCFObj
-    from getSequence import getSequence
+    from getSequence import getRefSequence
     from collections import defaultdict
 
-    # vafs = {'cag':[0.01,0.02]}
+    # vafs = {'TCG':[0.01,0.02]}
     vafs = defaultdict(list)
     target = open(inFile, 'r')
 
@@ -61,7 +63,7 @@ def readVCF(inFile, flankLength):
 
             # if var is single base substitution get flanking seq
             if single:
-                seq = getSequence(line, flankLength)
+                seq = getRefSequence(line, flankLength, ref)
                 vafs[seq].append(vcfObj.af)
 
     target.close()
@@ -86,10 +88,10 @@ def plotVAFs(avgVAFs, vafs):
     import matplotlib.pyplot as plt
     
     order =[
-            'ttt','ctt','gtt','att','tct','cct','gct','act','tgt','cgt','ggt','agt','tat','cat','gat','aat',
-            'ttc','ctc','gtc','atc','tcc','ccc','gcc','acc','tgc','cgc','ggc','agc','tac','cac','gac','aac',
-            'ttg','ctg','gtg','atg','tcg','ccg','gcg','acg','tgg','cgg','ggg','agg','tag','cag','gag','aag',
-            'tta','cta','gta','ata','tca','cca','gca','aca','tga','cga','gga','aga','taa','caa','gaa','aaa'
+            'TTT','CTT','GTT','ATT','TCT','CCT','GCT','ACT','TGT','CGT','GGT','AGT','TAT','CAT','GAT','AAT',
+            'TTC','CTC','GTC','ATC','TCC','CCC','GCC','ACC','TGC','CGC','GGC','AGC','TAC','CAC','GAC','AAC',
+            'TTG','CTG','GTG','ATG','TCG','CCG','GCG','ACG','TGG','CGG','GGG','AGG','TAG','CAG','GAG','AAG',
+            'TTA','CTA','GTA','ATA','TCA','CCA','GCA','ACA','TGA','CGA','GGA','AGA','TAA','CAA','GAA','AAA'
             ]
     colors=['cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan',
             'black','black','black','black','black','black','black','black','black','black','black','black','black','black','black','black',
@@ -115,7 +117,7 @@ def plotVAFs(avgVAFs, vafs):
     plt.show()
 
 # this will write data into pickle files to eliminate need to constantly
-# read in from ucsc genome browser
+# read in data
 def writeoutData(vafs, avgVAFs):
     print('Writing out data...')
     import pickle
@@ -170,7 +172,7 @@ def cpgVSnon(avgVAFs):
     sortedVAFs = defaultdict(list)
 
     for i in avgVAFs:
-        if i[1:] == 'cg':
+        if i[1:] == 'CG':
             sortedVAFs['cpg'].append(avgVAFs[i])
         else:
             sortedVAFs['other'].append(avgVAFs[i])
@@ -279,22 +281,22 @@ def plotFractions(fractions):
 
     plt.show()
 
-# this parses through multiple files, gets trinucleotide info from UCSC
+# this parses through multiple files, gets trinucleotide info 
 # then builds and writes a datastructure with file info and fraction
 # of total captures that a given trinucleotide substitution represents
-def parseAO(dirinput, multiplefiles, flankLength):
-    print('Reading data from genome browser (this can take hours)...')
+def parseAO(dirinput, multiplefiles, flankLength, ref):
+    print('Reading flanking sequences (this can take a long time)...')
     from parseline import VCFObj
-    from getSequence import getSequence
+    from getSequence import getRefSequence
     from collections import defaultdict
     from Bio.Seq import Seq
 
-    # allAO = {'a.vcf':{('cag','A>T'):0.01}}
+    # allAO = {'a.vcf':{('TCG','A>T'):0.01}}
     allAO = {}
     allowed = ['C>A', 'C>G', 'C>T', 'T>A', 'T>C', 'T>G']
 
     for i in multiplefiles:
-        # temp = {'cag':90}
+        # temp = {'TCG':90}
         temp = defaultdict(int)
         target = open(dirinput + '/' + i, 'r')
 
@@ -314,7 +316,10 @@ def parseAO(dirinput, multiplefiles, flankLength):
                 # if var is single base and not SNP get
                 # surrounding sequence
                 if single and vcfObj.af < 0.1:
-                    seq = getSequence(line, flankLength)
+                    seq = getRefSequence(line, flankLength, ref)
+                    # combine base types
+                    if seq[1] == 'G' or seq[1] == 'A':
+                        seq = str(Seq(seq).complement())
                     temp[(seq, varType)] += vcfObj.ao
 
         allAO[i] = temp
@@ -338,8 +343,7 @@ def parseAO(dirinput, multiplefiles, flankLength):
 
     return allAO
 
-# if data has already been read in from the UCSC genome browser
-# it can be loaded here
+# if data has already been read in it can be loaded here
 def loadPreviousAO():
     print('Reading in saved data...')
     import pickle
@@ -360,25 +364,23 @@ def plotAOData(allAO):
             'black','black','black','black','black','black','black','black','black','black','black','black','black','black','black','black',
             'red','red','red','red','red','red','red','red','red','red','red','red','red','red','red','red',
             'grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey'
+            'green','green','green','green','green','green','green','green','green','green','green','green','green','green','green','green'
+            'magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta'
             ]
-    t = ['ttt','ctt','gtt','att','ttc','ctc','gtc','atc','ttg','ctg','gtg','atg','tta','cta','gta','ata']
-    c = ['tct','cct','gct','act','tcc','ccc','gcc','acc','tcg','ccg','gcg','acg','tca','cca','gca','aca']
-    g = ['tgt','cgt','ggt','agt','tgc','cgc','ggc','agc','tgg','cgg','ggg','agg','tga','cga','gga','aga']
-    a = ['tat','cat','gat','aat','tac','cac','gac','aac','tag','cag','gag','aag','taa','caa','gaa','aaa']
+    c = ['TCT','CCT','GCT','ACT','TCC','CCC','GCC','ACC','TCG','CCG','GCG','ACG','TCA','CCA','GCA','ACA']
+    t = ['TTT','CTT','GTT','ATT','TTC','CTC','GTC','ATC','TTG','CTG','GTG','ATG','TTA','CTA','GTA','ATA']
     triplets = {}
-    triplets['t'] = t 
-    triplets['c'] = c 
-    triplets['g'] = g 
-    triplets['a'] = a 
+    triplets['T'] = t 
+    triplets['C'] = c 
     
 if __name__ == '__main__':
 
-    inFile, flankLength, previousData, dirinput, multiplefiles, previousAOData = runArgparse()
+    inFile, flankLength, previousData, dirinput, multiplefiles, previousAOData, ref = runArgparse()
 
     if not previousData:
         # get dict with all triplets and their associated VAFs 
-        # vafs = {'cag':[0.01,0.02]}
-        vafs = readVCF(inFile, flankLength)
+        # vafs = {'TCG':[0.01,0.02]}
+        vafs = readVCF(inFile, flankLength, ref)
         avgVAFs = averageVAFs(vafs)
         vafs, avgVAFs = eliminateSNPs(vafs, avgVAFs)
         writeoutData(vafs, avgVAFs)
@@ -404,9 +406,10 @@ if __name__ == '__main__':
     if previousAOData:
         allAO = loadPreviousAO()
     else:
-        allAO = parseAO(dirinput, multiplefiles, flankLength)
+        allAO = parseAO(dirinput, multiplefiles, flankLength, ref)
 
     # plot 96 trinucleotide AO data
+    print allAO
     plotAOData(allAO)
 
 
