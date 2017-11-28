@@ -194,9 +194,12 @@ def plotCPG(sortedVAFs):
     
 
     plt.clf()
-    plt.errorbar(nums, vafmean, yerr=vafstddev, linestyle="None", fmt='o')
-    plt.xticks(range(len(sortedVAFs)), sortedVAFs.keys(), rotation=0)
-    plt.ylabel('Average VAF ')
+    axis_font = {'fontname':'Arial', 'size':'30'}
+    plt.errorbar(nums, vafmean, yerr=vafstddev, linestyle="None", fmt='o', color='black')
+    plt.bar(nums, vafmean, color='grey')
+    plt.xticks(range(len(sortedVAFs)), sortedVAFs.keys(), rotation=0, **axis_font)
+    plt.yticks(**axis_font)
+    plt.ylabel('Average VAF ', **axis_font)
     plt.show()
 
 # this plots the overall base change prevalence, ignoring
@@ -285,7 +288,7 @@ def plotFractions(fractions):
 # then builds and writes a datastructure with file info and fraction
 # of total captures that a given trinucleotide substitution represents
 def parseAO(dirinput, multiplefiles, flankLength, ref):
-    print('Reading flanking sequences (this can take a long time)...')
+    print('Reading flanking sequences (up to about 1min per vcf)...')
     from parseline import VCFObj
     from getSequence import getRefSequence
     from collections import defaultdict
@@ -356,22 +359,92 @@ def loadPreviousAO():
 
 # this plots the 96 trinucleotide data take from capture counts
 def plotAOData(allAO):
-    print('Plotting all VAFs...')
+    print('Plotting all AO Data...')
     import matplotlib.pyplot as plt 
+    from collections import defaultdict
     
-    changes = ['C>A','C>G','C>T','T>A','T>C','T>G']
     colors=['cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan',
             'black','black','black','black','black','black','black','black','black','black','black','black','black','black','black','black',
             'red','red','red','red','red','red','red','red','red','red','red','red','red','red','red','red',
-            'grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey'
-            'green','green','green','green','green','green','green','green','green','green','green','green','green','green','green','green'
+            'grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey',
+            'green','green','green','green','green','green','green','green','green','green','green','green','green','green','green','green',
             'magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta'
             ]
-    c = ['TCT','CCT','GCT','ACT','TCC','CCC','GCC','ACC','TCG','CCG','GCG','ACG','TCA','CCA','GCA','ACA']
-    t = ['TTT','CTT','GTT','ATT','TTC','CTC','GTC','ATC','TTG','CTG','GTG','ATG','TTA','CTA','GTA','ATA']
-    triplets = {}
-    triplets['T'] = t 
-    triplets['C'] = c 
+    changes = ['C>A','C>G','C>T','T>A','T>C','T>G']
+    order = ['TCT','CCT','GCT','ACT','TCC','CCC','GCC','ACC','TCG','CCG','GCG','ACG','TCA','CCA','GCA','ACA',
+            'TTT','CTT','GTT','ATT','TTC','CTC','GTC','ATC','TTG','CTG','GTG','ATG','TTA','CTA','GTA','ATA']
+    labels = [
+            'TCT','CCT','GCT','ACT','TCC','CCC','GCC','ACC','TCG','CCG','GCG','ACG','TCA','CCA','GCA','ACA',
+            'TCT','CCT','GCT','ACT','TCC','CCC','GCC','ACC','TCG','CCG','GCG','ACG','TCA','CCA','GCA','ACA',
+            'TCT','CCT','GCT','ACT','TCC','CCC','GCC','ACC','TCG','CCG','GCG','ACG','TCA','CCA','GCA','ACA',
+            'TTT','CTT','GTT','ATT','TTC','CTC','GTC','ATC','TTG','CTG','GTG','ATG','TTA','CTA','GTA','ATA',
+            'TTT','CTT','GTT','ATT','TTC','CTC','GTC','ATC','TTG','CTG','GTG','ATG','TTA','CTA','GTA','ATA',
+            'TTT','CTT','GTT','ATT','TTC','CTC','GTC','ATC','TTG','CTG','GTG','ATG','TTA','CTA','GTA','ATA',
+            ]
+
+    # first combine data frame so all input files are combined so stdev
+    # calculations and average can be made
+    # df = { ('ATG', 'T>A'): [0.019, 0.18, 0.15] }
+    df = defaultdict(list)
+    for i in allAO:
+        for triplet in allAO[i]:
+            df[triplet].append(allAO[i][triplet])
+
+    # create sorted lists
+    import numpy as np
+    avgAO = []
+    stddevAO = []
+    for i in changes:
+        for j in order:
+            # make sure triplet is possible
+            if i[0] == j[1]:
+                avgAO.append(np.mean(df[(j, i)]))
+                stddevAO.append(np.std(df[(j, i)]))
+            else:
+                pass
+
+    # generate plots
+    from matplotlib import pyplot as plt
+    import matplotlib.patches as mpatches
+
+    plt.clf()
+    axis_font = {'fontname':'Arial', 'size':'30'}
+    tick_font = {'fontname':'Arial', 'size':'7'}
+    plt.errorbar(range(len(avgAO)), avgAO, yerr=stddevAO, linestyle="None", color='black')
+    plt.bar(range(len(avgAO)), avgAO, color=colors)
+    plt.xticks(range(len(labels)), labels, rotation=90, **tick_font)
+    plt.yticks(**axis_font)
+    plt.ylabel('Fraction of Observations', **axis_font)
+    plt.xlabel('Substitution Type', **axis_font)
+
+    plt.tick_params(
+    axis='both',       # changes apply to the x-axis
+    which='both',      # both major and minor ticks are affected
+    bottom='off',      # ticks along the bottom edge are off
+    left='off',        # y-axis ticks are off
+    top='off',         # ticks along the top edge are off
+    labelbottom='on') # labels along the bottom edge are off
+
+    # create the legend
+    CA = mpatches.Patch(color='cyan', label='C>A')
+    CG = mpatches.Patch(color='black', label='C>G')
+    CT = mpatches.Patch(color='red', label='C>T')
+    TA = mpatches.Patch(color='grey', label='T>A')
+    TC = mpatches.Patch(color='green', label='T>C')
+    TG = mpatches.Patch(color='magenta', label='T>G')
+    plt.legend(handles=[CA, CG, CT, TA, TC, TG])
+
+
+
+
+    plt.show()
+
+
+
+
+
+    
+
     
 if __name__ == '__main__':
 
@@ -409,7 +482,6 @@ if __name__ == '__main__':
         allAO = parseAO(dirinput, multiplefiles, flankLength, ref)
 
     # plot 96 trinucleotide AO data
-    print allAO
     plotAOData(allAO)
 
 
