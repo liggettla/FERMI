@@ -66,6 +66,20 @@ def readVCF(inFile, flankLength, ref):
                 seq = getRefSequence(line, flankLength, ref)
                 vafs[seq].append(vcfObj.af)
 
+    # combine into complimentary pairs
+    from Bio.Seq import Seq
+    labelings = [
+            'TCT','CCT','GCT','ACT','TCC','CCC','GCC','ACC','TCG','CCG','GCG','ACG','TCA','CCA','GCA','ACA',
+            'TTT','CTT','GTT','ATT','TTC','CTC','GTC','ATC','TTG','CTG','GTG','ATG','TTA','CTA','GTA','ATA',
+            ]
+    temp = defaultdict(list)
+    for i in vafs:
+        if i in labelings:
+            for j in vafs[i]:
+                temp[i].append(j)
+                
+    vafs = temp
+
     target.close()
     return vafs
 
@@ -87,30 +101,29 @@ def plotVAFs(avgVAFs, vafs):
     print('Plotting all VAFs...')
     import matplotlib.pyplot as plt
     
-    order =[
-            'TTT','CTT','GTT','ATT','TCT','CCT','GCT','ACT','TGT','CGT','GGT','AGT','TAT','CAT','GAT','AAT',
-            'TTC','CTC','GTC','ATC','TCC','CCC','GCC','ACC','TGC','CGC','GGC','AGC','TAC','CAC','GAC','AAC',
-            'TTG','CTG','GTG','ATG','TCG','CCG','GCG','ACG','TGG','CGG','GGG','AGG','TAG','CAG','GAG','AAG',
-            'TTA','CTA','GTA','ATA','TCA','CCA','GCA','ACA','TGA','CGA','GGA','AGA','TAA','CAA','GAA','AAA'
+    labelings = [
+            'TCT','CCT','GCT','ACT','TCC','CCC','GCC','ACC','TCG','CCG','GCG','ACG','TCA','CCA','GCA','ACA',
+            'TTT','CTT','GTT','ATT','TTC','CTC','GTC','ATC','TTG','CTG','GTG','ATG','TTA','CTA','GTA','ATA',
             ]
-    colors=['cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan',
-            'black','black','black','black','black','black','black','black','black','black','black','black','black','black','black','black',
-            'red','red','red','red','red','red','red','red','red','red','red','red','red','red','red','red',
-            'grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey'
+    colors=['cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan',
+            'black','black','black','black','black','black','black','black',
+            'red','red','red','red','red','red','red','red',
+            'grey','grey','grey','grey','grey','grey','grey','grey'
             ]
     ordered=[]
 
-    for i in order:
+    for i in labelings:
         ordered.append(avgVAFs[i])
 
     stdDev=[]
     import numpy as np
-    for i in order:
+    for i in labelings:
         stdDev.append(np.std(vafs[i]))
 
     axis_font = {'fontname':'Arial', 'size':'30'}
+    tick_font = {'fontname':'Arial', 'size':'20'}
     plt.bar(range(len(avgVAFs)), ordered, align='center', color=colors)
-    plt.xticks(range(len(avgVAFs)), order, rotation=90)
+    plt.xticks(range(len(avgVAFs)), labelings, rotation=90, **tick_font)
     plt.yticks(**axis_font)
     plt.ylabel('Average Variant Allele Frequency', **axis_font)
     plt.xlabel('Triplet Context', **axis_font)
