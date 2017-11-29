@@ -105,10 +105,14 @@ def plotVAFs(avgVAFs, vafs):
             'TCT','CCT','GCT','ACT','TCC','CCC','GCC','ACC','TCG','CCG','GCG','ACG','TCA','CCA','GCA','ACA',
             'TTT','CTT','GTT','ATT','TTC','CTC','GTC','ATC','TTG','CTG','GTG','ATG','TTA','CTA','GTA','ATA',
             ]
-    colors=['cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan',
-            'black','black','black','black','black','black','black','black',
-            'red','red','red','red','red','red','red','red',
-            'grey','grey','grey','grey','grey','grey','grey','grey'
+    colors=['cyan','cyan','cyan','cyan',
+            'black','black','black','black',
+            'red','red','red','red',
+            'grey','grey','grey','grey',
+            'green','green','green','green',
+            'magenta','magenta','magenta','magenta',
+            'blue','blue','blue','blue',
+            'purple','purple','purple','purple',
             ]
     ordered=[]
 
