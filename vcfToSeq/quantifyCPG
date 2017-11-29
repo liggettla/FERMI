@@ -456,12 +456,86 @@ def plotAOData(allAO):
 
     plt.show()
 
+# unlike when plotting all VAFs which just takes a single input file
+# this takes multiple input files, and plots the average of their VAFs
+# with stdev
+def plotVAFsMultipleIndiv(dirinput, multiplefiles, flankLength, ref, previousData):
+    from collections import defaultdict
+    from parseline import VCFObj
+    from getSequence import getRefSequence
+    import pickle
+    from matplotlib import pyplot as plt
+    import numpy as np
 
+    print('Building multi-sample VAF data structure...')
+    labelings = [
+            'TCT','CCT','GCT','ACT','TCC','CCC','GCC','ACC','TCG','CCG','GCG','ACG','TCA','CCA','GCA','ACA',
+            'TTT','CTT','GTT','ATT','TTC','CTC','GTC','ATC','TTG','CTG','GTG','ATG','TTA','CTA','GTA','ATA',
+            ]
+    colors=['cyan','cyan','cyan','cyan',
+            'black','black','black','black',
+            'red','red','red','red',
+            'grey','grey','grey','grey',
+            'green','green','green','green',
+            'magenta','magenta','magenta','magenta',
+            'blue','blue','blue','blue',
+            'purple','purple','purple','purple',
+            ]
 
+    # write data
+    if not previousData:
+        # allVAF = {'ACT':[0.75,0.93]}
+        allVAF = defaultdict(list)
 
+        for vcf in multiplefiles:
+            target = open(dirinput + '/' + vcf, 'r')
+            for line in target:
+                if '#' not in line and 'chr' in line: # skip the info
+                    vcfobj = VCFObj(line)
+
+                    # elim SNPs
+                    if vcfobj.af < 0.1:
+                        seq = getRefSequence(line, flankLength, ref)
+                        allVAF[seq].append(vcfobj.af)
+            target.close()
+
+        print('Writing combined VAF data...')
+        vafPickle = open('combinedvafs.pkl', 'wb')
+        pickle.dump(allVAF, vafPickle)
+        vafPickle.close()
+    
+    # this will read in previously pickled data
+    elif previousData:
+        print('Reading in combined saved VAF data...')
+        inputVafs = open('combinedvafs.pkl', 'rb')
+        allVAF = pickle.load(inputVafs)
+        inputVafs.close()
+
+    # average combined VAFs
+    tempavgVAFs = {}
+    tempstdDev = {}
+    for triplet in allVAF:
+        tempavgVAFs[triplet] = np.mean(allVAF[triplet])
+        tempstdDev[triplet] = np.std(allVAF[triplet])
 
     
+    # put in order
+    avgVAFs = []
+    stdDev = []
+    for i in labelings:
+        avgVAFs.append(tempavgVAFs[i])
+        stdDev.append(tempstdDev[i])
 
+    # plot the data
+    axis_font = {'fontname':'Arial', 'size':'30'}
+    tick_font = {'fontname':'Arial', 'size':'20'}
+    plt.bar(range(len(avgVAFs)), avgVAFs, align='center', color=colors)
+    plt.errorbar(range(len(avgVAFs)), avgVAFs, yerr=stdDev, linestyle="None", color='black')
+    plt.xticks(range(len(avgVAFs)), labelings, rotation=90, **tick_font)
+    plt.yticks(**axis_font)
+    plt.ylabel('Average Variant Allele Frequency', **axis_font)
+    plt.xlabel('Triplet Context', **axis_font)
+    plt.show()
     
 if __name__ == '__main__':
 
@@ -500,6 +574,9 @@ if __name__ == '__main__':
 
     # plot 96 trinucleotide AO data
     plotAOData(allAO)
+
+    # plotVAF breakdown across multiple individuals
+    plotVAFsMultipleIndiv(dirinput, multiplefiles, flankLength, ref, previousData)
 
 
     
