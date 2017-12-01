@@ -459,6 +459,9 @@ def plotAOData(allAO):
 # unlike when plotting all VAFs which just takes a single input file
 # this takes multiple input files, and plots the average of their VAFs
 # with stdev
+
+# this is super redundant, this should be incorporated with the first read-through
+# so multiple reads are not necessary
 def plotVAFsMultipleIndiv(dirinput, multiplefiles, flankLength, ref, previousData):
     from collections import defaultdict
     from parseline import VCFObj
@@ -536,6 +539,29 @@ def plotVAFsMultipleIndiv(dirinput, multiplefiles, flankLength, ref, previousDat
     plt.ylabel('Average Variant Allele Frequency', **axis_font)
     plt.xlabel('Triplet Context', **axis_font)
     plt.show()
+
+# this will normalize fractions of variants by the number of probed trinucleotides
+def normalizeAO(allAO):
+    from collections import defaultdict
+    # these are the expected ratios of trinucleotide representation
+    probed = {'ACA':3.553299492,'ACC':3.299492386,'ACG':0.8395158141,'ACT':3.37758688,'CCA':5.99375244,'CCC':2.811401796,'CCG':1.366653651,'CCT':4.646622413,'GCA':3.768059352,'GCC':4.41233893,'GCG':1.151893791,'GCT':3.611870363,'TCA':3.86567747,'TCC':4.236626318,'TCG':0.566185084,'TCT':3.826630223,'ATA':2.362358454,'ATC':2.987114408,'ATG':4.197579071,'ATT':2.61616556,'CTA':2.694260055,'CTC':3.846153846,'CTG':6.013276064,'CTT':3.006638032,'GTA':2.049980476,'GTC':2.674736431,'GTG':3.904724717,'GTT':2.499023819,'TTA':1.913315111,'TTC':3.084732526,'TTG':3.123779774,'TTT':1.698555252}
+
+    # allAO = {'g.vcf':{('CTC', 'T>A'): 0.01448191933240612,}}
+
+    # divide by expected ratio
+    # totals = {'g.vcf':36.123}
+    totals = defaultdict(float)
+    for vcf in allAO:
+        for triplet in allAO[vcf]:
+            allAO[vcf][triplet] = allAO[vcf][triplet] / probed[triplet[0]]
+            totals[vcf] += allAO[vcf][triplet]
+
+    # make everything add up to 1
+    for vcf in allAO:
+        for triplet in allAO[vcf]:
+            allAO[vcf][triplet] = allAO[vcf][triplet] / totals[vcf]
+            
+    return allAO
     
 if __name__ == '__main__':
 
@@ -554,17 +580,17 @@ if __name__ == '__main__':
         vafs, avgVAFs = eliminateSNPs(vafs, avgVAFs)
     
     # plot all variants
-    plotVAFs(avgVAFs, vafs)
+    #plotVAFs(avgVAFs, vafs)
 
     # calculate averages for CpGs and non CpGs
-    sortedVAFs = cpgVSnon(avgVAFs)
+    #sortedVAFs = cpgVSnon(avgVAFs)
 
     # plot the CpG vs non CpG
-    plotCPG(sortedVAFs)
+    #plotCPG(sortedVAFs)
 
     # plot base fraction based on capture number
-    fractions = overallCaptureFraction(dirinput, multiplefiles)
-    plotFractions(fractions)
+    #fractions = overallCaptureFraction(dirinput, multiplefiles)
+    #plotFractions(fractions)
  
     # gather 96 trinucleotide AO data
     if previousAOData:
@@ -572,11 +598,14 @@ if __name__ == '__main__':
     else:
         allAO = parseAO(dirinput, multiplefiles, flankLength, ref)
 
+    # this will normalize by percent makeup of trinucleotides in probed region
+    allAO = normalizeAO(allAO)
+
     # plot 96 trinucleotide AO data
     plotAOData(allAO)
 
     # plotVAF breakdown across multiple individuals
-    plotVAFsMultipleIndiv(dirinput, multiplefiles, flankLength, ref, previousData)
+    #plotVAFsMultipleIndiv(dirinput, multiplefiles, flankLength, ref, previousData)
 
 
     
