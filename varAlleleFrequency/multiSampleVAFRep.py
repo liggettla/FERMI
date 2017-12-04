@@ -13,14 +13,14 @@ from numpy import mean
 parser = argparse.ArgumentParser()
 parser.add_argument('--indir', '-i', type=str, required=True, help='Input directory containing the vcf files to be analyzed: /dir')
 parser.add_argument('--outdir', '-o', type=str, required=True, help='Output directory for plots: /dir')
-parser.add_argument('--principle', '-p', type=str, required=True, help='This is the principle sample being compared to an averaged set of other samples. Ex: A1-R1')
+parser.add_argument('--principle', '-p', type=str, nargs='*', required=True, help='These are the principle samples being compared to an averaged set of other samples. Ex: A1-R1')
 parser.add_argument('--samples', '-s', type=str, nargs='*', required=True, help='List of samples to be averaged and compared to the principle sample. Ex: A1-R1')
 parser.add_argument('--rarevars', '-r', type=float, help='This can be set to cutoff the data at a certain allele frequency and only include variants below a particular frequency like 0.03 or 0.003.')
 parser.add_argument('--commonVars', '-c', action='store_true', help='This will only plot variants that are found in both samples and ignore those variants that are only found in one of the samples.')
 parser.add_argument('--germline', '-g', type=str, nargs='*', help='Only output those variants that changed from these bases.')
 parser.add_argument('--variant', '-v', type=str, nargs='*', help='Only output those variants that change to these bases.')
 parser.add_argument('--displayplot', '-d', action='store_true', help='This will trigger the displaying of VAF plot.')
-parser.add_argument('--multiplier', '-m', type=float, help='This specifies a multiplier to artificially increase all the VAFs in the priniciple sample by a set multiplier allowing for comparison of shifting populations.')
+parser.add_argument('--multiplier', '-m', type=float, help='This specifies a multiplier to artificially increase all the VAFs in the principle sample by a set multiplier allowing for comparison of shifting populations.')
 parser.add_argument('--plotonchrom', '-z', action='store_true', help='This will output vafs of the data shown on the y-axis of the vaf comparison plot (typically the average samples) along chromosomal distances to understand hot and cold regions of the chromosome.')
 parser.add_argument('--combinecomplements', '-a', action='store_true', help='This will combine the complement of base pairs into a single plot, ie if C-T variants are asked for, both C-T and G-A variants will be output.')
 parser.add_argument('--onlyCoding', '-x', action='store_true', help='This will only use variants coming from coding strand probes.')
@@ -48,7 +48,7 @@ else:
 inputDir = args.indir
 outputDir = args.outdir
 #principle = inputDir + '/' + args.principle + '/' +'total_filtered.vcf'
-principle = inputDir + '/' + args.principle + '/' +'onlyProbedRegions.vcf'
+#principle = inputDir + '/' + args.principle + '/' +'onlyProbedRegions.vcf'
 samples = args.samples # this is a list
 commonVars = args.commonVars
 cutoff = args.rarevars
@@ -252,7 +252,15 @@ if __name__ == '__main__':
 
     avgData = buildAverageStructure(samples, regions)
 
-    principleData = buildPrincipleStructure(principle, regions)
+    # principle can either be a single sample or multiple samples
+    # to save time this will be conditionally handled by existing methods
+    if len(args.principle) == 1:
+        principle = inputDir + '/' + args.principle[0] + '/' +'onlyProbedRegions.vcf'
+        principleData = buildPrincipleStructure(principle, regions)
+
+    else:
+        principleData = buildAverageStructure(args.principle, regions)
+
     outputData(commonVars, avgData, principleData)
 
 # output plot if requested
