@@ -59,6 +59,7 @@ def buildDict():
         probesAndLocs[gene] = seq
         
     return probesAndLocs
+    print probesAndLocs
 '''
 create a dictionary for each probe where the string is represented by char elements and keys are locations
 then randomly pick a number and start at the probe

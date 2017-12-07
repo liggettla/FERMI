@@ -22,7 +22,8 @@ samplekey = args.samplekey
 # Create Region Lists #
 #######################
 def regions():
-    oncoSites = ['5073770', '7577539','7577119','115256529','115258747','115258744','534287','534288','534289','25398284','25380275','106197266','106197267','106197268','106197269','106155172','106155173','106155174','25457242','25457243','209113112','209113113','90631934','90631838','48649700']
+    #oncoSites = ['5073770', '7577539','7577119','115256529','115258747','115258744','534287','534288','534289','25398284','25380275','106197266','106197267','106197268','106197269','106155172','106155173','106155174','25457242','25457243','209113112','209113113','90631934','90631838','48649700']
+    oncoSites = ['5073770', '7577539','7577119','534287','534288','534289','25380275','106155172','106155173','106155174','25457242','25457243','90631934']
     oncoGenes = []
     '''
     for i in oncoSites: # provides total oncogene region (may underestimate total size)
@@ -84,16 +85,23 @@ def getSampleData(indir, samplelist, key, oncoSites):
 #############
 def plotData(compiledData, oncoSites):
     import matplotlib.pyplot as plt
+    import numpy as np
 
     for locus in oncoSites:
         age = compiledData[locus]['age']
         af = compiledData[locus]['af']
 
-        plt.plot(age, af, 'bo')
+        axis_font = {'fontname':'Arial', 'size':'30'}
+        title_font = {'fontname':'Arial', 'size':'30', 'color':'black', 'weight':'normal'}
+
+        plt.plot(age, af, 'ko')
         plt.axis([0,100,0,0.002])
-        plt.title('Oncogenic Locus: %s' % (locus))
-        plt.xlabel('Age (years)')
-        plt.ylabel('Allele Frequency')
+        plt.title('Oncogenic Locus: %s\n' % (locus), **title_font)
+        plt.xlabel('\nAge (years)', **axis_font)
+        plt.ylabel('Allele Frequency\n', **axis_font)
+        plt.xticks(rotation=45, **axis_font)
+        plt.yticks(np.arange(0,0.004,0.001),**axis_font)
+
         plt.tight_layout() # adjust window size to accomodate labels
         plt.savefig(locus + '.png')
         plt.show()

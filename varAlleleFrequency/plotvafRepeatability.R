@@ -7,8 +7,8 @@ library(ggrepel) # this avoids overlapping labels
 
 # Note that this script cannot begin with a comment for some reason
 
-#setwd('/media/alex/Extra/Dropbox/Code/FERMI/varAlleleFrequency')
-setwd('/home/alex/Dropbox/Code/FERMI/varAlleleFrequency')
+setwd('/media/alex/Extra/Dropbox/Code/FERMI/varAlleleFrequency')
+#setwd('/home/alex/Dropbox/Code/FERMI/varAlleleFrequency')
 
 # This script plots the VAFs of each mutation found between two samples along with a regression
 # line and 95% confidence interval in order to understand how repeatable the AFs are for the 
@@ -23,24 +23,30 @@ sample1 <- vafs$Sample1
 sample2 <- vafs$Sample2
 identity <- vafs$Identity
 
-# plot with 95% confidence interval
-lm_fit  = lm(sample1 ~ sample2)
-x = data.frame(vafs, predict(lm_fit, interval = 'prediction'))
+lm_eqn <- function(df,y,x){
+    m <- lm(y ~ x, df);
+    eq <- substitute(italic(y) == a + b %.% italic(x)*","~~italic(r)^2~"="~r2, 
+         list(a = format(coef(m)[1], digits = 2), 
+              b = format(coef(m)[2], digits = 2), 
+             r2 = format(summary(m)$r.squared, digits = 3)))
+    as.character(as.expression(eq));                 
+}
 
 # plot with y=x line
 p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity, size=15)) +
   geom_point() +
+  geom_text(aes(x = 0.0015, y = 0.003, label = lm_eqn(vafs, Sample1, Sample2)), parse = TRUE)+ # regression formula
   xlim(0,0.003) +
   ylim(0,0.003) +
   #xlim(0,1) +
   #ylim(0,1) +
   geom_abline(intercept = 0, slope = 1, size=3)+ # y=x line
-  xlab('\nVAF Individual 15') + ylab('VAF Mean\n') +
+  #xlab('\nVAF Individual 15') + ylab('VAF Mean\n') +
   #labs(title = 'C-T Variants Coding Regions\n')+
 # 2a
   #xlab('\nVAF Individual 15') + ylab('VAF Individual 7\n') +
 # 2b
-  xlab('\nVAF Individual 15') + ylab('VAF Mean\n') +
+  #xlab('\nVAF Individual 15') + ylab('VAF Mean\n') +
 # 2.2.3
   #xlab('\nVAF Individual 7') + ylab('VAF Individual 7\n') +
 # 3a
@@ -56,14 +62,14 @@ p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity, size=15))
 # 3f
   #xlab('\nVAF HCT116 MMR-') + ylab('VAF Mean Individuals 19, 2\n') +
 # 3h
-  #xlab('\nVAF HCT116 MMR-') + ylab('VAF Individual 2\n') +
-  #labs(title = 'C-N/G-N Variants')+
+  #xlab('\nVAF Individual 2') + ylab('VAF Mean\n') +
+  #labs(title = 'C>N/G>N Variants')+
 # 3i
-  #xlab('\nVAF HCT116 MMR-') + ylab('VAF Individual 2\n') +
-  #labs(title = 'T-N/A-N Variants')+
+  #xlab('\nVAF Individual 2') + ylab('VAF Mean\n') +
+  #labs(title = 'T>N/A>N Variants')+
 # 2s1
   #xlab('\nVAF Individual 15') + ylab('VAF Individual 7\n') +
-# 3s2
+# s10 
   #xlab('\nVAF Individual 15') + ylab('VAF Individual 7\n') +
   #labs(title = 'Total Variants\n')+
   #labs(title = 'C-T/G-A Variants\n')+
@@ -72,7 +78,9 @@ p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity, size=15))
   #labs(title = 'T-A/A-T Variants\n')+
   #labs(title = 'C-G/G-C Variants\n')+
   #labs(title = 'T-G/A-C Variants\n')+
-# 3s3
+# s4
+  #xlab('\nAllele 1') + ylab('Allele 2\n') +
+# s11 
   #xlab('\nVAF HCT116 MMR-') + ylab('VAF HCT116 MMR+\n') +
   #labs(title = 'Total Variants\n')+
   #labs(title = 'C-T/G-A Variants\n')+
@@ -81,7 +89,7 @@ p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity, size=15))
   #labs(title = 'T-C/A-G Variants\n')+
   #labs(title = 'T-G/A-C Variants\n')+
   #labs(title = 'T-A/A-T Variants\n')+
-# 3s4
+# s12 
   #xlab('\nVAF Individual 2') + ylab('VAF Mean\n') +
   #labs(title = 'Total Variants\n')+
   #labs(title = 'C-T/G-A Variants\n')+
@@ -90,7 +98,7 @@ p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity, size=15))
   #labs(title = 'T-C/A-G Variants\n')+
   #labs(title = 'T-G/A-C Variants\n')+
   #labs(title = 'T-A/A-T Variants\n')+
-# 3s5
+# s13 
   #xlab('\nVAF Individual 19') + ylab('VAF Mean\n') +
   #labs(title = 'Total Variants\n')+
   #labs(title = 'C-T/G-A Variants\n')+
@@ -100,7 +108,18 @@ p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity, size=15))
   #labs(title = 'T-G/A-C Variants\n')+
   #labs(title = 'T-A/A-T Variants\n')+
 
-  #geom_smooth(method=lm, se=FALSE, size=3)+ # regression line
+# 9.20.2017 Analysis
+  #xlab('\nVAF Individual 28') + ylab('VAF Mean\n') +
+
+# 9.21.2017 Analysis
+  #xlab('\nVAF Individual 19') + ylab('VAF Mean\n') +
+  #labs(title = 'Muliplier = 1x\n')+
+
+# 10.25.2017 Analysis
+  xlab('\nVAF Individual 2 Experiment 2') + ylab('VAF Mean\n') +
+  labs(title = 'T-N/A-N Variants')+
+
+  geom_smooth(method=lm, se=TRUE, size=3, colour='red')+ # regression line
   theme_bw()+ # no gray background
   theme(panel.border = element_blank())+ # no border
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+ # no gridlines
@@ -118,32 +137,3 @@ jpeg("output2.jpg", units="in", width=17, height=17, res=500)
 print(p)
 dev.off()
 
-'''
-m <- lm(sample2 ~ sample1);
-print(m)
-
-# The following produces plot with the oncogegenic mutations identified
-library(ggrepel)
-vafs$col <- grepl(paste0(oncosites,collapse = "|"), vafs$Identity)
-p <- ggplot(vafs, aes(x=Sample1, y=Sample2, alpha=1, color = col)) +
-    geom_point(size=5) +
-    geom_abline(intercept = 0, slope = 1, size=3)+ # y=x line
-    xlab("\nVAF Individual 2") + ylab("VAF Mean\n") +
-    xlim(0,0.006) +
-    ylim(0,0.006) +
-    #geom_text_repel(aes(label=ifelse(Sample2>0.002 |Sample1>0.002 ,as.character(Identity),""))) +
-    theme_bw()+ # no gray background
-    theme(panel.border = element_blank())+ # no border
-    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+ # no gridlines
-    theme(axis.title = element_text(size = 50))+ # change label size
-    theme(plot.title = element_text(size = 50))+ # change title size
-    theme(plot.title = element_text(hjust = 0.5))+ # center title
-    theme(axis.text.x = element_text(size = 50, colour="black", angle=90))+ # change tick size
-    theme(axis.text.y = element_text(size = 50, colour="black"))+ # change tick size
-    theme(legend.position="none")+ # no legend
-    theme(axis.ticks = element_line(colour = "black", size = 2))+ # hide ticks
-    theme(axis.line = element_line(colour = "black", size=3)) # add axis
-jpeg("output2.jpg", units="in", width=17, height=17, res=500)
-print(p)
-dev.off()
-'''

@@ -35,3 +35,15 @@ main/run
 main/probeBias.pdf
 jobCheck
 vcfToSeq/*pkl
+vcfToSeq/run.sh
+vcfToSeq/*jpg
+vcfToSeq/*txt
+vcfToSeq/personalRegions.py
+vcfToSeq/old/
+extractSeqs/commands.sh
+extractSeqs/locs
+extractSeqs/sequences.txt
+selectionTesting/run.sh
+mutationRates/probeBias.pdf
+observationProbs/plot.png
+tripletContexts/.Rhistory

@@ -50,8 +50,8 @@ def outputLocs(variants, wt, mut):
 
     for loc in variants:
         if variants[loc]['wt'] == wt and variants[loc]['var'] == mut: 
-            low = int(loc) - 10
-            high = int(loc) + 10
+            low = int(loc) - 15
+            high = int(loc) + 15
             target.write('wget -O - http://genome.ucsc.edu/cgi-bin/das/hg19/dna?segment=%s:%s,%s >> locs\n' % (variants[loc]['chrom'], low, high))
 
     target.close()
