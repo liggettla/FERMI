@@ -305,7 +305,7 @@ def plotFractions(fractions):
 # then builds and writes a datastructure with file info and fraction
 # of total captures that a given trinucleotide substitution represents
 def parseAO(dirinput, multiplefiles, flankLength, ref):
-    print('Reading flanking sequences (up to about 1min per vcf)...')
+    print('Reading flanking sequences (up to 1min per vcf)...')
     from parseline import VCFObj
     from getSequence import getRefSequence
     from collections import defaultdict
@@ -313,6 +313,8 @@ def parseAO(dirinput, multiplefiles, flankLength, ref):
 
     # allAO = {'a.vcf':{('TCG','A>T'):0.01}}
     allAO = {}
+    allVAF = {}
+    aftemp = defaultdict(list)
     allowed = ['C>A', 'C>G', 'C>T', 'T>A', 'T>C', 'T>G']
 
     for i in multiplefiles:
@@ -341,8 +343,10 @@ def parseAO(dirinput, multiplefiles, flankLength, ref):
                     if seq[1] == 'G' or seq[1] == 'A':
                         seq = str(Seq(seq).complement())
                     temp[(seq, varType)] += vcfObj.ao
+                    aftemp[(seq, varType)].append(vcfObj.af)
 
         allAO[i] = temp
+        allVAF[i] = aftemp
         target.close()
 
     # find fraction that each trinucleotide represents
@@ -353,6 +357,12 @@ def parseAO(dirinput, multiplefiles, flankLength, ref):
         for seq in allAO[vcf]:
             allAO[vcf][seq] = float(allAO[vcf][seq]) / float(total)
 
+    # average VAFS
+    from numpy import mean
+    for vcf in allVAF:
+        for seq in allVAF[vcf]:
+            allVAF[vcf][seq] = mean(allVAF[vcf][seq])
+
     # write data so it does not need to be constantly retrieved
     print('Writing out data...')
     import pickle
@@ -361,7 +371,11 @@ def parseAO(dirinput, multiplefiles, flankLength, ref):
     pickle.dump(allAO, aoPickle)
     aoPickle.close()
 
-    return allAO
+    vafPickle = open('vaf.pkl', 'wb')
+    pickle.dump(allVAF, vafPickle)
+    vafPickle.close()
+
+    return allAO, allVAF
 
 # if data has already been read in it can be loaded here
 def loadPreviousAO():
@@ -372,7 +386,11 @@ def loadPreviousAO():
     allAO = pickle.load(aoPickle)
     aoPickle.close()
 
-    return allAO
+    afPickle = open('vaf.pkl', 'rb')
+    allVAF = pickle.load(afPickle)
+    afPickle.close()
+
+    return allAO, allVAF
 
 # this plots the 96 trinucleotide data take from capture counts
 def plotAOData(allAO):
@@ -432,6 +450,7 @@ def plotAOData(allAO):
     plt.xticks(range(len(labels)), labels, rotation=90, **tick_font)
     plt.yticks(**axis_font)
     plt.ylabel('Fraction of Observations', **axis_font)
+    plt.ylabel('Mean VAF', **axis_font)
     plt.xlabel('Substitution Type', **axis_font)
 
     plt.tick_params(
@@ -450,9 +469,6 @@ def plotAOData(allAO):
     TC = mpatches.Patch(color='green', label='T>C')
     TG = mpatches.Patch(color='magenta', label='T>G')
     plt.legend(handles=[CA, CG, CT, TA, TC, TG])
-
-
-
 
     plt.show()
 
@@ -594,15 +610,17 @@ if __name__ == '__main__':
  
     # gather 96 trinucleotide AO data
     if previousAOData:
-        allAO = loadPreviousAO()
+        allAO, allVAF = loadPreviousAO()
     else:
-        allAO = parseAO(dirinput, multiplefiles, flankLength, ref)
+        allAO, allVAF = parseAO(dirinput, multiplefiles, flankLength, ref)
 
     # this will normalize by percent makeup of trinucleotides in probed region
     allAO = normalizeAO(allAO)
 
     # plot 96 trinucleotide AO data
     plotAOData(allAO)
+    plotAOData(allVAF)
+    print allVAF
 
     # plotVAF breakdown across multiple individuals
     #plotVAFsMultipleIndiv(dirinput, multiplefiles, flankLength, ref, previousData)

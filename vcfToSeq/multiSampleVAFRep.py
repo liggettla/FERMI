@@ -190,11 +190,13 @@ def buildAverageStructure(samples, regions, multiplier, combinecomplements):
                         matchingVariants = WT in germline and var in variant
                 '''
 
-                # get flanking sequence
-                seq = getRefSequence(line, 1, ref)
+                # eliminate SNPs
+                if AFNum < 0.1:
+                    # get flanking sequence
+                    seq = getRefSequence(line, 1, ref)
 
-                # tempData = {(1500, 'CAC'):[0.75,0.35,0.68]}
-                holdingData[(loc, seq)].append(AFNum)
+                    # tempData = {(1500, 'CAC'):[0.75,0.35,0.68]}
+                    holdingData[(loc, seq)].append(AFNum)
 
     # average all of the AFNum values
     avgData = takeAverage(holdingData)
