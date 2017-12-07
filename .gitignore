@@ -34,3 +34,4 @@ mutationOrigins/run.sh
 main/run
 main/probeBias.pdf
 jobCheck
+vcfToSeq/*pkl
