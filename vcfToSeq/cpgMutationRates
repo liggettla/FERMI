@@ -27,6 +27,7 @@ def readVCF(inFiles, inDir, ref, probes):
     from collections import defaultdict
     
     totalAO = defaultdict(list)
+    print 'TotExon','ExonCount','TotIntr','IntrCount','Exonic','Intronic','NormExon','NormIntron'
     
     for sample in inFiles:
         totalExon = 0
@@ -40,7 +41,7 @@ def readVCF(inFiles, inDir, ref, probes):
                 lobj = VCFObj(line)
 
                 # only C or G could be in CpG context
-                if lobj.wt == 'C' or lobj.wt == 'G' and len(lobj.var) == 1:
+                if (lobj.wt == 'C' or lobj.wt == 'G') and len(lobj.var) == 1 and lobj.af < 0.1:
                     seq = getRefSequence(line, 1, ref)
 
                     if seq[1:3] == 'CG' or seq[1:3] == 'GC':
@@ -58,12 +59,13 @@ def readVCF(inFiles, inDir, ref, probes):
         intronic = totalIntron / intronCount
 
         # normalize to 100 percent
-        exonic = exonic / (exonic + intronic)
-        intronic = intronic / (exonic + intronic)
+        normexonic = exonic / (exonic + intronic)
+        normintronic = intronic / (exonic + intronic)
+        print totalExon, exonCount, totalIntron, intronCount, exonic, intronic, normexonic, normintronic
         
         # append normalized results
-        totalAO['Exonic'].append(exonic)
-        totalAO['Intronic'].append(intronic)
+        totalAO['Exonic'].append(normexonic)
+        totalAO['Intronic'].append(normintronic)
         
         target.close()
 
@@ -93,6 +95,7 @@ def plotResults(totalAO):
     plt.yticks(**tick_font)
     plt.ylabel('Normalized Number of Variants', **axis_font)
     plt.xlabel('Substitution Type', **axis_font)
+    plt.title('CpG Mutability By Genomic Region', **axis_font)
     plt.show()
 
 def exportData(totalAO):
