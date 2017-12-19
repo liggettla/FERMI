@@ -12,13 +12,17 @@ def runArgparse():
     parser.add_argument('--inFiles', '-i', type=str, nargs='*', help='Specifies the input vcf file(s).')
     parser.add_argument('--inDir', '-d', type=str, help='Points to the input directory.')
     parser.add_argument('--reference', '-r', type=str, help='Point to the reference genome to be used for flanking sequence.')
+    parser.add_argument('--allbases', '-a', action='store_true', help='Instead of just analyzing CpG site, this will analyze all 6 possible base changes.')
+    parser.add_argument('--usevafs', '-v', action='store_true', help='Caculate with average VAFs rather than the normalized AO observations')
 
     args = parser.parse_args()
     inFiles = args.inFiles
     ref = args.reference
     inDir = args.inDir
+    allbases = args.allbases
+    usevafs = args.usevafs
 
-    return inFiles, ref, inDir
+    return inFiles, ref, inDir, allbases, usevafs
 
 def readVCF(inFiles, inDir, ref, probes):
     from parseline import VCFObj
@@ -104,49 +108,289 @@ def exportData(totalAO):
     pickle.dump(totalAO, p)
     p.close()
 
+def parseAll(inFiles, inDir, ref, probes):
+    from parseline import VCFObj
+    from Bio.Seq import Seq
+    from getSequence import getRefSequence
+    from collections import defaultdict
+    
+    # allbases = {'C>A':{'intron':[0.4,0.5], 'exon':[0.6,0.5]}}
+    indiv = defaultdict(list)
+    allbases = {'C>A':indiv.copy(),'C>G':indiv.copy(),'C>T':indiv.copy(),'T>A':indiv.copy(),'T>C':indiv.copy(),'T>G':indiv.copy()}
+    
+    for sample in inFiles:
+        exon = {'C>A':[0,0],'C>G':[0,0],'C>T':[0,0],'T>A':[0,0],'T>C':[0,0],'T>G':[0,0]}
+        intron = {'C>A':[0,0],'C>G':[0,0],'C>T':[0,0],'T>A':[0,0],'T>C':[0,0],'T>G':[0,0]}
+
+        target = open(inDir + '/' + sample + '/onlyProbedRegions.vcf', 'r')
+        for line in target:
+            if '#' not in line and 'chr' in line: # skip the info
+                lobj = VCFObj(line)
+
+                # only look at substitutions and non SNPs
+                if len(lobj.wt) == 1 and len(lobj.var) == 1 and lobj.af < 0.1:
+                    label = ('%s>%s' % (lobj.wt, lobj.var))
+                    if label not in exon:
+                        wt = str(Seq(lobj.wt).complement())
+                        var = str(Seq(lobj.var).complement())
+                        label = ('%s>%s' % (wt, var))
+
+                    for i in probes:
+                        for loc in probes[i]:
+                            if str(loc) in str(lobj.location) and i[0] == 'T':
+                                intron[label][0] += lobj.ao
+                                intron[label][1] += 1
+                            elif str(loc) in str(lobj.location) and not i[0] == 'T':
+                                exon[label][0] += lobj.ao
+                                exon[label][1] += 1
+
+        # first normalize by total number of sites in each category
+        for i in exon:
+            exon[label][0] = exon[label][0] / exon[label][1]
+            intron[label][0] = intron[label][0] / intron[label][1]
+
+        # normalize to 100 percent
+        for i in exon:
+            normexonic = exon[i][0] / (exon[i][0] + intron[i][0])
+            normintronic = intron[i][0] / (exon[i][0] + intron[i][0])
+            allbases[i]['exon'].append(normexonic)
+            allbases[i]['intron'].append(normintronic)
+        
+        target.close()
+
+    return allbases
+
+def plotAllBases(allbases):
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    # statistics
+    means = []
+    stddev = []
+    order = ['C>A', 'C>G','C>T','T>A','T>C','T>G']
+    labels = ['Intron C>A','Exon C>A','Intron C>G','Exon C>G','Intron C>T','Exon C>T','Intron T>A','Exon T>A','Intron T>C','Exon T>C','Intron T>G','Exon T>G']
+
+    for i in order:
+        means.append(np.mean(allbases[i]['intron']))
+        means.append(np.mean(allbases[i]['exon']))
+        stddev.append(np.std(allbases[i]['intron']))
+        stddev.append(np.std(allbases[i]['exon']))
+
+    # plotting
+
+    axis_font = {'fontname':'Arial', 'size':'30'}
+    tick_font = {'fontname':'Arial', 'size':'30'}
+    plt.errorbar(range(len(stddev)), means, yerr=stddev, linestyle='None', color='black')
+    plt.bar(range(len(means)), means, color='grey')
+    plt.xticks(range(len(labels)), labels, rotation = 90, **tick_font)
+    plt.yticks(**tick_font)
+    plt.ylabel('Normalized Number of Variants', **axis_font)
+    plt.xlabel('Substitution Type', **axis_font)
+    plt.title('Mutability By Genomic Region', **axis_font)
+    plt.show()
+
+def usevafs(inFiles, inDir, ref, probes):
+    from parseline import VCFObj
+    from Bio.Seq import Seq
+    from getSequence import getRefSequence
+    from collections import defaultdict
+    
+    totalAO = defaultdict(list)
+    
+    for sample in inFiles:
+        totalExon = 0
+        totalIntron = 0
+        exonCount = 0
+        intronCount = 0
+
+        target = open(inDir + '/' + sample + '/onlyProbedRegions.vcf', 'r')
+        for line in target:
+            if '#' not in line and 'chr' in line: # skip the info
+                lobj = VCFObj(line)
+
+                # only C or G could be in CpG context
+                if (lobj.wt == 'C' or lobj.wt == 'G') and len(lobj.var) == 1 and lobj.af < 0.1:
+                    seq = getRefSequence(line, 1, ref)
+
+                    if seq[1:3] == 'CG' or seq[1:3] == 'GC':
+                        for i in probes:
+                            for loc in probes[i]:
+                                if str(loc) in str(lobj.location) and i[0] == 'T':
+                                    exonCount += 1
+                                    totalExon += lobj.ao
+                                elif str(loc) in str(lobj.location) and not i[0] == 'T':
+                                    intronCount += 1
+                                    totalIntron += lobj.ao
+
+        # first normalize by total number of sites in each category
+        exonic = totalExon / exonCount
+        intronic = totalIntron / intronCount
+
+        # normalize to 100 percent
+        normexonic = exonic / (exonic + intronic)
+        normintronic = intronic / (exonic + intronic)
+        print totalExon, exonCount, totalIntron, intronCount, exonic, intronic, normexonic, normintronic
+        
+        # append normalized results
+        totalAO['Exonic'].append(normexonic)
+        totalAO['Intronic'].append(normintronic)
+        
+        target.close()
+
+    print totalAO
+    return totalAO
+
+# provides similar functionality as previous parsing methods but uses VAF rather than normalized AO
+def parseAllVAF(inFiles, inDir, ref, probes):
+    from parseline import VCFObj
+    from Bio.Seq import Seq
+    from getSequence import getRefSequence
+    from collections import defaultdict
+    import numpy as np
+    
+    # intron = {('CCG','C>A'):[0.75, 0.87]}
+    # exon = {('CCG','C>A'):[0.75, 0.87]}
+    intron = defaultdict(list)
+    exon = defaultdict(list)
+
+    for sample in inFiles:
+        tempintron = defaultdict(list)
+        tempexon = defaultdict(list)
+
+        target = open(inDir + '/' + sample + '/onlyProbedRegions.vcf', 'r')
+        for line in target:
+            if '#' not in line and 'chr' in line: # skip the info
+                lobj = VCFObj(line)
+
+                # only look at substitutions and non SNPs
+                if len(lobj.wt) == 1 and len(lobj.var) == 1 and lobj.af < 0.1:
+                    if lobj.wt == 'C' or lobj.wt == 'T':
+                        label = ('%s>%s' % (lobj.wt, lobj.var))
+                        seq = getRefSequence(line, 1, ref)
+                    else:
+                        wt = str(Seq(lobj.wt).complement())
+                        var = str(Seq(lobj.var).complement())
+                        label = ('%s>%s' % (wt, var))
+                        seq = str(Seq(getRefSequence(line, 1, ref)).reverse_complement())
+
+                    for i in probes:
+                        for loc in probes[i]:
+                            if str(loc) in str(lobj.location) and i[0] == 'T':
+                                tempintron[(seq,label)].append(lobj.af)
+                            elif str(loc) in str(lobj.location) and not i[0] == 'T':
+                                tempexon[(seq,label)].append(lobj.af)
+
+        for i in tempintron:
+            vafmean = np.mean(tempintron[i])
+            intron[i].append(vafmean)
+        for i in tempexon:
+            vafmean = np.mean(tempexon[i])
+            exon[i].append(vafmean)
+
+        target.close()
+
+    return intron, exon
+
+def plotvafs(intron, exon):
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import matplotlib.patches as mpatches
+
+    # statistics
+    means = []
+    stddev = []
+    labels = []
+    colors = []
+
+    for i in intron:
+        if i[1] == 'C>T':
+            means.append(np.mean(intron[i]))
+            stddev.append(np.std(intron[i]))
+            means.append(np.mean(exon[i]))
+            stddev.append(np.std(exon[i]))
+            labels.append(i[0])
+            colors.append('blue')
+            labels.append(i[0])
+            colors.append('orange')
+
+    axis_font = {'fontname':'Arial', 'size':'30'}
+    tick_font = {'fontname':'Arial', 'size':'30'}
+    plt.bar(range(len(means)), means, color=colors)
+    plt.errorbar(range(len(stddev)), means, yerr=stddev, linestyle='None', color='black')
+    plt.xticks(range(len(labels)), labels, rotation=90, **tick_font)
+    plt.yticks(**tick_font)
+    plt.ylabel('VAF', **axis_font)
+    plt.xlabel('Genomic Context', **axis_font)
+    plt.title('Mean VAFs by Genomic Context', **axis_font)
+    exon = mpatches.Patch(color='blue', label='Exon')
+    intron = mpatches.Patch(color='orange', label='Intron')
+    plt.legend(handles=[exon, intron])
+    plt.show()
+
+    '''
+    for i in order:
+        means.append(np.mean(totalAO[i]))
+        stddev.append(np.std(totalAO[i]))
+
+    # plotting
+
+    axis_font = {'fontname':'Arial', 'size':'30'}
+    tick_font = {'fontname':'Arial', 'size':'30'}
+    plt.errorbar(range(len(stddev)), means, yerr=stddev, linestyle='None', color='black')
+    plt.bar(range(len(means)), means, color='grey')
+    plt.xticks(range(len(order)), order, **tick_font)
+    plt.yticks(**tick_font)
+    plt.ylabel('Normalized Number of Variants', **axis_font)
+    plt.xlabel('Substitution Type', **axis_font)
+    plt.title('CpG Mutability By Genomic Region', **axis_font)
+    plt.show()
+    '''
+
+def exportVAF(intron, exon):
+    import pickle
+    i = open('intronVAF.pkl', 'wb')
+    pickle.dump(intron, i)
+    e = open('exonVAF.pkl', 'wb')
+    pickle.dump(exon, e)
+    p.close()
+
 if __name__ == '__main__':
     print('Parsing input args...')
-    inFiles, ref, inDir = runArgparse()
+    inFiles, ref, inDir, allbases, usevafs = runArgparse()
     probes = {'TIIIa':['1152278','1152279'],'NRAS-1':['1152564','1152565','1152566'],'NRAS-2':['1152587','1152588'],'DNMT3a':['254572','254573'],'IDH1':['2091130','2091131','2091132'],'SF3B1':['1982668','1982669'],'TIIIb':['2231906','2231907','2231908'],'TIIIc':['2290411','2290412'],'TET2-1':['1061972','1061973','1061974'],'TET2-2':['1061551','1061552'],'TIIId':['1105411','1105412','1105413'],'TIIIe':['1129972','1129973'],'TIIIf':['1211677','1211678'],'TIIIg':['1235477','1235478','1235479'],'TIIIh':['1244286','1244287'],'JAK2':['50737','50738'],'TIIIj':['21262','21263','21264'],'TIIIk':['2390'],'TIIIl':['2593','2594'],'TIIIm':['114865','114866','114867'],'HRAS':['5342','5343'],'KRAS-1':['253982','253983','253984'],'KRAS-2':['253802','253803'],'TIIIn':['925270','925271'],'IDH2':['906318','906319'],'TIIIo':['733796','733797','733798'],'TIIIp':['824550','824551'],'TIIIq':['859491','859492'],'p53-1':['75775','75776'],'p53-2':['75783','75784','75785'],'p53-3':['75770','75771','75772'],'GATA1':['486496','486497','486498']}
 
-    print('Parsing input files...')
-    # totalAO = {'intronic':[12,15], 'exonic':[14,11]}
-    totalAO = readVCF(inFiles, inDir, ref, probes)
-    
-    print('Calculating stats and plotting...')
-    plotResults(totalAO)
+    if not allbases and not usevafs:
+        print('Parsing input files...')
+        # totalAO = {'intronic':[12,15], 'exonic':[14,11]}
+        totalAO = readVCF(inFiles, inDir, ref, probes)
+        
+        print('Calculating stats and plotting...')
+        plotResults(totalAO)
 
-    print('Exporting data...')
-    exportData(totalAO)
-    
+        print('Exporting data...')
+        exportData(totalAO)
 
+    if allbases and not usevafs:
+        print('Parsing input files...')
+        # allbases = {'C>A':{'intronic':[12,15], 'exonic':[14,11]}}
+        allbases = parseAll(inFiles, inDir, ref, probes)
 
+        print('Plotting...')
+        plotAllBases(allbases)
 
+    if usevafs:
+        print('Parsing input files...')
+        intron, exon = parseAllVAF(inFiles, inDir, ref, probes)
 
+        print('Exporting data...')
+        exportVAF(intron,exon)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        print('Plotting...')
+        plotvafs(intron, exon)
 
 
-
-
-
-
-
-
-
+        
+        
+        
 
 
