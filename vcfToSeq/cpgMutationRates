@@ -13,7 +13,8 @@ def runArgparse():
     parser.add_argument('--inDir', '-d', type=str, help='Points to the input directory.')
     parser.add_argument('--reference', '-r', type=str, help='Point to the reference genome to be used for flanking sequence.')
     parser.add_argument('--allbases', '-a', action='store_true', help='Instead of just analyzing CpG site, this will analyze all 6 possible base changes.')
-    parser.add_argument('--usevafs', '-v', action='store_true', help='Caculate with average VAFs rather than the normalized AO observations')
+    parser.add_argument('--usevafs', '-v', action='store_true', help='Caculate with average VAFs rather than the normalized AO observations.')
+    parser.add_argument('--previousVAF', '-p', action='store_true', help='Load previously exported data.')
 
     args = parser.parse_args()
     inFiles = args.inFiles
@@ -21,8 +22,9 @@ def runArgparse():
     inDir = args.inDir
     allbases = args.allbases
     usevafs = args.usevafs
+    previousVAF = args.previousVAF
 
-    return inFiles, ref, inDir, allbases, usevafs
+    return inFiles, ref, inDir, allbases, usevafs, previousVAF
 
 def readVCF(inFiles, inDir, ref, probes):
     from parseline import VCFObj
@@ -291,7 +293,7 @@ def parseAllVAF(inFiles, inDir, ref, probes):
 
     return intron, exon
 
-def plotvafs(intron, exon):
+def plotvafs(intron, exon, mutType):
     import numpy as np
     import matplotlib.pyplot as plt
     import matplotlib.patches as mpatches
@@ -303,7 +305,7 @@ def plotvafs(intron, exon):
     colors = []
 
     for i in intron:
-        if i[1] == 'C>T':
+        if i[1] == mutType:
             means.append(np.mean(intron[i]))
             stddev.append(np.std(intron[i]))
             means.append(np.mean(exon[i]))
@@ -321,42 +323,151 @@ def plotvafs(intron, exon):
     plt.yticks(**tick_font)
     plt.ylabel('VAF', **axis_font)
     plt.xlabel('Genomic Context', **axis_font)
-    plt.title('Mean VAFs by Genomic Context', **axis_font)
+    plt.title('Mean VAFs %s' % (mutType), **axis_font)
     exon = mpatches.Patch(color='blue', label='Exon')
     intron = mpatches.Patch(color='orange', label='Intron')
     plt.legend(handles=[exon, intron])
     plt.show()
 
-    '''
-    for i in order:
-        means.append(np.mean(totalAO[i]))
-        stddev.append(np.std(totalAO[i]))
-
-    # plotting
-
-    axis_font = {'fontname':'Arial', 'size':'30'}
-    tick_font = {'fontname':'Arial', 'size':'30'}
-    plt.errorbar(range(len(stddev)), means, yerr=stddev, linestyle='None', color='black')
-    plt.bar(range(len(means)), means, color='grey')
-    plt.xticks(range(len(order)), order, **tick_font)
-    plt.yticks(**tick_font)
-    plt.ylabel('Normalized Number of Variants', **axis_font)
-    plt.xlabel('Substitution Type', **axis_font)
-    plt.title('CpG Mutability By Genomic Region', **axis_font)
-    plt.show()
-    '''
-
 def exportVAF(intron, exon):
     import pickle
     i = open('intronVAF.pkl', 'wb')
     pickle.dump(intron, i)
+    i.close()
     e = open('exonVAF.pkl', 'wb')
     pickle.dump(exon, e)
-    p.close()
+    e.close()
+
+def importVAF():
+    import pickle
+    i = open('intronVAF.pkl', 'rb')
+    intron = pickle.load(i)
+    i.close()
+    e = open('exonVAF.pkl', 'rb')
+    exon = pickle.load(e)
+    e.close()
+    
+    return intron, exon
+
+def combineRegions(intron, exon):
+    import pandas as pd
+    # intron = {('CCG','C>A'):[0.75, 0.87]}
+    introndf = pd.DataFrame()
+    exondf = pd.DataFrame()
+
+    intronCount = 0
+    for i in intron:
+        intronCount += 1
+        temp = pd.DataFrame(intron[i], columns=[str(intronCount)])
+        introndf = introndf.add(temp, fill_value=0)
+
+    exonCount = 0
+    for i in exon:
+        exonCount += 1
+        temp = pd.DataFrame(exon[i], columns=[str(exonCount)])
+        exondf = exondf.add(temp, fill_value=0)
+    
+    print('Calculating means...')
+    intronmeans = introndf.mean(axis=1)
+    exonmeans = exondf.mean(axis=1)
+
+    print('Plotting...')
+    import matplotlib.pyplot as plt
+    import matplotlib.patches as mpatches
+
+    # statistics
+    means = [intronmeans.mean(), exonmeans.mean()]
+    stddev = [intronmeans.std(), exonmeans.std()]
+    labels = ['TIII','Exon']
+
+    axis_font = {'fontname':'Arial', 'size':'30'}
+    tick_font = {'fontname':'Arial', 'size':'30'}
+    plt.bar(range(len(means)), means, color='grey')
+    plt.errorbar(range(len(stddev)), means, yerr=stddev, linestyle='None', color='black')
+    plt.xticks(range(len(labels)), labels, rotation=90, **tick_font)
+    plt.yticks(**tick_font)
+    plt.ylabel('VAF', **axis_font)
+    plt.xlabel('Genomic Context', **axis_font)
+    plt.title('Mean VAFs by Region', **axis_font)
+    plt.show()
+
+def combineSix(intron, exon):
+    import pandas as pd
+    from collections import defaultdict
+    # intron = {('CCG','C>A'):[0.75, 0.87]}
+    six = ['C>A', 'C>G','C>T','T>A','T>C','T>G']
+
+    introndf = pd.DataFrame()
+    exondf = pd.DataFrame()
+    samples = [(intron, 'TIII'), (exon, 'Exon')]
+    # allData = {'C>T':{'TIII':(0.75,0.001), 'Exon':(0.45,0.0002)}}
+    allData = defaultdict(dict)
+
+    for i in samples:
+        for change in six:
+            count = 0
+            temp = pd.DataFrame()
+            for j in i[0]:
+                if j[1] == change:
+                    count += 1
+                    sampleData = pd.DataFrame(i[0][j], columns=[str(count)])
+                    temp = temp.add(sampleData, fill_value=0)
+
+            means = temp.mean(axis=1)
+            sampleMean = means.mean()
+            sampleStd = means.std()
+            allData[change][i[1]] = (sampleMean, sampleStd)
+
+    print('Plotting...')
+    plotMeans = []
+    plotStd = []
+    plotColor = []
+    plotLabels = []
+    for change in six:
+        plotMeans.append(allData[change]['TIII'][0])
+        plotStd.append(allData[change]['TIII'][1])
+        plotColor.append('blue')
+        plotLabels.append(change)
+        plotMeans.append(allData[change]['Exon'][0])
+        plotStd.append(allData[change]['Exon'][1])
+        plotColor.append('orange')
+        plotLabels.append(change)
+
+    import matplotlib.pyplot as plt
+    import matplotlib.patches as mpatches
+    axis_font = {'fontname':'Arial', 'size':'30'}
+    tick_font = {'fontname':'Arial', 'size':'30'}
+    plt.bar(range(len(plotMeans)), plotMeans, color=plotColor)
+    plt.errorbar(range(len(plotStd)), plotMeans, yerr=plotStd, linestyle='None', color='black')
+    plt.xticks(range(len(plotLabels)), plotLabels, rotation=90, **tick_font)
+    plt.yticks(**tick_font)
+    plt.ylabel('VAF', **axis_font)
+    plt.xlabel('Genomic Change', **axis_font)
+    plt.title('Mean VAFs by Region', **axis_font)
+    tiii = mpatches.Patch(color='blue', label='TIII')
+    exon = mpatches.Patch(color='orange', label='Exon')
+    plt.legend(handles=[tiii, exon])
+    plt.show()
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 if __name__ == '__main__':
     print('Parsing input args...')
-    inFiles, ref, inDir, allbases, usevafs = runArgparse()
+    inFiles, ref, inDir, allbases, usevafs, previousVAF = runArgparse()
     probes = {'TIIIa':['1152278','1152279'],'NRAS-1':['1152564','1152565','1152566'],'NRAS-2':['1152587','1152588'],'DNMT3a':['254572','254573'],'IDH1':['2091130','2091131','2091132'],'SF3B1':['1982668','1982669'],'TIIIb':['2231906','2231907','2231908'],'TIIIc':['2290411','2290412'],'TET2-1':['1061972','1061973','1061974'],'TET2-2':['1061551','1061552'],'TIIId':['1105411','1105412','1105413'],'TIIIe':['1129972','1129973'],'TIIIf':['1211677','1211678'],'TIIIg':['1235477','1235478','1235479'],'TIIIh':['1244286','1244287'],'JAK2':['50737','50738'],'TIIIj':['21262','21263','21264'],'TIIIk':['2390'],'TIIIl':['2593','2594'],'TIIIm':['114865','114866','114867'],'HRAS':['5342','5343'],'KRAS-1':['253982','253983','253984'],'KRAS-2':['253802','253803'],'TIIIn':['925270','925271'],'IDH2':['906318','906319'],'TIIIo':['733796','733797','733798'],'TIIIp':['824550','824551'],'TIIIq':['859491','859492'],'p53-1':['75775','75776'],'p53-2':['75783','75784','75785'],'p53-3':['75770','75771','75772'],'GATA1':['486496','486497','486498']}
 
     if not allbases and not usevafs:
@@ -379,14 +490,24 @@ if __name__ == '__main__':
         plotAllBases(allbases)
 
     if usevafs:
-        print('Parsing input files...')
-        intron, exon = parseAllVAF(inFiles, inDir, ref, probes)
+        if previousVAF:
+            print('Loading previous data...')
+            intron, exon = importVAF()
+        else:
+            print('Parsing input files...')
+            intron, exon = parseAllVAF(inFiles, inDir, ref, probes)
 
-        print('Exporting data...')
-        exportVAF(intron,exon)
+            print('Exporting data...')
+            exportVAF(intron, exon)
 
         print('Plotting...')
-        plotvafs(intron, exon)
+        #plotvafs(intron, exon, 'T>G')
+        
+        print('Combining all introns and exons...')
+        combineRegions(intron, exon)
+
+        print('Combining introns and exons into 6 changes...')
+        combineSix(intron, exon)
 
 
         
