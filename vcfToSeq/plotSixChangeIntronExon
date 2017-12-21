@@ -1,0 +1,41 @@
+#!/usr/bin/env python
+
+def runArgparse():
+    print('Reading Argparse...')
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dirinput', '-d', type=str, help='Specifies the input directory for use with multiple files.')
+    parser.add_argument('--multiplefiles', '-m', nargs='+', help='If dirinput is specified, pass in the file names to be used in analysis.')
+
+    args = parser.parse_args()
+    dirinput = args.dirinput
+    multiplefiles = args.multiplefiles
+
+    return dirinput, multiplefiles
+
+def getProbes(): 
+    from util import defineProbes
+    probes = defineProbes()
+    return probes
+
+def calcFractions(dirinput, multiplefiles, probes, region):
+    from util import overallCaptureFraction
+    vafs = overallCaptureFraction(dirinput, multiplefiles, probes, region)
+    return vafs
+
+def getSix(vafs, title):
+    from util import sixChangeFractions
+    sixChangeFractions(vafs, title)
+
+def plotTogether(introns, exons):
+    from util import plotSixExonIntronTogether
+    plotSixExonIntronTogether(introns, exons)
+
+if __name__ == '__main__':
+    dirinput, multiplefiles = runArgparse()
+    probes = getProbes()
+    introns = calcFractions(dirinput, multiplefiles, probes, 'intron')
+    #getSix(introns, 'TIII')
+    exons = calcFractions(dirinput, multiplefiles, probes, 'exon')
+    #getSix(exons, 'Exons')
+    plotTogether(introns, exons)

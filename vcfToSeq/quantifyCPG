@@ -596,17 +596,17 @@ if __name__ == '__main__':
         vafs, avgVAFs = eliminateSNPs(vafs, avgVAFs)
     
     # plot all variants
-    #plotVAFs(avgVAFs, vafs)
+    plotVAFs(avgVAFs, vafs)
 
     # calculate averages for CpGs and non CpGs
-    #sortedVAFs = cpgVSnon(avgVAFs)
+    sortedVAFs = cpgVSnon(avgVAFs)
 
     # plot the CpG vs non CpG
     #plotCPG(sortedVAFs)
 
     # plot base fraction based on capture number
-    #fractions = overallCaptureFraction(dirinput, multiplefiles)
-    #plotFractions(fractions)
+    fractions = overallCaptureFraction(dirinput, multiplefiles)
+    plotFractions(fractions)
  
     # gather 96 trinucleotide AO data
     if previousAOData:
@@ -623,7 +623,7 @@ if __name__ == '__main__':
     print allVAF
 
     # plotVAF breakdown across multiple individuals
-    #plotVAFsMultipleIndiv(dirinput, multiplefiles, flankLength, ref, previousData)
+    plotVAFsMultipleIndiv(dirinput, multiplefiles, flankLength, ref, previousData)
 
 
     
