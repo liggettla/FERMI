@@ -328,6 +328,7 @@ def CtoTbyTrinucleotide(allVariants, samples):
 def contextUpperLower(allVariants, samples):
     print('Computing upper and lower population contexts...')
     from collections import defaultdict
+    from util import plotStacked
 
     colors = ['cyan','cyan','cyan','cyan','black','black','black','black','red','red','red','red','grey','grey','grey','grey']
     xlabel = 'Context'
@@ -335,7 +336,7 @@ def contextUpperLower(allVariants, samples):
     title = 'C>T Changes by Context'
     labels = ['TCT','CCT','GCT','ACT','TCC','CCC','GCC','ACC','TCG','CCG','GCG','ACG','TCA','CCA','GCA','ACA']
 
-    vafcutoff = ['upper','lower']
+    vafcutoff = ['Upper','Lower']
     changes = ['C>A', 'C>G','C>T','T>A','T>C','T>G']
     letters = ['T','C','G','A']
 
@@ -356,9 +357,9 @@ def contextUpperLower(allVariants, samples):
                     fractiondown = []
                     for base in letters:
                         l = allVariants[allVariants['Change'] == change]
-                        if region == 'upper':
+                        if region == 'Upper':
                             m = l[l['VAF'] > 0.0004]
-                        if region == 'lower':
+                        if region == 'Lower':
                             m = l[l['VAF'] < 0.0004]
                         n = m[m['Individual'] == sample]
 
@@ -397,103 +398,14 @@ def contextUpperLower(allVariants, samples):
 
             print position, allmeansup, allstdsup
 
+            # combine upstream and downstream
+            for base in allmeansup:
+                allmeansup[base] = allmeansup[base] + allmeansdown[base]
+                allstdsup[base] = allstdsup[base] + allstdsdown[base]
+
+
             # plot
-            import matplotlib.pyplot as plt
-            df=pd.DataFrame(allmeansup)
-            df.plot(kind='bar', yerr=allstdsup, stacked=False)
-            plt.show()
-
-
-
-
-
-
-
-
-
-
-                            #zup = y[y.Upstream.str[i].eq(base)]['WT'].count()
-                            #zdown = y[y.Downstream.str[i].eq(base)]['WT'].count()
-
-    
-    
-
-
-
-
-
-
-
-    '''
-    for change in changes:
-        means = []
-        std = []
-        stdup = defaultdict(list) 
-        stddown = defaultdict(list)
-        meansup = defaultdict(list)
-        meansdown = defaultdict(list)
-
-        up = {'T':[],'C':[],'G':[],'A':[]}
-        down = {'T':[],'C':[],'G':[],'A':[]}
-
-        for i in range(10):
-	    tempup = {'T':0,'C':0,'G':0,'A':0}
-            tempdown = {'T':0,'C':0,'G':0,'A':0}
-            for sample in range(len(samples)+1):
-
-                total = 0
-                for base in letters:
-                    x = allVariants[allVariants['Change'] == change]
-                    y = x[x['VAF'] > 0.0004]
-                    zup = y[y.Upstream.str[i].eq(base)]['WT'].count()
-                    zdown = y[y.Downstream.str[i].eq(base)]['WT'].count()
-
-                    tempup[base] = zup
-                    tempdown[base] = zdown
-                    total += zup
-
-            # normalize to 1
-            for i in tempup:
-                up[i] = float(tempup[i])/total
-                down[i] = float(tempdown[i])/total
-
-            for letter in letters:
-                meansup[letter].append(np.nanmean(up[letter]))
-                stdup[letter].append(np.nanstd(up[letter]))
-
-            for letter in letters:
-                meansdown[letter].append(np.nanmean(down[letter]))
-                stddown[letter].append(np.nanstd(down[letter]))
-
-
-        # concatenate results together
-        for base in meansup:
-            means[base] = meansup[base] + meansdown[base]
-            std[base] = stdup[base] + stdup[down]
-        print means
-
-        import matplotlib.pyplot as plt
-
-        # this is because this is the base of interest 
-        meansup.append(1)
-        stdup.append(0)
-        means = meansup + meansdown
-        std = stdup + stddown
-
-        plotData(means, std, 'grey', labels, xlabel, ylabel, change)
-    '''
-
-
-                    
-
-
-
-
-
-
-
-    
-
+            plotStacked(allmeansup, allstdsup, 'Base Position', 'Nuceotide Fraction', '%s Region %s Changes' % (region, change))
 
 
 

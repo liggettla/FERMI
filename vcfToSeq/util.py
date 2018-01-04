@@ -120,6 +120,31 @@ def plotData(means, stddev, colors, labels, xlabel, ylabel, title):
     #plt.legend(handles=[exon, intron])
     plt.show()
 
+def plotStacked(means, std, xlabel, ylabel, title):
+    import matplotlib.pyplot as plt
+    import pandas as pd
+
+    axis_font = {'fontname':'Arial', 'size':'30'}
+    tick_font = {'fontname':'Arial', 'size':'30'}
+    meandf=pd.DataFrame(means)
+    stddf = pd.DataFrame(std)
+
+    meandf.plot(kind='bar', yerr=stddf, stacked=False)
+    plt.xticks(**tick_font)
+    plt.yticks(**tick_font)
+    plt.ylabel(ylabel, **axis_font)
+    plt.xlabel(xlabel, **axis_font)
+    plt.title(title, **axis_font)
+    plt.show()
+
+    meandf.plot(kind='bar', yerr=stddf, stacked=True)
+    plt.xticks(**tick_font)
+    plt.yticks(**tick_font)
+    plt.ylabel(ylabel, **axis_font)
+    plt.xlabel(xlabel, **axis_font)
+    plt.title(title, **axis_font)
+    plt.show()
+
 def saveData(df, name):
     import pickle
     print('Saving data...')
