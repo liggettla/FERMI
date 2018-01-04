@@ -334,10 +334,97 @@ def contextUpperLower(allVariants, samples):
     ylabel = 'VAF'
     title = 'C>T Changes by Context'
     labels = ['TCT','CCT','GCT','ACT','TCC','CCC','GCC','ACC','TCG','CCG','GCG','ACG','TCA','CCA','GCA','ACA']
-    letters = ['T','C','G','A']
-    
-    changes = ['C>A', 'C>G','C>T','T>A','T>C','T>G']
 
+    vafcutoff = ['upper','lower']
+    changes = ['C>A', 'C>G','C>T','T>A','T>C','T>G']
+    letters = ['T','C','G','A']
+
+    for region in vafcutoff:
+        for change in changes:
+            allmeansup = {'T':[],'C':[],'G':[],'A':[]}
+            allstdsup = {'T':[],'C':[],'G':[],'A':[]}
+            allmeansdown = {'T':[],'C':[],'G':[],'A':[]}
+            allstdsdown = {'T':[],'C':[],'G':[],'A':[]}
+            for position in range(10):
+                uppositionmakeup = {'T':[],'C':[],'G':[],'A':[]}
+                downpositionmakeup = {'T':[],'C':[],'G':[],'A':[]}
+                for indiv in range(len(samples)):
+                    sample = indiv + 1
+                    fourbasesup = []
+                    fractionup = []
+                    fourbasesdown = []
+                    fractiondown = []
+                    for base in letters:
+                        l = allVariants[allVariants['Change'] == change]
+                        if region == 'upper':
+                            m = l[l['VAF'] > 0.0004]
+                        if region == 'lower':
+                            m = l[l['VAF'] < 0.0004]
+                        n = m[m['Individual'] == sample]
+
+                        o = n[n.Upstream.str[position].eq(base)]['WT'].count()
+                        fourbasesup.append(o)
+                        p = n[n.Downstream.str[position].eq(base)]['WT'].count()
+                        fourbasesdown.append(p)
+                        #print base, o
+                    #print sample, fourbasesup
+
+                    # convert to fractions
+                    # this can give divide by zero probably need some exception handler
+                    for i in fourbasesup:
+                        fractionup.append(i / float(sum(fourbasesup)))
+                    for i in fourbasesdown:
+                        fractiondown.append(i / float(sum(fourbasesdown)))
+                    #print sample, fractionup
+
+                    # add to master dictionary
+                    uppositionmakeup['T'].append(fractionup[0])
+                    uppositionmakeup['C'].append(fractionup[1])
+                    uppositionmakeup['G'].append(fractionup[2])
+                    uppositionmakeup['A'].append(fractionup[3])
+                    downpositionmakeup['T'].append(fractiondown[0])
+                    downpositionmakeup['C'].append(fractiondown[1])
+                    downpositionmakeup['G'].append(fractiondown[2])
+                    downpositionmakeup['A'].append(fractiondown[3])
+                #print position, uppositionmakeup
+
+                # average and add to overall dictionary at correct positions
+                for base in letters:
+                    allmeansup[base].append(np.nanmean(uppositionmakeup[base]))
+                    allstdsup[base].append(np.nanstd(uppositionmakeup[base]))
+                    allmeansdown[base].append(np.nanmean(downpositionmakeup[base]))
+                    allstdsdown[base].append(np.nanstd(downpositionmakeup[base]))
+
+            print position, allmeansup, allstdsup
+
+            # plot
+            import matplotlib.pyplot as plt
+            df=pd.DataFrame(allmeansup)
+            df.plot(kind='bar', yerr=allstdsup, stacked=False)
+            plt.show()
+
+
+
+
+
+
+
+
+
+
+                            #zup = y[y.Upstream.str[i].eq(base)]['WT'].count()
+                            #zdown = y[y.Downstream.str[i].eq(base)]['WT'].count()
+
+    
+    
+
+
+
+
+
+
+
+    '''
     for change in changes:
         means = []
         std = []
@@ -385,11 +472,6 @@ def contextUpperLower(allVariants, samples):
             std[base] = stdup[base] + stdup[down]
         print means
 
-
-
-
-        '''
-
         import matplotlib.pyplot as plt
 
         # this is because this is the base of interest 
@@ -399,7 +481,7 @@ def contextUpperLower(allVariants, samples):
         std = stdup + stddown
 
         plotData(means, std, 'grey', labels, xlabel, ylabel, change)
-        '''
+    '''
 
 
                     
