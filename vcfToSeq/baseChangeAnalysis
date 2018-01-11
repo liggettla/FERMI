@@ -325,7 +325,7 @@ def CtoTbyTrinucleotide(allVariants, samples):
 # in the upper and lower populations within the VAF comparison
 # plots to see if this predicts the mutability of a particular
 # base change
-def contextUpperLower(allVariants, samples):
+def contextUpperLower(allVariants, samples, regions='split'):
     print('Computing upper and lower population contexts...')
     from collections import defaultdict
     from util import plotStacked
@@ -337,6 +337,8 @@ def contextUpperLower(allVariants, samples):
     labels = ['TCT','CCT','GCT','ACT','TCC','CCC','GCC','ACC','TCG','CCG','GCG','ACG','TCA','CCA','GCA','ACA']
 
     vafcutoff = ['Upper','Lower']
+    if regions == 'combined':
+        vafcutoff = ['']
     changes = ['C>A', 'C>G','C>T','T>A','T>C','T>G']
     letters = ['T','C','G','A']
 
@@ -357,10 +359,13 @@ def contextUpperLower(allVariants, samples):
                     fractiondown = []
                     for base in letters:
                         l = allVariants[allVariants['Change'] == change]
-                        if region == 'Upper':
+                        if region == 'Upper' and regions == 'split':
                             m = l[l['VAF'] > 0.0004]
-                        if region == 'Lower':
+                        if region == 'Lower' and regions == 'split':
                             m = l[l['VAF'] < 0.0004]
+                        if regions == 'combined':
+                            m = l[l['VAF'] > 0]
+
                         n = m[m['Individual'] == sample]
 
                         o = n[n.Upstream.str[position].eq(base)]['WT'].count()
@@ -405,7 +410,11 @@ def contextUpperLower(allVariants, samples):
 
 
             # plot
-            plotStacked(allmeansup, allstdsup, 'Base Position', 'Nuceotide Fraction', '%s Region %s Changes' % (region, change))
+            if regions == 'split':
+                plotStacked(allmeansup, allstdsup, 'Base Position', 'Nuceotide Fraction', '%s Region %s Changes' % (region, change))
+            if regions == 'combined':
+                plotStacked(allmeansup, allstdsup, 'Base Position', 'Nuceotide Fraction', '%s Changes' % (change))
+
 
 
 
@@ -430,7 +439,8 @@ if __name__ == '__main__':
     #cpgMutabilityNormalized(allVariants, samples)
     #cpgMutabilityNormalizedAO(allVariants, samples)
     #CtoTbyTrinucleotide(allVariants, samples)
-    contextUpperLower(allVariants, samples)
+    #contextUpperLower(allVariants, samples)
+    contextUpperLower(allVariants, samples, 'combined')
 
 
 
