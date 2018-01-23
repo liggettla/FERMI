@@ -1,0 +1,77 @@
+#!/usr/bin/python
+# the purpose of this script is to analyze samples for selection of T21 mutations
+
+def runArgparse():
+    ############
+    # Argparse #
+    ############
+    import argparse
+    from numpy import mean
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--indir', '-i', type=str, required=True, help='Input directory containing the vcf files to be analyzed: /dir.')
+    parser.add_argument('--samples', '-s', type=str, nargs='*', required=True, help='List of samples to be averaged and compared to the principle sample. Ex: A1-R1.')
+    parser.add_argument('--limit', '-l', type=float, help='This will set a VAF maximum to eliminate germline mutations if desireable.')
+    parser.add_argument('--reference', '-r', type=str, help='This points to the reference geneome to be used in identifying flanking sequence.')
+    parser.add_argument('--loadolddata', '-o', action='store_true', help='Load previously existing data.')
+
+    args = parser.parse_args()
+
+    indir = args.indir
+    samples = args.samples
+    if args.limit:
+        limit = args.limit
+    else:
+        limit = 1
+    ref = args.reference
+    if args.loadolddata:
+        load = True
+    else:
+        load = False
+
+    return indir, samples, limit, ref, load
+
+def readData(indir, samples, probes, ref, load):
+
+    if not load:
+        allVariants = populatePandasDataframe(indir, samples, probes, ref, upstream=1, downstream=1)
+        saveData(allVariants, 'mostCommon')
+    elif load:
+        allVariants = loadData('mostCommon')
+
+    print allVariants
+    return allVariants
+
+# this will identify the most common variants below a certain VAF
+# the idea is to identify common oncogenic mutations carried by a cancer
+# and then identify what mutations rebound after therapy
+def identifyCommonVars(allVariants, samples):
+    for sample in range(len(samples)):
+        filtered = allVariants[allVariants['Individual'] == sample + 1]
+        sorteddf = filtered.sort(['VAF'], ascending=[0])
+        print sorteddf.head(n=15)
+        
+# the purpose here is to compare T21 to D21 to look for differential
+# selection of GATA
+def lookatGata(allVariants, samples):
+    # first just look at overall average
+    gata = allVariants[allVariants['Gene'] = 'GATA1']
+        
+
+        
+
+
+if __name__ == '__main__':
+    from util import defineProbes
+    from util import populatePandasDataframe
+    from util import saveData
+    from util import loadData
+    import pandas as pd
+
+    indir, samples, limit, ref, load = runArgparse()
+    probes = defineProbes()
+    allVariants = readData(indir, samples, probes, ref, load)
+
+    # analysis of results
+    identifyCommonVars(allVariants, samples)
+    lookatGata(allVariants, samples)
