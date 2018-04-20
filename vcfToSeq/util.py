@@ -128,17 +128,19 @@ def plotStacked(means, std, xlabel, ylabel, title):
     tick_font = {'fontname':'Arial', 'size':'30'}
     meandf=pd.DataFrame(means)
     stddf = pd.DataFrame(std)
+    positions = [-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,7,8,9,10]
 
     meandf.plot(kind='bar', yerr=stddf, stacked=False)
-    plt.xticks(**tick_font)
+    plt.xticks(range(len(positions)), positions, **tick_font)
     plt.yticks(**tick_font)
+    #plt.ylim(0,0.75)
     plt.ylabel(ylabel, **axis_font)
     plt.xlabel(xlabel, **axis_font)
     plt.title(title, **axis_font)
     plt.show()
 
     meandf.plot(kind='bar', yerr=stddf, stacked=True)
-    plt.xticks(**tick_font)
+    plt.xticks(range(len(positions)), positions, **tick_font)
     plt.yticks(**tick_font)
     plt.ylabel(ylabel, **axis_font)
     plt.xlabel(xlabel, **axis_font)

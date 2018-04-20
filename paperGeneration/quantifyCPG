@@ -1,0 +1,655 @@
+#!/usr/bin/env python
+# this script takes an input vcf file and outputs the average VAFs for CpG sites
+# and non CpG sites to test if the mutation rates of CpG sites are higher than
+# for non CpG sites
+
+############
+# Argparse #
+############
+def runArgparse():
+    print('Reading Argparse...')
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--inFile', '-i', type=str, help='Specifies the input vcf file.')
+    parser.add_argument('--flanklength', '-f', type=int, help='Specifies the number of bases of flanking sequence to include')
+    parser.add_argument('--previousdata', '-p', action='store_true', help='It can take a long time to read data so this will trigger use of previous output pickle data.')
+    parser.add_argument('--dirinput', '-d', type=str, help='Specifies the input directory for use with multiple files.')
+    parser.add_argument('--multiplefiles', '-m', nargs='+', help='If dirinput is specified, pass in the file names to be used in analysis.')
+    parser.add_argument('--previousaodata', '-q', action='store_true', help='It can take hours to parse through multiple files and retrieve the necessary data; this will retrieve previously stored data.')
+    parser.add_argument('--reference', '-r', type=str, help='Point to the reference genome to be used for flanking sequence.')
+
+    args = parser.parse_args()
+    inFile = args.inFile
+    flankLength = args.flanklength
+    previousData = args.previousdata
+    previousAOData = args.previousaodata
+    ref = args.reference
+    
+    if args.dirinput:
+        dirinput = args.dirinput
+        multiplefiles = args.multiplefiles
+    else:
+        dirinput = False
+        multiplefiles = False
+
+    return inFile, flankLength, previousData, dirinput, multiplefiles, previousAOData, ref
+
+# checks if a given variant is just a single base substitution or not
+def checkSubst(var, wt):
+    if len(var)==1 and len(wt)==1:
+        single = True
+    else:
+        single = False
+
+    return single
+
+def readVCF(inFile, flankLength, ref):
+    print('Reading flanking seqences...')
+    from parseline import VCFObj
+    from getSequence import getRefSequence
+    from collections import defaultdict
+
+    # vafs = {'TCG':[0.01,0.02]}
+    vafs = defaultdict(list)
+    target = open(inFile, 'r')
+
+    for line in target:
+        if '#' not in line and 'chr' in line: # skip the info
+            vcfObj = VCFObj(line)
+
+            # check var is just a single base substitution
+            single = checkSubst(vcfObj.var, vcfObj.wt)
+
+            # if var is single base substitution get flanking seq
+            if single:
+                seq = getRefSequence(line, flankLength, ref)
+                vafs[seq].append(vcfObj.af)
+
+    # combine into complimentary pairs
+    from Bio.Seq import Seq
+    labelings = [
+            'TCT','CCT','GCT','ACT','TCC','CCC','GCC','ACC','TCG','CCG','GCG','ACG','TCA','CCA','GCA','ACA',
+            'TTT','CTT','GTT','ATT','TTC','CTC','GTC','ATC','TTG','CTG','GTG','ATG','TTA','CTA','GTA','ATA',
+            ]
+    temp = defaultdict(list)
+    for i in vafs:
+        if i in labelings:
+            for j in vafs[i]:
+                temp[i].append(j)
+                
+    vafs = temp
+
+    target.close()
+    return vafs
+
+# this averages the associated allele frequencies for each triplet
+def averageVAFs(vafs):
+    print('Computing averages...')
+    from collections import defaultdict
+    from numpy import mean
+    avgVAFs = defaultdict(float)
+
+    for triplet in vafs:
+        average = mean(vafs[triplet])
+        avgVAFs[triplet] = average
+
+    return avgVAFs
+
+# this displays the average VAFs for each triplet
+def plotVAFs(avgVAFs, vafs):
+    print('Plotting all VAFs...')
+    import matplotlib.pyplot as plt
+    
+    labelings = [
+            'TCT','CCT','GCT','ACT','TCC','CCC','GCC','ACC','TCG','CCG','GCG','ACG','TCA','CCA','GCA','ACA',
+            'TTT','CTT','GTT','ATT','TTC','CTC','GTC','ATC','TTG','CTG','GTG','ATG','TTA','CTA','GTA','ATA',
+            ]
+    colors=['cyan','cyan','cyan','cyan',
+            'black','black','black','black',
+            'red','red','red','red',
+            'grey','grey','grey','grey',
+            'green','green','green','green',
+            'magenta','magenta','magenta','magenta',
+            'blue','blue','blue','blue',
+            'purple','purple','purple','purple',
+            ]
+    ordered=[]
+
+    for i in labelings:
+        ordered.append(avgVAFs[i])
+
+    stdDev=[]
+    import numpy as np
+    for i in labelings:
+        stdDev.append(np.std(vafs[i]))
+
+    axis_font = {'fontname':'Arial', 'size':'30'}
+    tick_font = {'fontname':'Arial', 'size':'20'}
+    plt.bar(range(len(avgVAFs)), ordered, align='center', color=colors)
+    plt.xticks(range(len(avgVAFs)), labelings, rotation=90, **tick_font)
+    plt.yticks(**axis_font)
+    plt.ylabel('Average Variant Allele Frequency', **axis_font)
+    plt.xlabel('Triplet Context', **axis_font)
+    plt.show()
+
+# this will write data into pickle files to eliminate need to constantly
+# read in data
+def writeoutData(vafs, avgVAFs):
+    print('Writing out data...')
+    import pickle
+    
+    vafPickle = open('vafs.pkl', 'wb')
+    pickle.dump(vafs, vafPickle)
+    vafPickle.close()
+    
+    avgVafPickle = open('avgvafs.pkl', 'wb')
+    pickle.dump(avgVAFs, avgVafPickle)
+    avgVafPickle.close()
+
+# this will read in previously pickled data
+def readPrevious():
+    print('Reading in saved data...')
+    import pickle
+
+    inputVafs = open('vafs.pkl', 'rb')
+    vafs = pickle.load(inputVafs)
+    inputVafs.close()
+
+    inputAvgVafs = open('avgvafs.pkl', 'rb')
+    avgVAFs = pickle.load(inputAvgVafs)
+    inputAvgVafs.close()
+
+    return vafs, avgVAFs
+
+# this should have been done earlier, but this will ignore SNPs
+def eliminateSNPs(vafs, avgVAFs):
+    print('Eliminating SNPs...')
+    from collections import defaultdict
+
+    newVAFs = defaultdict(list)
+    newAvgVAFs = defaultdict(float)
+
+    for triplet in vafs:
+        for i in vafs[triplet]:
+            if i < 0.1:
+                newVAFs[triplet].append(i)
+    
+    newAvgVAFs = averageVAFs(newVAFs)
+
+    return newVAFs, newAvgVAFs
+
+# this creates a sorted dictionary so that CpG and non CpG sites can be
+# compared
+def cpgVSnon(avgVAFs):
+    print('Sorting CpG Sites...')
+    from collections import defaultdict
+    from numpy import mean
+
+    sortedVAFs = defaultdict(list)
+
+    for i in avgVAFs:
+        if i[1:] == 'CG':
+            sortedVAFs['cpg'].append(avgVAFs[i])
+        else:
+            sortedVAFs['other'].append(avgVAFs[i])
+
+    return sortedVAFs
+
+def plotCPG(sortedVAFs):
+    print('Plotting CpG Comparison...')
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    nums = np.arange(len(sortedVAFs))
+    vafmean = []
+    vafstddev = []
+
+    for i in sortedVAFs:
+        vafmean.append(np.mean(sortedVAFs[i]))
+        vafstddev.append(np.std(sortedVAFs[i]))
+    
+
+    plt.clf()
+    axis_font = {'fontname':'Arial', 'size':'30'}
+    plt.errorbar(nums, vafmean, yerr=vafstddev, linestyle="None", fmt='o', color='black')
+    plt.bar(nums, vafmean, color='grey')
+    plt.xticks(range(len(sortedVAFs)), sortedVAFs.keys(), rotation=0, **axis_font)
+    plt.yticks(**axis_font)
+    plt.ylabel('Average VAF ', **axis_font)
+    plt.show()
+
+# this plots the overall base change prevalence, ignoring
+# the triplet context
+def overallCaptureFraction(dirinput, fileList):
+    print('Reading overall captured base changes...')
+    from parseline import VCFObj
+    from collections import defaultdict
+    from Bio.Seq import Seq
+
+    vafs = {'C>A':[], 'C>G':[], 'C>T':[], 'T>A':[], 'T>C':[], 'T>G':[]}
+
+    for i in fileList:
+        temp = {'C>A':0, 'C>G':0, 'C>T':0, 'T>A':0, 'T>C':0, 'T>G':0}
+        target = open(dirinput + '/' + i, 'r')
+
+        for line in target:
+            if '#' not in line and 'chr' in line: # skip the info
+                vcfObj = VCFObj(line)
+
+                # only use single substitutions and eliminate SNPs
+                if len(vcfObj.wt) == 1 and len(vcfObj.var) == 1 and vcfObj.af < 0.1:
+                    varType = ('%s>%s' % (vcfObj.wt, vcfObj.var))
+
+                    if varType not in vafs:
+                        varType = ('%s>%s' % (str(Seq(vcfObj.wt).complement()), str(Seq(vcfObj.var).complement())))
+
+                    # add AO together
+                    temp[varType] += int(vcfObj.ao)
+        target.close()
+
+        # calculate fractions
+        totalAO = 0
+        for i in temp:
+            totalAO += temp[i]
+
+        for i in temp:
+            temp[i] = float(temp[i]) / float(totalAO)
+
+        # transfer data into vafs
+        for i in temp:
+            vafs[i].append(temp[i])
+
+    return vafs
+
+# this will plot the overall fraction of bases mutated
+def plotFractions(fractions):
+    print('Plotting substitution fractions...')
+    import matplotlib.pyplot as plt
+    import numpy as np
+    
+    order = ['C>A','C>G','C>T','T>A','T>C','T>G']
+    ordered = []
+    for i in order:
+        ordered.append(fractions[i])
+
+    nums = np.arange(len(fractions))
+    vafmean = []
+    vafstddev = []
+
+    for i in order:
+        vafmean.append(np.mean(fractions[i]))
+        vafstddev.append(np.std(fractions[i]))
+
+    plt.clf()
+    axis_font = {'fontname':'Arial', 'size':'30'}
+    colorlist = ['cyan','black','red','grey','green','magenta']
+    plt.errorbar(nums, vafmean, yerr=vafstddev, linestyle="None", color='black')
+    plt.bar(nums, vafmean, color=colorlist)
+    plt.xticks(range(len(fractions)), order, rotation=0, **axis_font)
+    plt.yticks(**axis_font)
+    plt.ylabel('Fraction of Observations', **axis_font)
+    plt.xlabel('Substitution Type', **axis_font)
+
+    plt.tick_params(
+    axis='both',       # changes apply to the x-axis
+    which='both',      # both major and minor ticks are affected
+    bottom='off',      # ticks along the bottom edge are off
+    left='off',        # y-axis ticks are off
+    top='off',         # ticks along the top edge are off
+    labelbottom='on') # labels along the bottom edge are off
+
+    plt.show()
+
+# this parses through multiple files, gets trinucleotide info 
+# then builds and writes a datastructure with file info and fraction
+# of total captures that a given trinucleotide substitution represents
+def parseAO(dirinput, multiplefiles, flankLength, ref):
+    print('Reading flanking sequences (up to 1min per vcf)...')
+    from parseline import VCFObj
+    from getSequence import getRefSequence
+    from collections import defaultdict
+    from Bio.Seq import Seq
+
+    # allAO = {'a.vcf':{('TCG','A>T'):0.01}}
+    allAO = {}
+    allVAF = {}
+    aftemp = defaultdict(list)
+    allowed = ['C>A', 'C>G', 'C>T', 'T>A', 'T>C', 'T>G']
+
+    for i in multiplefiles:
+        # temp = {'TCG':90}
+        temp = defaultdict(int)
+        target = open(dirinput + '/' + i, 'r')
+
+        for line in target:
+            if '#' not in line and 'chr' in line: # skip the info
+                vcfObj = VCFObj(line)
+
+                # check var is just a single base substitution
+                single = checkSubst(vcfObj.var, vcfObj.wt)
+
+                # convert bases to 6 allowed changes
+                if ('%s>%s' % (vcfObj.wt, vcfObj.var)) not in allowed:
+                    varType = ('%s>%s' % (str(Seq(vcfObj.wt).complement()), str(Seq(vcfObj.var).complement())))
+                else:
+                    varType = ('%s>%s' % (vcfObj.wt, vcfObj.var))
+
+                # if var is single base and not SNP get
+                # surrounding sequence
+                if single and vcfObj.af < 0.1:
+                    seq = getRefSequence(line, flankLength, ref)
+                    # combine base types
+                    if seq[1] == 'G' or seq[1] == 'A':
+                        seq = str(Seq(seq).complement())
+                    temp[(seq, varType)] += vcfObj.ao
+                    aftemp[(seq, varType)].append(vcfObj.af)
+
+        allAO[i] = temp
+        allVAF[i] = aftemp
+        target.close()
+
+    # find fraction that each trinucleotide represents
+    for vcf in allAO:
+        total = 0
+        for seq in allAO[vcf]:
+            total += allAO[vcf][seq]
+        for seq in allAO[vcf]:
+            allAO[vcf][seq] = float(allAO[vcf][seq]) / float(total)
+
+    # average VAFS
+    from numpy import mean
+    for vcf in allVAF:
+        for seq in allVAF[vcf]:
+            allVAF[vcf][seq] = mean(allVAF[vcf][seq])
+
+    # write data so it does not need to be constantly retrieved
+    print('Writing out data...')
+    import pickle
+    
+    aoPickle = open('ao.pkl', 'wb')
+    pickle.dump(allAO, aoPickle)
+    aoPickle.close()
+
+    vafPickle = open('vaf.pkl', 'wb')
+    pickle.dump(allVAF, vafPickle)
+    vafPickle.close()
+
+    return allAO, allVAF
+
+# if data has already been read in it can be loaded here
+def loadPreviousAO():
+    print('Reading in saved data...')
+    import pickle
+
+    aoPickle = open('ao.pkl', 'rb')
+    allAO = pickle.load(aoPickle)
+    aoPickle.close()
+
+    afPickle = open('vaf.pkl', 'rb')
+    allVAF = pickle.load(afPickle)
+    afPickle.close()
+
+    return allAO, allVAF
+
+# this plots the 96 trinucleotide data take from capture counts
+def plotAOData(allAO):
+    print('Plotting all AO Data...')
+    import matplotlib.pyplot as plt 
+    from collections import defaultdict
+    
+    colors=['cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan','cyan',
+            'black','black','black','black','black','black','black','black','black','black','black','black','black','black','black','black',
+            'red','red','red','red','red','red','red','red','red','red','red','red','red','red','red','red',
+            'grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey','grey',
+            'green','green','green','green','green','green','green','green','green','green','green','green','green','green','green','green',
+            'magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta'
+            ]
+    colors=['#4C72B0','#4C72B0','#4C72B0','#4C72B0','#4C72B0','#4C72B0','#4C72B0','#4C72B0','#4C72B0','#4C72B0','#4C72B0','#4C72B0','#4C72B0','#4C72B0','#4C72B0','#4C72B0',
+            '#55A868','#55A868','#55A868','#55A868','#55A868','#55A868','#55A868','#55A868','#55A868','#55A868','#55A868','#55A868','#55A868','#55A868','#55A868','#55A868',
+            '#C44E52','#C44E52','#C44E52','#C44E52','#C44E52','#C44E52','#C44E52','#C44E52','#C44E52','#C44E52','#C44E52','#C44E52','#C44E52','#C44E52','#C44E52','#C44E52',
+            '#8172B2','#8172B2','#8172B2','#8172B2','#8172B2','#8172B2','#8172B2','#8172B2','#8172B2','#8172B2','#8172B2','#8172B2','#8172B2','#8172B2','#8172B2','#8172B2',
+            '#CCB974','#CCB974','#CCB974','#CCB974','#CCB974','#CCB974','#CCB974','#CCB974','#CCB974','#CCB974','#CCB974','#CCB974','#CCB974','#CCB974','#CCB974','#CCB974',
+            '#64B5CD','#64B5CD','#64B5CD','#64B5CD','#64B5CD','#64B5CD','#64B5CD','#64B5CD','#64B5CD','#64B5CD','#64B5CD','#64B5CD','#64B5CD','#64B5CD','#64B5CD','#64B5CD'
+            ]
+    changes = ['C>A','C>G','C>T','T>A','T>C','T>G']
+    order = ['TCT','CCT','GCT','ACT','TCC','CCC','GCC','ACC','TCG','CCG','GCG','ACG','TCA','CCA','GCA','ACA',
+            'TTT','CTT','GTT','ATT','TTC','CTC','GTC','ATC','TTG','CTG','GTG','ATG','TTA','CTA','GTA','ATA']
+    labels = [
+            'TCT','CCT','GCT','ACT','TCC','CCC','GCC','ACC','TCG','CCG','GCG','ACG','TCA','CCA','GCA','ACA',
+            'TCT','CCT','GCT','ACT','TCC','CCC','GCC','ACC','TCG','CCG','GCG','ACG','TCA','CCA','GCA','ACA',
+            'TCT','CCT','GCT','ACT','TCC','CCC','GCC','ACC','TCG','CCG','GCG','ACG','TCA','CCA','GCA','ACA',
+            'TTT','CTT','GTT','ATT','TTC','CTC','GTC','ATC','TTG','CTG','GTG','ATG','TTA','CTA','GTA','ATA',
+            'TTT','CTT','GTT','ATT','TTC','CTC','GTC','ATC','TTG','CTG','GTG','ATG','TTA','CTA','GTA','ATA',
+            'TTT','CTT','GTT','ATT','TTC','CTC','GTC','ATC','TTG','CTG','GTG','ATG','TTA','CTA','GTA','ATA',
+            ]
+
+    # first combine data frame so all input files are combined so stdev
+    # calculations and average can be made
+    # df = { ('ATG', 'T>A'): [0.019, 0.18, 0.15] }
+    df = defaultdict(list)
+    for i in allAO:
+        for triplet in allAO[i]:
+            df[triplet].append(allAO[i][triplet])
+
+    # create sorted lists
+    import numpy as np
+    avgAO = []
+    stddevAO = []
+    for i in changes:
+        for j in order:
+            # make sure triplet is possible
+            if i[0] == j[1]:
+                avgAO.append(np.mean(df[(j, i)]))
+                stddevAO.append(np.std(df[(j, i)]))
+            else:
+                pass
+
+    # generate plots
+    from matplotlib import pyplot as plt
+    import matplotlib.patches as mpatches
+    import seaborn as sns
+
+    plt.clf()
+    axis_font = {'fontname':'Arial', 'size':'30'}
+    tick_font = {'fontname':'Arial', 'size':'7'}
+    plt.errorbar(range(len(avgAO)), avgAO, yerr=stddevAO, linestyle="None", color='#575859')
+    #plt.bar(range(len(avgAO)), avgAO, color=colors)
+    sns.barplot(range(len(avgAO)), avgAO, palette=colors)
+    plt.xticks(range(len(labels)), labels, rotation=90, **tick_font)
+    plt.yticks(**axis_font)
+    plt.ylabel('Fraction of Observations', **axis_font)
+    plt.ylabel('Mean VAF', **axis_font)
+    plt.xlabel('Substitution Type', **axis_font)
+    plt.ylim(0,0.06)
+
+    sns.set_context("paper", font_scale=2)
+    sns.despine(offset=10, trim=True)
+    plt.xticks(range(len(labels)), labels, rotation=90, **tick_font)
+    plt.tight_layout()
+
+    plt.tick_params(
+    axis='both',       # changes apply to the x-axis
+    which='both',      # both major and minor ticks are affected
+    #bottom='off',      # ticks along the bottom edge are off
+    #left='off',        # y-axis ticks are off
+    top='off',         # ticks along the top edge are off
+    labelbottom='on') # labels along the bottom edge are off
+
+    # create the legend
+    CA = mpatches.Patch(color='cyan', label='C>A')
+    CG = mpatches.Patch(color='black', label='C>G')
+    CT = mpatches.Patch(color='red', label='C>T')
+    TA = mpatches.Patch(color='grey', label='T>A')
+    TC = mpatches.Patch(color='green', label='T>C')
+    TG = mpatches.Patch(color='magenta', label='T>G')
+
+    CA = mpatches.Patch(color='#4C72B0', label='C>A')
+    CG = mpatches.Patch(color='#55A868', label='C>G')
+    CT = mpatches.Patch(color='#C44E52', label='C>T')
+    TA = mpatches.Patch(color='#8172B2', label='T>A')
+    TC = mpatches.Patch(color='#CCB974', label='T>C')
+    TG = mpatches.Patch(color='#64B5CD', label='T>G')
+    plt.legend(handles=[CA, CG, CT, TA, TC, TG])
+
+    #plt.savefig('3b.png', bbox_inches='tight',dpi=1200)
+
+    plt.show()
+
+# unlike when plotting all VAFs which just takes a single input file
+# this takes multiple input files, and plots the average of their VAFs
+# with stdev
+
+# this is super redundant, this should be incorporated with the first read-through
+# so multiple reads are not necessary
+def plotVAFsMultipleIndiv(dirinput, multiplefiles, flankLength, ref, previousData):
+    from collections import defaultdict
+    from parseline import VCFObj
+    from getSequence import getRefSequence
+    import pickle
+    from matplotlib import pyplot as plt
+    import numpy as np
+
+    print('Building multi-sample VAF data structure...')
+    labelings = [
+            'TCT','CCT','GCT','ACT','TCC','CCC','GCC','ACC','TCG','CCG','GCG','ACG','TCA','CCA','GCA','ACA',
+            'TTT','CTT','GTT','ATT','TTC','CTC','GTC','ATC','TTG','CTG','GTG','ATG','TTA','CTA','GTA','ATA',
+            ]
+    colors=['cyan','cyan','cyan','cyan',
+            'black','black','black','black',
+            'red','red','red','red',
+            'grey','grey','grey','grey',
+            'green','green','green','green',
+            'magenta','magenta','magenta','magenta',
+            'blue','blue','blue','blue',
+            'purple','purple','purple','purple',
+            ]
+
+    # write data
+    if not previousData:
+        # allVAF = {'ACT':[0.75,0.93]}
+        allVAF = defaultdict(list)
+
+        for vcf in multiplefiles:
+            target = open(dirinput + '/' + vcf, 'r')
+            for line in target:
+                if '#' not in line and 'chr' in line: # skip the info
+                    vcfobj = VCFObj(line)
+
+                    # elim SNPs
+                    if vcfobj.af < 0.1:
+                        seq = getRefSequence(line, flankLength, ref)
+                        allVAF[seq].append(vcfobj.af)
+            target.close()
+
+        print('Writing combined VAF data...')
+        vafPickle = open('combinedvafs.pkl', 'wb')
+        pickle.dump(allVAF, vafPickle)
+        vafPickle.close()
+    
+    # this will read in previously pickled data
+    elif previousData:
+        print('Reading in combined saved VAF data...')
+        inputVafs = open('combinedvafs.pkl', 'rb')
+        allVAF = pickle.load(inputVafs)
+        inputVafs.close()
+
+    # average combined VAFs
+    tempavgVAFs = {}
+    tempstdDev = {}
+    for triplet in allVAF:
+        tempavgVAFs[triplet] = np.mean(allVAF[triplet])
+        tempstdDev[triplet] = np.std(allVAF[triplet])
+
+    
+    # put in order
+    avgVAFs = []
+    stdDev = []
+    for i in labelings:
+        avgVAFs.append(tempavgVAFs[i])
+        stdDev.append(tempstdDev[i])
+
+    # plot the data
+    axis_font = {'fontname':'Arial', 'size':'30'}
+    tick_font = {'fontname':'Arial', 'size':'20'}
+    plt.bar(range(len(avgVAFs)), avgVAFs, align='center', color=colors)
+    plt.errorbar(range(len(avgVAFs)), avgVAFs, yerr=stdDev, linestyle="None", color='black')
+    plt.xticks(range(len(avgVAFs)), labelings, rotation=90, **tick_font)
+    plt.yticks(**axis_font)
+    plt.ylabel('Average Variant Allele Frequency', **axis_font)
+    plt.xlabel('Triplet Context', **axis_font)
+    plt.show()
+
+# this will normalize fractions of variants by the number of probed trinucleotides
+def normalizeAO(allAO):
+    from collections import defaultdict
+    # these are the expected ratios of trinucleotide representation
+    probed = {'ACA':3.553299492,'ACC':3.299492386,'ACG':0.8395158141,'ACT':3.37758688,'CCA':5.99375244,'CCC':2.811401796,'CCG':1.366653651,'CCT':4.646622413,'GCA':3.768059352,'GCC':4.41233893,'GCG':1.151893791,'GCT':3.611870363,'TCA':3.86567747,'TCC':4.236626318,'TCG':0.566185084,'TCT':3.826630223,'ATA':2.362358454,'ATC':2.987114408,'ATG':4.197579071,'ATT':2.61616556,'CTA':2.694260055,'CTC':3.846153846,'CTG':6.013276064,'CTT':3.006638032,'GTA':2.049980476,'GTC':2.674736431,'GTG':3.904724717,'GTT':2.499023819,'TTA':1.913315111,'TTC':3.084732526,'TTG':3.123779774,'TTT':1.698555252}
+
+    # allAO = {'g.vcf':{('CTC', 'T>A'): 0.01448191933240612,}}
+
+    # divide by expected ratio
+    # totals = {'g.vcf':36.123}
+    totals = defaultdict(float)
+    for vcf in allAO:
+        for triplet in allAO[vcf]:
+            allAO[vcf][triplet] = allAO[vcf][triplet] / probed[triplet[0]]
+            totals[vcf] += allAO[vcf][triplet]
+
+    # make everything add up to 1
+    for vcf in allAO:
+        for triplet in allAO[vcf]:
+            allAO[vcf][triplet] = allAO[vcf][triplet] / totals[vcf]
+            
+    return allAO
+    
+if __name__ == '__main__':
+
+    inFile, flankLength, previousData, dirinput, multiplefiles, previousAOData, ref = runArgparse()
+
+    if not previousData:
+        # get dict with all triplets and their associated VAFs 
+        # vafs = {'TCG':[0.01,0.02]}
+        vafs = readVCF(inFile, flankLength, ref)
+        avgVAFs = averageVAFs(vafs)
+        vafs, avgVAFs = eliminateSNPs(vafs, avgVAFs)
+        writeoutData(vafs, avgVAFs)
+
+    if previousData:
+        vafs, avgVAFs = readPrevious()
+        vafs, avgVAFs = eliminateSNPs(vafs, avgVAFs)
+    
+    # plot all variants
+    #plotVAFs(avgVAFs, vafs)
+
+    # calculate averages for CpGs and non CpGs
+    sortedVAFs = cpgVSnon(avgVAFs)
+
+    # plot the CpG vs non CpG
+    #plotCPG(sortedVAFs)
+
+    # plot base fraction based on capture number
+    #fractions = overallCaptureFraction(dirinput, multiplefiles)
+    #plotFractions(fractions)
+ 
+    # gather 96 trinucleotide AO data
+    if previousAOData:
+        allAO, allVAF = loadPreviousAO()
+    else:
+        allAO, allVAF = parseAO(dirinput, multiplefiles, flankLength, ref)
+
+    # this will normalize by percent makeup of trinucleotides in probed region
+    allAO = normalizeAO(allAO)
+
+    # plot 96 trinucleotide AO data
+    plotAOData(allAO)
+    #plotAOData(allVAF)
+    #print allVAF
+
+    # plotVAF breakdown across multiple individuals
+    #plotVAFsMultipleIndiv(dirinput, multiplefiles, flankLength, ref, previousData)
+
+
+    
+
+

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # the purpose of this script is to analyze samples for selection of T21 mutations
 
 def runArgparse():
@@ -39,7 +39,6 @@ def readData(indir, samples, probes, ref, load):
     elif load:
         allVariants = loadData('mostCommon')
 
-    print allVariants
     return allVariants
 
 # this will identify the most common variants below a certain VAF
@@ -54,8 +53,61 @@ def identifyCommonVars(allVariants, samples):
 # the purpose here is to compare T21 to D21 to look for differential
 # selection of GATA
 def lookatGata(allVariants, samples):
+    from collections import defaultdict
     # first just look at overall average
-    gata = allVariants[allVariants['Gene'] = 'GATA1']
+    sampleID = {'T21':['66.fastq','70.fastq'], 'D21':['64.fastq','65.fastq','67.fastq','69.fastq'], 'T21-AML':['68.fastq']}
+    gata = allVariants[allVariants['Gene'] == 'GATA1']
+    totalAvg = defaultdict(list)
+
+    for individual in samples:
+        for i in sampleID:
+            if individual in sampleID[i]:
+                genotype = i
+                x = gata[gata['Individual'] == samples.index(individual) + 1]
+                totalAvg[i].append(x[x['Chrom'] == 'chrX']['VAF'].mean())
+
+    print totalAvg
+
+    from util import plotData
+    labels = ['D21','T21','T21-AML']
+    means = []
+    std = []
+    for i in labels:
+        means.append(np.mean(totalAvg[i]))
+        std.append(np.std(totalAvg[i]))
+    
+    colors = ['grey','grey','grey']
+    xlabel = 'Type of Individual'
+    ylabel = 'Mean VAF'
+    title = 'GATA1 Selection'
+    plotData(means, std, colors, labels, xlabel, ylabel, title)
+
+# this looks at individual mutations within GATA1
+def allGATA(allVariants, samples):
+    df = allVariants
+    df['newindex']=df['Loc'].astype(str) + df['Change'] + df['Chrom']
+    df['uniques']=df['Loc'].astype(str) + df['Change'] + df['Chrom'] + '_' + df['Individual'].astype(str)
+    x=df[df['Gene']=='GATA1']
+    x=x.drop_duplicates(subset='uniques')
+    x=x.pivot(index='newindex', columns='Individual', values='VAF')
+    x['Mean']=x[[1,2,3,4,5,6,7]].mean(axis=1)
+    x['Std']=x[[1,2,3,4,5,6,7]].std(axis=1)
+    x=x.sort_values(['Std'], ascending=False)
+
+# this just yields a DataFrame that is pivotted to use individuals as columns and VAF as values
+def compareVAF(allVariants, samples):
+    x = allVariants
+    x = x.set_index(['uniques'])
+    x = x[~x.index.duplicated(keep='first')]
+    x = x.pivot(index='newindex', columns='Individual', values='VAF')
+
+    return x
+
+
+
+    
+
+
         
 
         
@@ -67,11 +119,14 @@ if __name__ == '__main__':
     from util import saveData
     from util import loadData
     import pandas as pd
+    import numpy as np
 
     indir, samples, limit, ref, load = runArgparse()
     probes = defineProbes()
     allVariants = readData(indir, samples, probes, ref, load)
 
     # analysis of results
-    identifyCommonVars(allVariants, samples)
-    lookatGata(allVariants, samples)
+    #identifyCommonVars(allVariants, samples)
+    #lookatGata(allVariants, samples)
+    allGATA(allVariants, samples)
+    compareVAFs = compareVAF(allVariants, samples)

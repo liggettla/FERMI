@@ -1,0 +1,32 @@
+#!/usr/bin/env python
+
+# this is using the range of r-squared values calculated and stored here:
+# https://docs.google.com/spreadsheets/d/1XTUKgqG9VKWdfth_HkXovElPR9qBaLslyzV9e3F3ADo/edit#gid=0
+# the purpose is to produce a figure for the paper that shows no change in the similarity between
+# young data and the old
+
+from matplotlib import pyplot as plt 
+import seaborn as sns
+
+ages = [1,1,34,34,30,34,46,47,40,59,59,62,65,64,64,73,73,72,79,89]
+rsquared = [0.526084,0.426465,0.618713,0.618167,0.617252,0.492385,0.60911,0.507389,0.585214,0.630994,0.557788,0.469789,0.603348,0.581147,0.557178,0.61418,0.599533,0.560151,0.425595,0.555762]
+
+
+
+
+plt.clf()
+axis_font = {'fontname':'Arial', 'size':'30'}
+plt.plot(ages, rsquared, 'ko')
+#plt.title('' % (locus), **title_font)
+plt.xlabel('Age (years)', {'size':'20'})
+plt.ylabel('R-Squared', {'size':'20'})
+plt.xticks(**axis_font)
+plt.yticks(**axis_font)
+plt.ylim(0,1)
+plt.xlim(0,100)
+sns.set_context("paper", font_scale=2)
+plt.tight_layout()
+sns.despine(offset=10, trim=True)
+plt.savefig('2c.png', bbox_inches='tight',dpi=1200)
+
+plt.show()

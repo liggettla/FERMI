@@ -401,7 +401,9 @@ def contextUpperLower(allVariants, samples, regions='split'):
                     allmeansdown[base].append(np.nanmean(downpositionmakeup[base]))
                     allstdsdown[base].append(np.nanstd(downpositionmakeup[base]))
 
-            print position, allmeansup, allstdsup
+            #print allmeansup, allstdsup
+            for i in allmeansup:
+                print i, allmeansup[i][9], allstdsup[i][9], allmeansdown[i][0], allstdsdown[i][0]
 
             # combine upstream and downstream
             for base in allmeansup:
@@ -414,6 +416,25 @@ def contextUpperLower(allVariants, samples, regions='split'):
                 plotStacked(allmeansup, allstdsup, 'Base Position', 'Nuceotide Fraction', '%s Region %s Changes' % (region, change))
             if regions == 'combined':
                 plotStacked(allmeansup, allstdsup, 'Base Position', 'Nuceotide Fraction', '%s Changes' % (change))
+
+# this will find the average percent of probed region in
+# a given individual that is mutated
+def percentVariant(allVariants, samples):
+    totvar = []
+    percent = []
+    totalProbed = 4838 # this is experiment specific
+    for i in range(len(samples)):
+        indiv = i + 1
+        a = allVariants[allVariants['Individual'] == indiv]
+        b = a.drop_duplicates(['Loc'])
+        count = b['Loc'].count()
+        totvar.append(count)
+        percent.append(float(count) / totalProbed)
+
+    print np.mean(totvar), np.std(totvar), totvar
+    print np.mean(percent), np.std(percent), percent
+
+    
 
 
 
@@ -440,7 +461,8 @@ if __name__ == '__main__':
     #cpgMutabilityNormalizedAO(allVariants, samples)
     #CtoTbyTrinucleotide(allVariants, samples)
     #contextUpperLower(allVariants, samples)
-    contextUpperLower(allVariants, samples, 'combined')
+    #contextUpperLower(allVariants, samples, 'combined')
+    percentVariant(allVariants, samples)
 
 
 

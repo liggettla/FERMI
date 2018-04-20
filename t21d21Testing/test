@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+import matplotlib.pyplot as plt
+x=[1,2,3]
+plt.bar(range(len(x)),x)
+plt.show()

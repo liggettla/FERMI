@@ -1,0 +1,52 @@
+#!/usr/bin/env python
+
+# the purpose of this script is to randomize sequencing reads within a fastq
+# file and cut file length to a specified length
+# the motivation behind this is to identify any effect coverage is having on
+# resulting somatic mutation spectra
+
+def runArgparse():
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--indir', '-i', type=str, help='Input directory containing the vcf files to be analyzed: /dir.')
+    parser.add_argument('--filelist', '-f', nargs='*', help='Files to be mixed and trimmed.')
+    parser.add_argument('--fastqlen', '-l', type=int, help='Number of reads to be included in fastq files.')
+
+    args = parser.parse_args()
+    indir = args.indir
+    fileList = args.filelist
+    fastqlen = args.fastqlen
+
+    return indir, fileList, fastqlen
+
+def randomizeFastq(fileList, fastqlen):
+    for i in fileList:
+        target = open(i, 'r')
+        position = 0
+        x = pd.DataFrame()
+        for line in target:
+            if position == 1:
+                header = line.rstrip('\n')
+                position += 1
+            elif position == 2:
+                sequence = line.rstrip('\n')
+                position += 1
+            elif position == 3:
+                plus = line.rstrip('\n')
+                position += 1
+            elif position == 4:
+                quality = line.rstrip('\n')
+                position = 1
+                y = pd.DataFrame({'header':[header], 'seq':[sequence], 'plus':[plus], 'qual':[quality]})
+                x = x.append(y, ignore_index=True)
+
+        x = x.sample(n=fastqlen)
+        x.to_csv(path_or_buf='mixed_%s' % (i), sep='\n', header=False, index=False)
+
+if __name__ == '__main__':
+    import pandas as pd
+
+    indir, fileList, fastqlen = runArgparse()
+    fileList, readNumber = 0, 0
+    randomizeFastq(fileList, fastqlen)

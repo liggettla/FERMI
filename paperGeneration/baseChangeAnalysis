@@ -1,0 +1,470 @@
+#!/usr/bin/env python
+def runArgparse():
+    print('Reading Argparse...')
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--inFiles', '-i', type=str, nargs='*', help='Specifies the input vcf file(s).')
+    parser.add_argument('--inDir', '-d', type=str, help='Points to the input directory.')
+    parser.add_argument('--reference', '-r', type=str, help='Point to the reference genome to be used for flanking sequence.')
+    parser.add_argument('--savedata', '-s', type=str, help='Name of savefile if output of data structure is desired.')
+    parser.add_argument('--previousdata', '-p', type=str, help='Point to a saved data structure to be loaded.')
+
+    args = parser.parse_args()
+    inFiles = args.inFiles
+    ref = args.reference
+    inDir = args.inDir
+    if args.savedata:
+        output = args.savedata
+    else:
+        output = False
+    if args.previousdata:
+        previous = args.previousdata
+    else:
+        previous = False
+
+    return inFiles, ref, inDir, output, previous
+
+def getData(samples, ref, inDir, output, previous):
+    probes = defineProbes()
+    if previous:
+        from util import loadData
+        allVariants = loadData(previous)
+    else:
+        allVariants = populatePandasDataframe(inDir, samples, probes, ref)
+    if output and not previous:
+        from util import saveData
+        saveData(allVariants, output)
+
+    return allVariants
+
+# this plots average VAFs by the six possible base changes
+def vafsSixChanges(allVariants, samples):
+    print('Computing avg VAFs by six variant types...')
+    changes = ['C>A', 'C>G','C>T','T>A','T>C','T>G']
+
+    means = []
+    std = []
+    colors = ['cyan','black','red','grey','green','magenta']
+    xlabel = 'Substitution Type'
+    ylabel = 'VAF'
+    title = 'Mean VAF by Substitution Type'
+
+    for change in changes:
+        tempmeans = []
+        for sample in range(len(samples)+1):
+            x = allVariants[allVariants['Individual'] == sample]
+            y = x[x['ConvChange'] == change]['VAF'].mean()
+            tempmeans.append(y)
+
+        # computer stats ignoring nan values
+        means.append(np.nanmean(tempmeans))
+        std.append(np.nanstd(tempmeans))
+
+    plotData(means, std, colors, changes, xlabel, ylabel, title)
+
+# this plots the overall averaged VAFs between exon and TIII regions
+def vafExonIntron(allVariants, samples):
+    print('Computing overall exon/TIII average VAFs...')
+    means = []
+    std = []
+    colors = ['grey','black']
+    xlabel = 'Region'
+    ylabel = 'VAF'
+    title = 'Mean VAF by Region'
+    labels = ['Exon', 'Intron']
+
+    tempexon = []
+    tempintron = []
+    for sample in range(len(samples)+1):
+        x = allVariants[allVariants['Individual'] == sample]
+        y = x[x['IntEx'] == 'Exon']['VAF'].mean()
+        z = x[x['IntEx'] == 'TIII']['VAF'].mean()
+
+        tempexon.append(y)
+        tempintron.append(z)
+
+    means.append(np.nanmean(tempexon))
+    std.append(np.nanstd(tempexon))
+    means.append(np.nanmean(tempintron))
+    std.append(np.nanstd(tempintron))
+
+    plotData(means, std, colors, labels, xlabel, ylabel, title)
+
+# this plots the mean VAFs by 6 base changes by region of the genome
+def mutabilityByGenomeRegion(allVariants, samples):
+    print('Computing mean VAFs by six variant types and region...')
+    changes = ['C>A', 'C>G','C>T','T>A','T>C','T>G']
+
+    means = []
+    std = []
+    colors = ['cyan','cyan','black','black','red','red','grey','grey','green','green','magenta','magenta']
+    xlabel = 'Substitution Type'
+    ylabel = 'VAF'
+    title = 'Mean VAF by Substitution Type and Genomic Region'
+    labels = ['C>A Exon','C>A TIII','C>G Exon','C>G TIII','C>T Exon','C>T TIII','T>A Exon','T>A TIII','T>C Exon','T>C TIII','T>G Exon','T>G TIII']
+
+    for change in changes:
+        tempexon = []
+        tempintron = []
+        for sample in range(len(samples)+1):
+            q = allVariants[allVariants['Individual'] == sample]
+            x = q[q['Change'] == change]
+            y = x[x['IntEx'] == 'Exon']['VAF'].mean()
+            z = x[x['IntEx'] == 'TIII']['VAF'].mean()
+
+            tempexon.append(y)
+            tempintron.append(z)
+            
+        means.append(np.nanmean(tempexon))
+        std.append(np.nanstd(tempexon))
+        means.append(np.nanmean(tempintron))
+        std.append(np.nanstd(tempintron))
+
+    plotData(means, std, colors, labels, xlabel, ylabel, title)
+
+# the purpose of this is to get the mutability by genome region
+# but normalize this as a fraction of mutations
+def mutabilityByGenomeRegionNormalized(allVariants, samples):
+    print('Computing normalized mean VAFs by six variant types and region...')
+    changes = ['C>A', 'C>G','C>T','T>A','T>C','T>G']
+
+    means = []
+    std = []
+    colors = ['cyan','cyan','black','black','red','red','grey','grey','green','green','magenta','magenta']
+    xlabel = 'Substitution Type'
+    ylabel = 'VAF'
+    title = 'Mean VAF by Substitution Type and Genomic Region'
+    labels = ['C>A Exon','C>A TIII','C>G Exon','C>G TIII','C>T Exon','C>T TIII','T>A Exon','T>A TIII','T>C Exon','T>C TIII','T>G Exon','T>G TIII']
+
+    for change in changes:
+        tempexon = []
+        tempintron = []
+        for sample in range(len(samples)+1):
+            q = allVariants[allVariants['Individual'] == sample]
+            x = q[q['Change'] == change]
+            y = x[x['IntEx'] == 'Exon']['VAF'].mean()
+            z = x[x['IntEx'] == 'TIII']['VAF'].mean()
+
+            normy = y / (y + z)
+            normz = z / (y + z)
+
+            tempexon.append(normy)
+            tempintron.append(normz)
+            
+        means.append(np.nanmean(tempexon))
+        std.append(np.nanstd(tempexon))
+        means.append(np.nanmean(tempintron))
+        std.append(np.nanstd(tempintron))
+
+    plotData(means, std, colors, labels, xlabel, ylabel, title)
+
+# same analysis as above, but uses AO instead of VAF
+def mutabilityByGenomeRegionNormalizedAO(allVariants, samples):
+    print('Computing normalized mean AO by six variant types and region...')
+    changes = ['C>A', 'C>G','C>T','T>A','T>C','T>G']
+
+    means = []
+    std = []
+    colors = ['cyan','cyan','black','black','red','red','grey','grey','green','green','magenta','magenta']
+    xlabel = 'Substitution Type'
+    ylabel = 'AO'
+    title = 'Mean Normalized AO by Substitution Type and Genomic Region'
+    labels = ['C>A Exon','C>A TIII','C>G Exon','C>G TIII','C>T Exon','C>T TIII','T>A Exon','T>A TIII','T>C Exon','T>C TIII','T>G Exon','T>G TIII']
+
+    for change in changes:
+        tempexon = []
+        tempintron = []
+        for sample in range(len(samples)+1):
+            q = allVariants[allVariants['Individual'] == sample]
+            x = q[q['Change'] == change]
+            y = x[x['IntEx'] == 'Exon']['AO'].mean()
+            z = x[x['IntEx'] == 'TIII']['AO'].mean()
+
+            normy = y / (y + z)
+            normz = z / (y + z)
+
+            tempexon.append(normy)
+            tempintron.append(normz)
+            
+        means.append(np.nanmean(tempexon))
+        std.append(np.nanstd(tempexon))
+        means.append(np.nanmean(tempintron))
+        std.append(np.nanstd(tempintron))
+
+    plotData(means, std, colors, labels, xlabel, ylabel, title)
+
+# this looks at overall VAFs only in the CpG context to see if CpG sites
+# are more mutable within exons or introns
+def cpgMutability(allVariants, samples):
+    print('Computing mean VAFs within CpG context...')
+
+    means = []
+    std = []
+    colors = ['grey','black']
+    xlabel = 'Position'
+    ylabel = 'VAF'
+    title = 'Mean VAF of CpG Sites Within TIII/Exons'
+    labels = ['Exon','TIII']
+
+    tempexon = []
+    tempintron = []
+    for sample in range(len(samples)+1):
+        a = allVariants[allVariants.Downstream.str[0].eq('G')]
+        b = a[a['WT'] == 'C']
+        c = b[b['Individual'] == sample]
+        d = c[c['IntEx'] == 'Exon']['VAF'].mean()
+        e = c[c['IntEx'] == 'TIII']['VAF'].mean()
+        
+        tempexon.append(d)
+        tempintron.append(e)
+        
+    means.append(np.nanmean(tempexon))
+    std.append(np.nanstd(tempexon))
+    means.append(np.nanmean(tempintron))
+    std.append(np.nanstd(tempintron))
+
+    plotData(means, std, colors, labels, xlabel, ylabel, title)
+
+# the purpose of this method is to plot any differences in mutability in CpG
+# regions by normalize these to 1 within an individual
+def cpgMutabilityNormalized(allVariants, samples):
+    print('Computing mean normalized VAFs within CpG context...')
+
+    means = []
+    std = []
+    colors = ['grey','black']
+    xlabel = 'Position'
+    ylabel = 'VAF'
+    title = 'Normalized Mean VAF of CpG Sites Within TIII/Exons'
+    labels = ['Exon','TIII']
+
+    tempexon = []
+    tempintron = []
+    for sample in range(len(samples)+1):
+        a = allVariants[allVariants.Downstream.str[0].eq('G')]
+        b = a[a['WT'] == 'C']
+        c = b[b['Individual'] == sample]
+        d = c[c['IntEx'] == 'Exon']['VAF'].mean()
+        e = c[c['IntEx'] == 'TIII']['VAF'].mean()
+
+        normd = d / (d + e)
+        norme = e / (d + e)
+        
+        tempexon.append(normd)
+        tempintron.append(norme)
+        
+    means.append(np.nanmean(tempexon))
+    std.append(np.nanstd(tempexon))
+    means.append(np.nanmean(tempintron))
+    std.append(np.nanstd(tempintron))
+
+    plotData(means, std, colors, labels, xlabel, ylabel, title)
+    
+# same type of analysis as above, but instead of using VAF, this uses AO 
+def cpgMutabilityNormalizedAO(allVariants, samples):
+    print('Computing mean normalized VAFs using AO within CpG context...')
+
+    means = []
+    std = []
+    colors = ['grey','black']
+    xlabel = 'Position'
+    ylabel = 'AO'
+    title = 'Normalized Mean AO of CpG Sites Within TIII/Exons'
+    labels = ['Exon','TIII']
+
+    tempexon = []
+    tempintron = []
+    for sample in range(len(samples)+1):
+        a = allVariants[allVariants.Downstream.str[0].eq('G')]
+        b = a[a['WT'] == 'C']
+        c = b[b['Individual'] == sample]
+        d = c[c['IntEx'] == 'Exon']['AO'].mean()
+        e = c[c['IntEx'] == 'TIII']['AO'].mean()
+
+        normd = d / (d + e)
+        norme = e / (d + e)
+        
+        tempexon.append(normd)
+        tempintron.append(norme)
+        
+    means.append(np.nanmean(tempexon))
+    std.append(np.nanstd(tempexon))
+    means.append(np.nanmean(tempintron))
+    std.append(np.nanstd(tempintron))
+
+    plotData(means, std, colors, labels, xlabel, ylabel, title)
+
+# the purpose of this analysis is to look at C>T changes by their
+# trinucleotide sequences
+def CtoTbyTrinucleotide(allVariants, samples):
+    print('Computing C>T changes by trinucleotide...')
+
+    means = []
+    std = []
+    colors = ['cyan','cyan','cyan','cyan','black','black','black','black','red','red','red','red','grey','grey','grey','grey']
+    xlabel = 'Context'
+    ylabel = 'VAF'
+    title = 'C>T Changes by Context'
+    labels = ['TCT','CCT','GCT','ACT','TCC','CCC','GCC','ACC','TCG','CCG','GCG','ACG','TCA','CCA','GCA','ACA']
+
+    for triplet in labels:
+        tempmean = []
+        for sample in range(len(samples)+1):
+            a = allVariants[allVariants['Change'] == 'C>T']
+            b = a[a.Upstream.str[-1].eq(triplet[0])]
+            c = b[b.Downstream.str[0].eq(triplet[-1])]['VAF'].mean()
+        
+            tempmean.append(c)
+        means.append(np.nanmean(tempmean))
+        std.append(np.nanstd(tempmean))
+
+    plotData(means, std, colors, labels, xlabel, ylabel, title)
+
+# the purpose here is to look at the 10 flanking bp changes
+# in the upper and lower populations within the VAF comparison
+# plots to see if this predicts the mutability of a particular
+# base change
+def contextUpperLower(allVariants, samples, regions='split'):
+    print('Computing upper and lower population contexts...')
+    from collections import defaultdict
+    from util import plotStacked
+
+    colors = ['cyan','cyan','cyan','cyan','black','black','black','black','red','red','red','red','grey','grey','grey','grey']
+    xlabel = 'Context'
+    ylabel = 'VAF'
+    title = 'C>T Changes by Context'
+    labels = ['TCT','CCT','GCT','ACT','TCC','CCC','GCC','ACC','TCG','CCG','GCG','ACG','TCA','CCA','GCA','ACA']
+
+    vafcutoff = ['Upper','Lower']
+    if regions == 'combined':
+        vafcutoff = ['']
+    changes = ['C>A', 'C>G','C>T','T>A','T>C','T>G']
+    letters = ['T','C','G','A']
+
+    for region in vafcutoff:
+        for change in changes:
+            allmeansup = {'T':[],'C':[],'G':[],'A':[]}
+            allstdsup = {'T':[],'C':[],'G':[],'A':[]}
+            allmeansdown = {'T':[],'C':[],'G':[],'A':[]}
+            allstdsdown = {'T':[],'C':[],'G':[],'A':[]}
+            for position in range(10):
+                uppositionmakeup = {'T':[],'C':[],'G':[],'A':[]}
+                downpositionmakeup = {'T':[],'C':[],'G':[],'A':[]}
+                for indiv in range(len(samples)):
+                    sample = indiv + 1
+                    fourbasesup = []
+                    fractionup = []
+                    fourbasesdown = []
+                    fractiondown = []
+                    for base in letters:
+                        l = allVariants[allVariants['Change'] == change]
+                        if region == 'Upper' and regions == 'split':
+                            m = l[l['VAF'] > 0.0004]
+                        if region == 'Lower' and regions == 'split':
+                            m = l[l['VAF'] < 0.0004]
+                        if regions == 'combined':
+                            m = l[l['VAF'] > 0]
+
+                        n = m[m['Individual'] == sample]
+
+                        o = n[n.Upstream.str[position].eq(base)]['WT'].count()
+                        fourbasesup.append(o)
+                        p = n[n.Downstream.str[position].eq(base)]['WT'].count()
+                        fourbasesdown.append(p)
+                        #print base, o
+                    #print sample, fourbasesup
+
+                    # convert to fractions
+                    # this can give divide by zero probably need some exception handler
+                    for i in fourbasesup:
+                        fractionup.append(i / float(sum(fourbasesup)))
+                    for i in fourbasesdown:
+                        fractiondown.append(i / float(sum(fourbasesdown)))
+                    #print sample, fractionup
+
+                    # add to master dictionary
+                    uppositionmakeup['T'].append(fractionup[0])
+                    uppositionmakeup['C'].append(fractionup[1])
+                    uppositionmakeup['G'].append(fractionup[2])
+                    uppositionmakeup['A'].append(fractionup[3])
+                    downpositionmakeup['T'].append(fractiondown[0])
+                    downpositionmakeup['C'].append(fractiondown[1])
+                    downpositionmakeup['G'].append(fractiondown[2])
+                    downpositionmakeup['A'].append(fractiondown[3])
+                #print position, uppositionmakeup
+
+                # average and add to overall dictionary at correct positions
+                for base in letters:
+                    allmeansup[base].append(np.nanmean(uppositionmakeup[base]))
+                    allstdsup[base].append(np.nanstd(uppositionmakeup[base]))
+                    allmeansdown[base].append(np.nanmean(downpositionmakeup[base]))
+                    allstdsdown[base].append(np.nanstd(downpositionmakeup[base]))
+
+            #print allmeansup, allstdsup
+            for i in allmeansup:
+                print i, allmeansup[i][9], allstdsup[i][9], allmeansdown[i][0], allstdsdown[i][0]
+
+            # combine upstream and downstream
+            for base in allmeansup:
+                allmeansup[base] = allmeansup[base] + allmeansdown[base]
+                allstdsup[base] = allstdsup[base] + allstdsdown[base]
+
+
+            # plot
+            if regions == 'split':
+                plotStacked(allmeansup, allstdsup, 'Base Position', 'Nuceotide Fraction', '%s Region %s Changes' % (region, change))
+            if regions == 'combined':
+                plotStacked(allmeansup, allstdsup, 'Base Position', 'Nuceotide Fraction', '%s Changes' % (change))
+
+# this will find the average percent of probed region in
+# a given individual that is mutated
+def percentVariant(allVariants, samples):
+    totvar = []
+    percent = []
+    totalProbed = 4838 # this is experiment specific
+    for i in range(len(samples)):
+        indiv = i + 1
+        a = allVariants[allVariants['Individual'] == indiv]
+        b = a.drop_duplicates(['Loc'])
+        count = b['Loc'].count()
+        totvar.append(count)
+        percent.append(float(count) / totalProbed)
+
+    print np.mean(totvar), np.std(totvar), totvar
+    print np.mean(percent), np.std(percent), percent
+
+    
+
+
+
+
+
+
+if __name__ == '__main__':    
+    from util import populatePandasDataframe
+    from util import defineProbes
+    from util import plotData
+    import pandas as pd
+    import numpy as np
+
+    samples, ref, inDir, output, previous = runArgparse()
+    allVariants = getData(samples, ref, inDir, output, previous)
+
+    vafsSixChanges(allVariants, samples)
+    #vafExonIntron(allVariants, samples)
+    #mutabilityByGenomeRegion(allVariants, samples)
+    #mutabilityByGenomeRegionNormalized(allVariants, samples)
+    #mutabilityByGenomeRegionNormalizedAO(allVariants, samples)
+    #cpgMutability(allVariants, samples)
+    #cpgMutabilityNormalized(allVariants, samples)
+    #cpgMutabilityNormalizedAO(allVariants, samples)
+    #CtoTbyTrinucleotide(allVariants, samples)
+    #contextUpperLower(allVariants, samples)
+    #contextUpperLower(allVariants, samples, 'combined')
+    #percentVariant(allVariants, samples)
+
+
+
+
+

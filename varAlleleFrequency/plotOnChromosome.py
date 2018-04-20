@@ -86,6 +86,7 @@ def generateColors(muts):
     colors = {'CA':'c', 'CG':'k', 'CT':'#ed0000', 'TA':'0.5', 'TC':'g', 'TG':'m'}
     # if not combining
     colors = {'CA':'c', 'CG':'k', 'CT':'#ed0000', 'TA':'0.5', 'TC':'g', 'TG':'m', 'GT':'#000099', 'GC':'#660066', 'GA':'#00ff00', 'AT':'#ffff00', 'AG':'#ff6600', 'AC':'#663300'}
+    #colors = {'CA':'#4C72B0"', 'CG':'#55A868', 'CT':'#C44E52', 'TA':'#8172B2', 'TC':'#CCB974', 'TG':'#64B5CD', 'GT':'#4878CF', 'GC':'#6ACC65', 'GA':'#D65F5F', 'AT':'#B47CC7', 'AG':'#C4AD66', 'AC':'#77BEDB'}
     changes = []
 
     # change to cononical changes
@@ -114,6 +115,7 @@ def generatePlot(probe):
     import numpy as np
     import matplotlib.pyplot as plt
     import matplotlib.patches as mpatches
+    import seaborn as sns
 
     # probe in form:
     # {locus:[1234],vaf:[0.5],mut:[CT]}
@@ -125,6 +127,7 @@ def generatePlot(probe):
     # create plot
     ind = np.arange(len(loci))
     p1 = plt.bar(loci, vafs, color=changes)
+
     # when youre bored
     #plt.xkcd()
 
@@ -256,6 +259,7 @@ def exactPlotting(gene, probe):
     import numpy as np
     import matplotlib.pyplot as plt
     import matplotlib.patches as mpatches
+    import seaborn as sns
 
     # probe in form:
     # {locus:[1234],vaf:[0.5],mut:[CT]}
@@ -283,10 +287,10 @@ def exactPlotting(gene, probe):
         plt.xlim(xmin=int(exactProbes[gene][0]))
         plt.xlim(xmax=int(exactProbes[gene][1]))
 
-    plt.xlabel('Chromosome Location', **axis_font)
-    plt.ylabel('Variant Allele Frequencies', **axis_font)
-    plt.title('Probe Within Chromosome %s:%s' % (probe['chrom'],gene), **title_font)
-    plt.savefig('plotOnProbe.png')
+    plt.xlabel('Chromosome Location', {'size':'30'})
+    plt.ylabel('Variant Allele Frequencies', {'size':'30'})
+    plt.title('Probe Within Chromosome %s:%s' % (probe['chrom'],gene), {'size':'30'})
+    #plt.savefig('plotOnProbe.png')
 
     # this formats the xticks so they aren't abbreviated
     from matplotlib.ticker import FormatStrFormatter
@@ -316,9 +320,13 @@ def exactPlotting(gene, probe):
     d = mpatches.Patch(color='#ffff00', label='A-T')
     e = mpatches.Patch(color='#ff6600', label='A-G')
     f = mpatches.Patch(color='#663300', label='A-C')
-    #plt.legend(handles=[cyan, black, red, gray, green, magenta])
-    plt.legend(handles=[cyan, black, red, gray, green, magenta, a,b,c,d,e,f], prop={'size': 15})
+    plt.legend(handles=[cyan, black, red, gray, green, magenta])
+    #plt.legend(handles=[cyan, black, red, gray, green, magenta, a,b,c,d,e,f], prop={'size': 15})
+    plt.xlim(7577500,7577700)
+    #plt.xlim(92527000,92527200)
     plt.tight_layout()
+    sns.set_context("paper", font_scale=3)
+    sns.despine(offset=10, trim=True)
 
     plt.show()
 

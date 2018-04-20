@@ -405,6 +405,13 @@ def plotAOData(allAO):
             'green','green','green','green','green','green','green','green','green','green','green','green','green','green','green','green',
             'magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta','magenta'
             ]
+    colors=['#4C72B0','#4C72B0','#4C72B0','#4C72B0','#4C72B0','#4C72B0','#4C72B0','#4C72B0','#4C72B0','#4C72B0','#4C72B0','#4C72B0','#4C72B0','#4C72B0','#4C72B0','#4C72B0',
+            '#55A868','#55A868','#55A868','#55A868','#55A868','#55A868','#55A868','#55A868','#55A868','#55A868','#55A868','#55A868','#55A868','#55A868','#55A868','#55A868',
+            '#C44E52','#C44E52','#C44E52','#C44E52','#C44E52','#C44E52','#C44E52','#C44E52','#C44E52','#C44E52','#C44E52','#C44E52','#C44E52','#C44E52','#C44E52','#C44E52',
+            '#8172B2','#8172B2','#8172B2','#8172B2','#8172B2','#8172B2','#8172B2','#8172B2','#8172B2','#8172B2','#8172B2','#8172B2','#8172B2','#8172B2','#8172B2','#8172B2',
+            '#CCB974','#CCB974','#CCB974','#CCB974','#CCB974','#CCB974','#CCB974','#CCB974','#CCB974','#CCB974','#CCB974','#CCB974','#CCB974','#CCB974','#CCB974','#CCB974',
+            '#64B5CD','#64B5CD','#64B5CD','#64B5CD','#64B5CD','#64B5CD','#64B5CD','#64B5CD','#64B5CD','#64B5CD','#64B5CD','#64B5CD','#64B5CD','#64B5CD','#64B5CD','#64B5CD'
+            ]
     changes = ['C>A','C>G','C>T','T>A','T>C','T>G']
     order = ['TCT','CCT','GCT','ACT','TCC','CCC','GCC','ACC','TCG','CCG','GCG','ACG','TCA','CCA','GCA','ACA',
             'TTT','CTT','GTT','ATT','TTC','CTC','GTC','ATC','TTG','CTG','GTG','ATG','TTA','CTA','GTA','ATA']
@@ -441,17 +448,25 @@ def plotAOData(allAO):
     # generate plots
     from matplotlib import pyplot as plt
     import matplotlib.patches as mpatches
+    import seaborn as sns
 
     plt.clf()
     axis_font = {'fontname':'Arial', 'size':'30'}
     tick_font = {'fontname':'Arial', 'size':'7'}
     plt.errorbar(range(len(avgAO)), avgAO, yerr=stddevAO, linestyle="None", color='black')
-    plt.bar(range(len(avgAO)), avgAO, color=colors)
+    #plt.bar(range(len(avgAO)), avgAO, color=colors)
+    sns.barplot(range(len(avgAO)), avgAO, palette=colors)
     plt.xticks(range(len(labels)), labels, rotation=90, **tick_font)
     plt.yticks(**axis_font)
     plt.ylabel('Fraction of Observations', **axis_font)
     plt.ylabel('Mean VAF', **axis_font)
     plt.xlabel('Substitution Type', **axis_font)
+    plt.ylim(0,0.06)
+
+    sns.set_context("paper", font_scale=2)
+    sns.despine(offset=10, trim=True)
+    plt.xticks(range(len(labels)), labels, rotation=90, **tick_font)
+    plt.tight_layout()
 
     plt.tick_params(
     axis='both',       # changes apply to the x-axis
@@ -462,13 +477,15 @@ def plotAOData(allAO):
     labelbottom='on') # labels along the bottom edge are off
 
     # create the legend
-    CA = mpatches.Patch(color='cyan', label='C>A')
-    CG = mpatches.Patch(color='black', label='C>G')
-    CT = mpatches.Patch(color='red', label='C>T')
-    TA = mpatches.Patch(color='grey', label='T>A')
-    TC = mpatches.Patch(color='green', label='T>C')
-    TG = mpatches.Patch(color='magenta', label='T>G')
+    CA = mpatches.Patch(color='#4C72B0', label='C>A')
+    CG = mpatches.Patch(color='#55A868', label='C>G')
+    CT = mpatches.Patch(color='#C44E52', label='C>T')
+    TA = mpatches.Patch(color='#8172B2', label='T>A')
+    TC = mpatches.Patch(color='#CCB974', label='T>C')
+    TG = mpatches.Patch(color='#64B5CD', label='T>G')
     plt.legend(handles=[CA, CG, CT, TA, TC, TG])
+
+    #plt.savefig('3b.png', bbox_inches='tight',dpi=1200)
 
     plt.show()
 

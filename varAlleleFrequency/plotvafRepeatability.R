@@ -7,8 +7,8 @@ library(ggrepel) # this avoids overlapping labels
 
 # Note that this script cannot begin with a comment for some reason
 
-setwd('/media/alex/Extra/Dropbox/Code/FERMI/varAlleleFrequency')
-#setwd('/home/alex/Dropbox/Code/FERMI/varAlleleFrequency')
+setwd('/home/alex/Dropbox/Code/FERMI/varAlleleFrequency')
+#setwd('/media/alex/mainstorage/LinuxDropbox/Dropbox/Code/FERMI/varAlleleFrequency')
 
 # This script plots the VAFs of each mutation found between two samples along with a regression
 # line and 95% confidence interval in order to understand how repeatable the AFs are for the 
@@ -34,13 +34,20 @@ lm_eqn <- function(df,y,x){
 
 # plot with y=x line
 p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity, size=15)) +
+  geom_text_repel(aes(label=ifelse(sample2>0.25|sample1>0.25,as.character(identity),''))) + # this labels points above freq and does not allow overlap
+  #geom_point(size=10) +
   geom_point() +
-  geom_text(aes(x = 0.0015, y = 0.003, label = lm_eqn(vafs, Sample1, Sample2)), parse = TRUE)+ # regression formula
-  xlim(0,0.003) +
-  ylim(0,0.003) +
-  #xlim(0,1) +
-  #ylim(0,1) +
+  #geom_text(aes(x = 0.005, y = 0.01, label = lm_eqn(vafs, Sample1, Sample2)), parse = TRUE)+ # regression formula, make sure it is within plot limits
+  #geom_text(aes(x = 0.5, y = 0.9, label = lm_eqn(vafs, Sample1, Sample2)), parse = TRUE)+ # regression formula, make sure it is within plot limits
+  #xlim(0,0.03) +
+  #ylim(0,0.03) +
+  xlim(0,1) +
+  ylim(0,1) +
   geom_abline(intercept = 0, slope = 1, size=3)+ # y=x line
+
+  xlab('\nNon-Tumor') + ylab('Tumor\n') +
+  labs(title = 'Lung Brushing Samples')+
+
   #xlab('\nVAF Individual 15') + ylab('VAF Mean\n') +
   #labs(title = 'C-T Variants Coding Regions\n')+
 # 2a
@@ -116,10 +123,13 @@ p <- ggplot(vafs, aes(x=sample1, y=sample2, alpha=0.5, label=identity, size=15))
   #labs(title = 'Muliplier = 1x\n')+
 
 # 10.25.2017 Analysis
-  xlab('\nVAF Individual 2 Experiment 2') + ylab('VAF Mean\n') +
-  labs(title = 'T-N/A-N Variants')+
+  #xlab('\nVAF Individual 2 Experiment 2') + ylab('VAF Mean\n') +
+  #labs(title = 'T-N/A-N Variants')+
 
-  geom_smooth(method=lm, se=TRUE, size=3, colour='red')+ # regression line
+# 1.22.2018 Down Syndrome Analysis
+  #xlab('\nMean VAF T21') + ylab('Mean VAF D21\n') +
+
+  #geom_smooth(method=lm, se=TRUE, size=3, colour='red')+ # regression line
   theme_bw()+ # no gray background
   theme(panel.border = element_blank())+ # no border
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+ # no gridlines

@@ -1,0 +1,105 @@
+#!/usr/bin/env python
+
+# the purpose of this script is to plot some of the data that was produced by
+# baseChangeAnalysis runs. It is a terrible cheap way of plotting but so it goes...
+# t-test calculations https://select-statistics.co.uk/calculators/two-sample-t-test-calculator/
+
+allData = {'means':[],'std':[], 'title':[]}
+labels = ['A Pos -1', 'C Pos -1', 'T Pos -1', 'G Pos -1','A Pos 1', 'C Pos 1', 'T Pos 1', 'G Pos 1']
+
+# C>A
+means = {'Upper':[0.0142857142857,0.927380952381,0.0404761904762,0.0178571428571,0.75119047619,0.184523809524,0.0642857142857,0.0], 'Lower':[0.154579524598,0.413096311872,0.258480633205,0.173843530324,0.319186370041,0.342070756123,0.285894038083,0.0528488357522]}
+std = {'Upper':[0.0515078753638,0.0987234277806,0.0778465844013,0.0643848442047,0.202999754253,0.158548010569,0.102519286389,0.0], 'Lower':[0.0271696615291,0.0484652299855,0.0114842353811,0.0233452691196,0.017608627943,0.016691255234,0.0131723929217,0.008601515129]}
+title = 'C>A Substitutions'
+allData['means'].append(means)
+allData['std'].append(std)
+allData['title'].append(title)
+
+# C>T
+means = {'Upper':[0.20541373507,0.300834833422,0.256099540734,0.237651890774,0.344126699137,0.297385924727,0.277098909784,0.0813884663527], 'Lower':[0.225414111513,0.316046390816,0.222949517903,0.235589979768,0.306077241326,0.326855665527,0.322235058911,0.0448320342354]}
+std = {'Upper':[0.00413908990349,0.00405249185125,0.0063638243063,0.00432297573905,0.00511790081309,0.00463318338929,0.00783456853723,0.00206593162254], 'Lower':[0.0292618757503,0.0166223473935,0.0364188181333,0.0223831331567,0.0324063665677,0.0244755768363,0.040777965073,0.0121708605249]}
+title = 'C>T Substitutions'
+allData['means'].append(means)
+allData['std'].append(std)
+allData['title'].append(title)
+
+# T>A
+means = {'Upper':[0.395443602542,0.161392289709,0.0825913361296,0.360572771619,0.192254229627,0.142973788706,0.0717209960907,0.593050985576], 'Lower':[0.215744163282,0.351021049176,0.202844709254,0.230390078288,0.158350494631,0.31200548551,0.184443151777,0.345200868082]}
+std = {'Upper':[0.172287254756,0.144043526904,0.092624173361,0.0982949313829,0.0741846276754,0.131915531329,0.0929398089905,0.120210050924], 'Lower':[0.0182918464965,0.0106969045173,0.00494628403137,0.0106704167872,0.0144664122136,0.00643694079485,0.0114866380208,0.0195471190161]}
+title = 'T>A Substitutions'
+allData['means'].append(means)
+allData['std'].append(std)
+allData['title'].append(title)
+
+# plot data
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+
+for i in range(len(allData['means'])):
+    means = allData['means'][i]
+    std = allData['std'][i]
+    title = allData['title'][i]
+
+    axis_font = {'fontname':'Arial', 'size':'30'}
+    tick_font = {'fontname':'Arial', 'size':'30'}
+    meandf=pd.DataFrame(means)
+    stddf = pd.DataFrame(std)
+    xlabel = 'Flanking Nucleotide'
+    ylabel = 'Nucleotide Fraction'
+
+    print meandf
+    print stddf
+    standarddev = []
+    for i in range(len(std['Upper'])):
+        standarddev.append(std['Lower'][i])
+        standarddev.append(std['Upper'][i])
+    print standarddev
+
+    colors = []
+    for i in range(4):
+        colors.append('#4C72B0')
+        colors.append('#C44E52')
+
+    colors = []
+    for i in range(4):
+        colors.append('blue')
+        colors.append('orange')
+
+    meandf.plot(kind='bar', yerr=stddf, stacked=False, color=colors, error_kw=dict(ecolor='#575859'))
+    plt.yticks(**tick_font)
+    sns.set_context("paper", font_scale=3.5)
+    plt.xlabel(xlabel, {'size':'40'})
+    plt.ylabel(ylabel, {'size':'40'})
+    plt.title(title, {'size':'40'})
+    sns.despine(offset=10, trim=True)
+    plt.xticks(range(len(labels)), labels, rotation=45)
+    plt.show()
+
+    '''
+    meandf['Loc']=[1,2,3,4,5,6,7,8]
+    a=pd.melt(meandf, id_vars=['Loc'])
+    stddf['Loc']=[1,2,3,4,5,6,7,8]
+    b=pd.melt(meandf, id_vars=['Loc'])
+    a.columns = ['Loc', 'Region', 'Frequency']
+    b.columns = ['Loc', 'Region', 'Frequency']
+
+    colors = []
+    for i in range(4):
+        colors.append('#4C72B0')
+        colors.append('#C44E52')
+
+    colors = []
+    for i in range(4):
+        colors.append('blue')
+        colors.append('orange')
+
+    sns.barplot(x='Loc', y='Frequency', hue='Region', data=a, palette=colors)
+    plt.xlabel(xlabel, {'size':'20'})
+    plt.ylabel(ylabel, {'size':'20'})
+    plt.title(title, {'size':'20'})
+    sns.set_context("paper", font_scale=2)
+    sns.despine(offset=10, trim=True)
+    plt.xticks(range(len(labels)), labels, rotation=0)
+    plt.show()
+    '''

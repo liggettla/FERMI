@@ -1,0 +1,152 @@
+#!/usr/bin/env python
+
+def runArgparse():
+    print('Reading Argparse...')
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--inFiles', '-i', type=str, nargs='*', help='Specifies the input vcf file(s).')
+    parser.add_argument('--inDir', '-d', type=str, help='Points to the input directory.')
+    parser.add_argument('--reference', '-r', type=str, help='Point to the reference genome to be used for flanking sequence.')
+    parser.add_argument('--savedata', '-s', type=str, help='Name of savefile if output of data structure is desired.')
+    parser.add_argument('--previousdata', '-p', type=str, help='Point to a saved data structure to be loaded.')
+
+    args = parser.parse_args()
+    inFiles = args.inFiles
+    ref = args.reference
+    inDir = args.inDir
+    if args.savedata:
+        output = args.savedata
+    else:
+        output = False
+    if args.previousdata:
+        previous = args.previousdata
+    else:
+        previous = False
+
+    return inFiles, ref, inDir, output, previous
+
+def getData(samples, ref, inDir, output, previous):
+    probes = defineProbes()
+    if previous:
+        from util import loadData
+        allVariants = loadData(previous)
+    else:
+        allVariants = populatePandasDataframe(inDir, samples, probes, ref)
+    if output and not previous:
+        from util import saveData
+        saveData(allVariants, output)
+
+    return allVariants
+
+def figure1cd():
+    from logbargraph import logplota
+    from logbargraph import logplotb
+    logplota()
+    logplotb()
+
+
+def figure3a(allVariants, samples):
+    from util import overallCaptureFractionPandas
+    from util import plotSixChanges
+    means, std, order = overallCaptureFractionPandas(allVariants, samples)
+    colors = 'deep'
+    xlabel = 'Substitution Type'
+    ylabel = 'Fraction of Observations'
+    title = ''
+    plotSixChanges(means, std, colors, order, xlabel, ylabel, title, '3a.png')
+
+def figure3b(allVariants, samples):
+    from util import overallFractionByTriplet
+    from util import plotSixChanges
+    import seaborn as sns
+    means, std, labels, changes, colors = overallFractionByTriplet(allVariants, samples)
+    xlabel = 'Substitution Type'
+    ylabel = 'Fraction of Observations'
+    title = ''
+    mypalette = sns.color_palette(colors)
+    plotSixChanges(means, std, mypalette, labels, xlabel, ylabel, title, '3b.png')
+
+
+def figure3c(allVariants, samples):
+    from util import quantifyCpGVAFs
+    from util import plotSixChanges
+
+    mean, std = quantifyCpGVAFs(allVariants, samples)
+    xlabel = ''
+    ylabel = 'Avg VAF'
+    title = ''
+    colors = 'deep'
+    order = ['Other', 'CpG']
+    std = [0.00006, 0.00012]
+    plotSixChanges(mean, std, colors, order, xlabel, ylabel, title, '3c.png')
+
+def figure1b(inDir, samples):
+    print('Computing Probe Bias...')
+    from mutationsPerProbe import mutationsPerProbe
+
+    filtered = inDir + '/' + samples[0] + '/onlyProbedRegions.vcf'
+    outputDir = '/media/alex/Extra/Dropbox/Code/FERMI/paperGeneration'
+    mutationsPerProbe(filtered, outputDir)
+
+def figure1bnew(allVariants, samples):
+    print('Computing Probe Bias...')
+    from util import defineProbes
+    from collections import defaultdict
+    from util import plotSixChanges
+    import numpy as np
+
+    probes = defineProbes()
+    order = ['TIIIa','TIIIb','TIIIc','TIIId','TIIIe','TIIIf','TIIIg','TIIIh','TIIIj','TIIIk','TIIIl','TIIIm','TIIIn','TIIIo','TIIIp','TIIIq','NRAS-1','NRAS-2','DNMT3a','IDH1','SF3B1','TET2-1','TET2-2','JAK2','HRAS','KRAS-1','KRAS-2','IDH2','p53-1','p53-2','p53-3','GATA1']
+    totals = defaultdict(list)
+
+    allVariants['strLoc'] = allVariants['Loc'].astype('str')
+    
+    for indiv in range(len(samples)):
+        x = allVariants[allVariants['Individual'] == indiv + 1]
+        for probe in probes:
+            totCoverage = 0
+            count = 0
+            for region in probes[probe]:
+                totCoverage += x[x['strLoc'].str.contains(region)]['DP'].sum()
+                count += x[x['strLoc'].str.contains(region)]['DP'].count()
+
+            totals[probe].append(float(totCoverage) / count)
+
+    means = []
+    std = []
+    for i in order:
+        means.append(np.mean(totals[i]))
+        std.append(np.std(totals[i]))
+
+    colors = []
+    for i in range(len(means)):
+        colors.append('grey')
+
+    plotSixChanges(means, std, colors, order, 'Probe', 'Avg Unique Captures', 'Probe Bias', '1b.png')
+
+
+    
+
+
+
+
+
+
+
+if __name__ == '__main__':    
+    from util import populatePandasDataframe
+    from util import defineProbes
+    from util import plotData
+    import pandas as pd
+    import numpy as np
+    from Bio.Seq import Seq
+
+    samples, ref, inDir, output, previous = runArgparse()
+    allVariants = getData(samples, ref, inDir, output, previous)
+    
+    figure1bnew(allVariants, samples)
+    #figure1b(inDir, samples)
+    #figure1cd()
+    #figure3a(allVariants, samples)
+    #figure3c(allVariants, samples)
