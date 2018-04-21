@@ -10,36 +10,31 @@ def builddf(commonVars, avgData, principleData):
     # combine all date into a pandas df
     df = pd.DataFrame({'x':principleData, 'y':avgData})
 
-    # deal with unique variants
-    '''
-    if commonVars:
-        print 'common'
-    else:
-        df = df.dropna()
-    '''
+    # this will retain the uniques by converting NaN to 0
+    if not commonVars:
+        df = df.fillna(value=0)
+
+    # this should be defined at runtime
     df = df[df['x'] < 0.1]
     df = df[df['y'] < 0.1]
 
     # plot data
     plt.scatter(df['x'], df['y'], color = 'gray', s=5) # s controls point size
-    plt.plot([0.14,0.86],[1,1], linewidth=22)
-    plt.xlim(0,0.02)
-    plt.ylim(0,0.02)
+    plt.xlim(-0.0002,0.02)
+    plt.ylim(-0.0002,0.02)
 
-    sns.set_context("paper", font_scale=3)
+    # add y=x line
+    plt.plot([0,1],[0,1], lw=2, color='black')
+
+    sns.set_context("paper", font_scale=2)
     plt.xlabel('Sample x', {'size':'20'})
     plt.ylabel('Sample y', {'size':'20'})
     plt.title('VAF Comparison')
 
     sns.despine(offset=10, trim=True)
+    plt.xticks(rotation=45)
     plt.tight_layout()
     plt.show()
-    #plt.bar(range(len(means)), means, color=colors)
-
-
-
-
-
 
 if __name__ == '__main__':
     builddf(commonVars, avgData, principleData)
