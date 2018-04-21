@@ -26,9 +26,16 @@ parser.add_argument('--combinecomplements', '-a', action='store_true', help='Thi
 parser.add_argument('--onlyCoding', '-x', action='store_true', help='This will only use variants coming from coding strand probes.')
 parser.add_argument('--onlyTemplate', '-y', action='store_true', help='This will only use variants coming from template strand probes.')
 parser.add_argument('--justoncosites', '-j', action='store_true', help='This will just plot oncogenic variants.')
+parser.add_argument('--pythonplotting', '-n', action='store_true', help='This will trigger use of the python plotting algorithm.')
 
 
 args = parser.parse_args()
+
+# specifiy which plotting algorithm to use
+if args.pythonplotting:
+    pythonplotting = True
+else:
+    pythonplotting = False
 
 #####################
 # Specify Mutations #
@@ -285,22 +292,30 @@ if __name__ == '__main__':
     else:
         principleData = buildAverageStructure(args.principle, regions, oncosites, justoncosites)
 
-    outputData(commonVars, avgData, principleData)
+    # this will use the original R plotting algorithm
+    if not pythonplotting:
+        outputData(commonVars, avgData, principleData)
 
-# output plot if requested
-    if args.displayplot:
-        plotAndDisplay(outputFile, plotFile1, plotFile2, True)
-    else:
-        plotAndDisplay(outputFile, plotFile1, plotFile2, False)
+        # output plot if requested
+        if args.displayplot:
+            plotAndDisplay(outputFile, plotFile1, plotFile2, True)
+        else:
+            plotAndDisplay(outputFile, plotFile1, plotFile2, False)
 
-    # this now also reports pearsons correlation coefficient
-    from revisedComputeRSquared import getRSquared
-    r2, p = getRSquared()
-    print('R-Squared = %f' % (r2))
-    print('Pearson Coefficient = %f' % (p[0]))
-    print('p-value = %f' % (p[1]))
+        # this now also reports pearsons correlation coefficient
+        from revisedComputeRSquared import getRSquared
+        r2, p = getRSquared()
+        print('R-Squared = %f' % (r2))
+        print('Pearson Coefficient = %f' % (p[0]))
+        print('p-value = %f' % (p[1]))
 
-    if args.plotonchrom:
-        from os import system
-        system('python plotOnChromosome.py')
+        if args.plotonchrom:
+            from os import system
+            system('python plotOnChromosome.py')
+
+    # this will use the newer and hopefully superior python plotting algorithm
+    if pythonplotting:
+        from  plotvafRepeatability import builddf
+        builddf(commonVars, avgData, principleData)
+
 
