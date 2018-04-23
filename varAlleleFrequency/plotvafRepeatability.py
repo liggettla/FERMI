@@ -24,7 +24,7 @@ def builddf(commonVars, avgData, principleData):
     plt.ylim(-0.0002,0.02)
 
     # add y=x line
-    plt.plot([0,1],[0,1], lw=2, color='black')
+    plt.plot([0,1],[0,1], lw=2, color='#414242', linestyle='dashed')
 
     sns.set_context("paper", font_scale=2)
     plt.xlabel('Sample x', {'size':'20'})
