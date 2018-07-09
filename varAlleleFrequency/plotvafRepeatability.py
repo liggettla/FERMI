@@ -20,16 +20,16 @@ def builddf(commonVars, avgData, principleData):
 
     # plot data
     plt.scatter(df['x'], df['y'], color = 'gray', s=5) # s controls point size
-    plt.xlim(-0.0002,0.02)
-    plt.ylim(-0.0002,0.02)
+    plt.xlim(-0.0002,0.002)
+    plt.ylim(-0.0002,0.002)
 
     # add y=x line
     plt.plot([0,1],[0,1], lw=2, color='#414242', linestyle='dashed')
 
     sns.set_context("paper", font_scale=2)
-    plt.xlabel('Sample x', {'size':'20'})
-    plt.ylabel('Sample y', {'size':'20'})
-    plt.title('VAF Comparison')
+    plt.xlabel('73', {'size':'20'})
+    plt.ylabel('2', {'size':'20'})
+    plt.title('VAF Comparison\nSperm vs Deviator')
 
     sns.despine(offset=10, trim=True)
     plt.xticks(rotation=45)
