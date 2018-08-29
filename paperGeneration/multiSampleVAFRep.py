@@ -167,6 +167,7 @@ def buildAverageStructure(samples, regions, oncosites, justoncosites):
 
     # average all of the AFNum values
     avgData = takeAverage(tempData)
+    print tempData
     return avgData
 
 #############################
